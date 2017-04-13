@@ -2107,9 +2107,10 @@ Get invisible text boolean by locator
 
 Отримати інформацію із предмету additionalClassifications[0].scheme
   [Arguments]  ${product_id}
+  ${return_value}=  get_invisible_text  //div[@id='lots']//div[contains(@id,'accordionItems')]//div[contains(@data-title,'${product_id}')]//p[@class='additional-classification-scheme hidden']
   Collapse Product  ${product_id}
   Collapse Single Lot
-  [return]  ДК003
+  [return]  ${return_value}
 
 Отримати інформацію із предмету additionalClassifications[0].id
   [Arguments]  ${product_id}
@@ -2159,8 +2160,14 @@ Get invisible text boolean by locator
 
 Отримати інформацію із лоту value.currency
   [Arguments]  ${lot_id}
+  ${summa}=  get_text  xpath=//div[@id='lots']//div[contains(@data-title,'${lot_id}')]//p[@class='budget']//span[@class='value']
   Collapse Lot  ${lot_id}
-  [return]  UAH
+  Run Keyword And Return If  'UAH' in '${summa}'  Convert To String  UAH
+  Run Keyword And Return If  'RUB' in '${summa}'  Convert To String  RUB
+  Run Keyword And Return If  'USD' in '${summa}'  Convert To String  USD
+  Run Keyword And Return If  'EUR' in '${summa}'  Convert To String  EUR
+  Run Keyword And Return If  'GBP' in '${summa}'  Convert To String  GBP
+  [return]  ${EMPTY}
 
 Отримати інформацію із лоту value.valueAddedTaxIncluded
   [Arguments]  ${lot_id}
@@ -2173,8 +2180,14 @@ Get invisible text boolean by locator
 
 Отримати інформацію із лоту minimalStep.currency
   [Arguments]  ${lot_id}
+  ${summa}=  get_text  xpath=//div[@id='lots']//div[contains(@data-title,'${lot_id}')]//p[@class='minimal-step']//span[@class='value']
   Collapse Lot  ${lot_id}
-  [return]  UAH
+  Run Keyword And Return If  'UAH' in '${summa}'  Convert To String  UAH
+  Run Keyword And Return If  'RUB' in '${summa}'  Convert To String  RUB
+  Run Keyword And Return If  'USD' in '${summa}'  Convert To String  USD
+  Run Keyword And Return If  'EUR' in '${summa}'  Convert To String  EUR
+  Run Keyword And Return If  'GBP' in '${summa}'  Convert To String  GBP
+  [return]  ${EMPTY}
 
 Отримати інформацію із лоту minimalStep.valueAddedTaxIncluded
   [Arguments]  ${lot_id}
@@ -2346,7 +2359,13 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера value.currency
-  [return]  UAH
+  ${summa}=  get_text  xpath=//p[contains(@class, 'budget')]//*[@class='value']
+  Run Keyword And Return If  'UAH' in '${summa}'  Convert To String  UAH
+  Run Keyword And Return If  'RUB' in '${summa}'  Convert To String  RUB
+  Run Keyword And Return If  'USD' in '${summa}'  Convert To String  USD
+  Run Keyword And Return If  'EUR' in '${summa}'  Convert To String  EUR
+  Run Keyword And Return If  'GBP' in '${summa}'  Convert To String  GBP
+  [return]  ${EMPTY}
 
 Отримати інформацію із тендера value.valueAddedTaxIncluded
   ${return_value}=  get_text  xpath=//p[contains(@class, 'budget')]//*[@class='value']
