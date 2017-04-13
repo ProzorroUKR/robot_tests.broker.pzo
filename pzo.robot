@@ -72,6 +72,7 @@ Login
   # Click Button   xpath=//*[@type='submit']
   Click Button   xpath=//*[@class='btn btn-lg w-lg-x2 btn-success js-submit-btn']
   Wait Until Page Contains          Активні   20
+  Set Global Variable  ${PZO_LOGIN_USER}  ${username}
   #Go To  ${USERS.users['${username}'].homepage}
 
 Створити тендер
@@ -92,8 +93,8 @@ Login
   ${streetAddress}    Get From Dictionary   ${items[0].deliveryAddress}     streetAddress
   ${deliveryDate}   Get From Dictionary   ${items[0].deliveryDate}        endDate
   ${procurementMethodType} =  Set Variable If  'procurementMethodType' in ${tender_data_keys}  ${tender_data.data.procurementMethodType}  belowThreshold
-  Set To Dictionary  ${TENDER}  tender_methodtype=${procurementMethodType}
-  Set To Dictionary  ${TENDER}  lots=${lots}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype=${procurementMethodType}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  lots=${lots}
   #
   ${title}=         Get From Dictionary   ${tender_data.data}               title
   ${title_ru}=      Get From Dictionary  ${tender_data.data}  title_ru
@@ -757,31 +758,31 @@ Switch To Questions
   Wait Until Page Contains           Питання/відповіді   10
 
 Save tender ID
-  ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  TENDER_ID
+  ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Run Keyword If  ${status}  Add id to tender
 
 Add id to tender
   ${url}=   Log Location
   ${tender_id}=  Split String From Right  ${url}  /  max_split=1
-  Set To Dictionary  ${TENDER}  TENDER_ID=${tender_id[1]}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID=${tender_id[1]}
 
 Get Tender Sync Url
   [Arguments]  ${tender_id}
   Run Keyword And Return  Catenate  SEPARATOR=  ${tender_sync_prefix}  ${tender_id}  
 
 Sync Tender
-  ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  TENDER_ID
+  ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Run Keyword And Return If  ${status}  Go To  ${BROKERS['pzo'].syncpage}
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${sync_url}=  Get Tender Sync Url  ${tender_id}
   Go To  ${sync_url}
 
 Open Tender
-  ${no_id}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  TENDER_ID
+  ${no_id}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Return From Keyword If  ${no_id}
   Wait For All Transfer Complete
   Sync Tender
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}  
   Go To  ${tender_url}
   Sleep  1
@@ -840,7 +841,7 @@ Save Tender
   [Arguments]  ${username}  ${file_path}  ${tender_uaid}  ${lot_id}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Start Edit Lot  ${lot_id}
@@ -858,7 +859,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${field}  ${value}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Start Edit Lot  ${lot_id}
@@ -883,7 +884,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${lot}  ${item}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Open Tender
@@ -902,7 +903,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${item}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Start Edit Lot  ${lot_id}
@@ -947,7 +948,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${feature}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Open Tender
@@ -963,7 +964,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${feature_id}
   Switch browser   ${username}
 
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
   Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showfeaturebytext:${feature_id}
@@ -979,7 +980,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${feature}  ${lot_id}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
 
   Start Edit Lot  ${lot_id}
@@ -991,9 +992,9 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${feature}  ${item_id}
   Switch browser   ${username}
 
-  ${procurementMethodType}=  Get From Dictionary  ${TENDER}  tender_methodtype
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
   Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showitembytext:${item_id}
@@ -1006,7 +1007,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${answer}  ${question_id}
   Switch browser   ${username}
 
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
   Go To  http://dev.pzo.com.ua/tender/question-answer?id=${tender_id}
@@ -1022,7 +1023,7 @@ Save Tender
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}  ${award_index}
   Switch browser   ${username}
 
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
   Go To  http://dev.pzo.com.ua/tender/complaint-answer?id=${tender_id}
@@ -1054,8 +1055,8 @@ Save Tender
   [Arguments]  ${username}  ${doc_name}  ${tender_uaid}  ${proposal_id}
   Switch browser   ${username}
   ${doc_contents}=  Get File  ${doc_name}
-  Set To Dictionary  ${TENDER}  proposal${proposal_id}_document=${doc_name}
-  Set To Dictionary  ${TENDER}  proposal${proposal_id}_document_contents=${doc_contents}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document=${doc_name}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document_contents=${doc_contents}
 
 Відхилити кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${proposal_id}
@@ -1074,8 +1075,8 @@ Save Tender
   #workaround
   ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
 
-  ${doc_name}=  Get From Dictionary  ${TENDER}  proposal${proposal_id}_document
-  ${doc_contents}=  Get From Dictionary  ${TENDER}  proposal${proposal_id}_document_contents
+  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document
+  ${doc_contents}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document_contents
   Create File  ${doc_name}  ${doc_contents}
 
   Open Tender
@@ -1242,7 +1243,7 @@ Wait For Complaints Sync
 Підтвердити вирішення вимоги
   [Arguments]  ${username}  ${tender_uaid}  ${type}  ${type_id}  ${claim}  ${data}  ${award_index}
   Switch browser  ${username}
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Open Tender
   Go To  http://dev.pzo.com.ua/tender/complaint-resolve?id=${tender_id}
   Wait Until Page Contains Element  xpath=//select[@id='complaintresolveform-complaint']  10
@@ -1296,7 +1297,7 @@ Wait For Complaints Sync
   [Arguments]  ${username}  ${tender_uaid}  ${bid}  ${lots_ids}  ${features_ids}
   Switch browser  ${username}
 
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${lots}=  Get From Dictionary  ${bid.data}  lotValues
   ${lots_length}=  Get Length  ${lots}
 
@@ -1304,7 +1305,7 @@ Wait For Complaints Sync
   ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
-  \   Set To Dictionary  ${TENDER}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
+  \   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
   \   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${lots[${INDEX}].relatedLot}
   \   Sleep  2
   \   Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
@@ -1318,7 +1319,7 @@ Wait For Complaints Sync
   [Arguments]  ${username}  ${tender_uaid}  ${bid}  ${lots_ids}  ${features_ids}
   Switch browser  ${username}
 
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Open Tender
   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
@@ -1333,7 +1334,7 @@ Wait For Complaints Sync
 
 Подати цінову пропозицію Features
   [Arguments]  ${features}
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${features_length}=  Get Length  ${features}
   : FOR    ${INDEX}    IN RANGE    0    ${features_length}
   \   Run Keyword And Ignore Error  Click Element  xpath=//select[contains(@data-opid, '${features[${INDEX}]['code']}')]
@@ -1358,19 +1359,19 @@ Wait For Complaints Sync
   Sleep  1
 
 Start Edit Proposal
-  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  last_proposal_lotid
+  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
   Sync Tender
   Run Keyword If  ${no_lotid} == True  Start Edit Proposal Whole
   Run Keyword If  ${no_lotid} == False  Start Edit Proposal Lot
   Sleep  2
 
 Start Edit Proposal Whole
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
 
 Start Edit Proposal Lot
-  ${tender_id}=  Get From Dictionary  ${TENDER}  TENDER_ID
-  ${last_proposal_lotid}=  Get From Dictionary  ${TENDER}  last_proposal_lotid
+  ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
+  ${last_proposal_lotid}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${last_proposal_lotid}
 
 Save Proposal
@@ -1386,7 +1387,7 @@ Save Proposal
   ...      ${arguments[2]} ==  doc_type
   Switch browser  ${username}
   Start Edit Proposal
-  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  last_proposal_lotid
+  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
   #
   Run Keyword If  ${no_lotid} == False  Click Element  xpath=//div[contains(@class, 'active')]//a[contains(@href, '#add-documents')]
   Run Keyword If  ${no_lotid} == True  Click Element  xpath=//a[contains(@href, '#add-documents')]
@@ -1412,7 +1413,7 @@ Save Proposal
   [Arguments]  ${username}  ${tender_uaid}  ${file_path}  ${doc_id}
   Switch browser  ${username}
   Start Edit Proposal
-  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${TENDER}  last_proposal_lotid
+  ${no_lotid}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
   #
   Run Keyword If  ${no_lotid} == False  Run Keyword And Ignore Error  Click Element  xpath=//div[contains(@class, 'active')]//li[contains(@data-title, '${doc_id}')]
   Run Keyword If  ${no_lotid} == True  Run Keyword And Ignore Error  Click Element  xpath=//li[contains(@data-title, '${doc_id}')]
@@ -1452,13 +1453,13 @@ Save Proposal
 Завантажити документ рішення кваліфікаційної комісії
   [Arguments]  ${username}  ${doc_name}  ${tender_uaid}  ${award_index}
   Switch browser   ${username}
-  Set To Dictionary  ${TENDER}  qproposal${award_index}_document=${doc_name}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document=${doc_name}
 
 Підтвердити постачальника
   [Arguments]  ${username}  ${tender_uaid}  ${award_index}
   Switch browser   ${username}
 
-  ${doc_name}=  Get From Dictionary  ${TENDER}  qproposal${award_index}_document
+  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
 
   Open Tender
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
