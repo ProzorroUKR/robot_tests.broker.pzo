@@ -149,6 +149,7 @@ Login
   ${lots_length}=  Get Length  ${lots}
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
+  \   Sleep  2
   \   Click Element  xpath=//a[@href='#add-lots']
   \   Sleep  2
   \   Click Element  jquery=div[data-type="lot"].active span[data-confirm-text="Ви впевнені що бажаєте видалити поточний товар/послугу?"]
@@ -891,7 +892,7 @@ Save Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Wait Until Page Contains  Основна інформація  10
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
-  Sleep  1
+  Sleep  2
   Click Element  xpath=//a[@href='#add-lots']
   Sleep  2
   Додати лот Ex  ${lot.data}  0  ${procurementMethodType}
