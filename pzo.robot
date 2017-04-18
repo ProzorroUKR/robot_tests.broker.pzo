@@ -154,6 +154,7 @@ Login
   \   Sleep  2
   \   Click Element  jquery=div[data-type="lot"].active span[data-confirm-text="Ви впевнені що бажаєте видалити поточний товар/послугу?"]
   \   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+  \   Sleep  1
   \   Run Keyword If  'features' in ${tender_data_keys}  Додати лот  ${lots[${INDEX}]}  ${INDEX}  ${procurementMethodType}  ${items}  ${tender_data.data.features}
   \   Run Keyword If  'features' not in ${tender_data_keys}  Додати лот Ex2  ${lots[${INDEX}]}  ${INDEX}  ${procurementMethodType}  ${items}
 
@@ -587,9 +588,9 @@ Wait For Sync Tender Finish
   [Documentation]
   ...      ${ARGUMENTS[0]} =  ${lot_id}
   ...      ${ARGUMENTS[1]} =  ${award_data}
-  ${lots_length}=  Get Length  ${TENDER.lots}
+  ${lots_length}=  Get Length  ${USERS.users['${PZO_LOGIN_USER}'].lots}
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
-  \   Run Keyword If  '${TENDER.lots[${INDEX}].id}' == '${ARGUMENTS[0]}'  Select From List By Label    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active select[id$="-award_lot_key"]     ${TENDER.lots[${INDEX}].title}
+  \   Run Keyword If  '${USERS.users['${PZO_LOGIN_USER}'].lots[${INDEX}].id}' == '${ARGUMENTS[0]}'  Select From List By Label    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active select[id$="-award_lot_key"]     ${USERS.users['${PZO_LOGIN_USER}'].lots[${INDEX}].title}
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_name"]    ${ARGUMENTS[1].suppliers[0].identifier.legalName}
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_edrpou"]    ${ARGUMENTS[1].suppliers[0].identifier.id}
   Select From List By Label    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active select[id$="-award_organization_region_id"]    ${ARGUMENTS[1].suppliers[0].address.region}
@@ -795,6 +796,8 @@ Wait For All Transfer Complete
 Wait For Transfer Complete
   Sleep  3
   Reload Page
+  Run Keyword And Ignore Error  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
+  Sleep  1
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
 Звірити статус тендераa
@@ -831,6 +834,7 @@ Start Edit Lot
   Sleep  1
 
 Save Tender
+  Sleep  1
   Click Button  xpath=//*[text()='Зберегти зміни']
   Wait Until Page Contains  Закупівля оновлена  10
   Sleep  1
@@ -924,6 +928,7 @@ Save Tender
   Click Element  xpath=//li[contains(@data-title, '${item_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний товар/послугу?']
   Sleep  1 
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+  Sleep  1 
 
   Save Tender
 
@@ -974,6 +979,7 @@ Save Tender
   Click Element  xpath=//li[contains(@data-title, '${feature_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний неціновий критерій?']
   Sleep  1 
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+  Sleep  1 
 
   Save Tender
 
@@ -1293,6 +1299,8 @@ Wait For Complaints Sync
   Click Element   xpath=//button[contains(text(), 'Подати пропозицію')]
   Sleep  1
   Click Element   xpath=//button[contains(text(), 'Закрити')]
+  Sleep  2
+  Wait For All Transfer Complete
 
 Подати цінову пропозицію Lots
   [Arguments]  ${username}  ${tender_uaid}  ${bid}  ${lots_ids}  ${features_ids}
@@ -1379,6 +1387,8 @@ Save Proposal
   Click Element   xpath=//button[contains(text(), 'Редагувати пропозицію')]
   Sleep  1
   Click Element   xpath=//button[contains(text(), 'Закрити')]
+  Sleep  2
+  Wait For All Transfer Complete
 
 Завантажити документ в ставку
   [Arguments]  ${username}  @{arguments}
@@ -2353,6 +2363,8 @@ Switch To Complaints
 
 Отримати інформацію із тендера title
   ${return_value}=  get_text  xpath=//p[contains(@class, 'title')]//*[@class='value']
+  #'Run Keyword And Return If' workaround if browser width is less than ours
+  Run Keyword And Return If  '${return_value}' == '${EMPTY}'  get_text  xpath=//h4[contains(@class, 'page-title')]
   [return]  ${return_value}
 
 Отримати інформацію із тендера description
