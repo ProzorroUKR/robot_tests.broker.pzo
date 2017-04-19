@@ -166,6 +166,7 @@ Login
   Sleep  1
   Wait Until Page Contains   Закупівля створена, дочекайтесь опублікування на сайті уповноваженого органу.   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Wait For Sync Tender  360
 
@@ -569,17 +570,20 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains   Рішення завантажене, тепер потрібно накласти ЕЦП.   60
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Click Element   jquery=#tender-qualification-form .js-submit-btn
   Sleep  1
   Load Sign  
   Wait Until Page Contains   ЕЦП успішно накладено на рішення, тепер потрібно підтвердити рішення.   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Click Element   jquery=#tender-qualification-form .js-submit-btn
   Sleep  1
   Wait Until Page Contains   Рішення підтверджене, очікує опублікування на сайті уповноваженого органу.   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Wait For Sync Tender  360
 
@@ -626,6 +630,7 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains   Контракт успішно завантажений   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Wait Until Page Contains   Активувати контракт   10
   Click Element  xpath=//a[contains(@href, '/tender/contract-activate?id=')]
@@ -636,6 +641,7 @@ Wait For Sync Tender Finish
   Load Sign  
   Wait Until Page Contains   ЕЦП успішно накладено   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Sleep  1
 
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
