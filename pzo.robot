@@ -623,8 +623,9 @@ Wait For Sync Tender Finish
   Input Text    id=contractform-date_start  ${date_start}
   ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
   Input Text    id=contractform-date_end  ${date_end}
-  Choose File   jquery=#tender-contract-form .documents-dynamic-forms-wrapper .item-wrapper.active[data-type="contractdocument"] input[type=file]  ${CURDIR}/testfile.txt
-  Wait Until Page Contains  testfile  20  
+  ${file_path_t}  ${file_name_t}  ${file_content_t}=  create_fake_doc
+  Choose File   jquery=#tender-contract-form .documents-dynamic-forms-wrapper .item-wrapper.active[data-type="contractdocument"] input[type=file]  ${file_path_t}
+  Wait Until Page Contains  ${file_name_t}  20
 
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
