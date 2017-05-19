@@ -654,7 +654,8 @@ Wait For Sync Tender Finish
   ${date_sign}=  Get Current Date  local  0  %d.%m.%Y %H:%M  
   Input Text    id=contractform-date_signed  '${date_sign}'
   Execute JavaScript    $('#contractform-date_signed').blur();
-  Sleep  1
+  Sleep  3
+  Capture Page Screenshot
   ${status}=  Run keyword And Return Status  Page Should Contain  Значення "Дата підписання" повинно бути більшим значення
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
   ${status}=  Run keyword And Return Status  Page Should Contain  Контракт можна буде підписати після
