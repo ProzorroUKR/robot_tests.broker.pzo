@@ -4,6 +4,7 @@ from datetime import datetime
 from robot.libraries.BuiltIn import BuiltIn
 from robot.output import librarylogger
 import urllib
+import urllib3
 
 def get_library():
     return BuiltIn().get_library_instance('Selenium2Library')
@@ -74,7 +75,7 @@ def get_invisible_text(locator):
     element = get_library()._element_find(locator, False, True)
     text = get_webdriver_instance().execute_script('return jQuery(arguments[0]).text();', element)
     return text
-    
+  
 
 def get_text_excluding_children(locator):
     element = get_library()._element_find(locator, False, True)
@@ -100,3 +101,7 @@ def download_file(url, file_name, output_dir):
 def multiply_hundred(number):
     return number*100
 
+def inject_urllib3(number):
+    import urllib3.contrib.pyopenssl
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+ 
