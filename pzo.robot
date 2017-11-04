@@ -56,7 +56,7 @@ ${pzo_proc_type}=                                              unknown
   Open Browser  ${BROKERS['pzo'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
   Set Window Size  @{USERS.users['${username}'].size}
   Set Window Position  @{USERS.users['${username}'].position}
-  inject_urllib3  0
+  inject_urllib3
   Login  ${username}
 
 Login
@@ -2383,9 +2383,6 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера title
-  # ${return_value}=  get_text  xpath=//p[contains(@class, 'title')]//*[@class='value']
-  # 'Run Keyword And Return If' workaround if browser width is less than ours
-  # Run Keyword And Return If  '${return_value}' == '${EMPTY}'  get_text  xpath=//h4[contains(@class, 'page-title')]
   ${return_value}=  get_text  xpath=//div[contains(@class, 'content-part')]//h4[contains(@class, 'page-title')]
   [return]  ${return_value}
 

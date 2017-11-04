@@ -101,7 +101,7 @@ def download_file(url, file_name, output_dir):
 def multiply_hundred(number):
     return number*100
 
-def inject_urllib3(number):
+def inject_urllib3():
     import urllib3.contrib.pyopenssl
     urllib3.contrib.pyopenssl.inject_into_urllib3()
  
