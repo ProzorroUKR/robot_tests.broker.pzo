@@ -638,9 +638,8 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains   Контракт успішно завантажений   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
-  Sleep  1
 
-  Sleep  61
+  Sleep  62
   Wait Until Page Contains   Активувати контракт   10
   Click Element  xpath=//a[contains(@href, '/tender/contract-activate?id=')]
   Sleep  1
@@ -648,12 +647,19 @@ Wait For Sync Tender Finish
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
 
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Load Sign  
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Wait Until Page Contains   ЕЦП успішно накладено   10
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Sleep  1
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Click Element   jquery=#tender-contract-form .js-submit-btn
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'  Sleep  1
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'
+  ...  Run Keywords
+  ...  Load Sign  
+  ...  AND
+  ...  Wait Until Page Contains   ЕЦП успішно накладено   10
+  ...  AND
+  ...  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  ...  AND
+  ...  Sleep  1
+  ...  AND
+  ...  Click Element   jquery=#tender-contract-form .js-submit-btn
+  ...  AND
+  ...  Sleep  1
 
   Wait Until Page Contains   Контракт успішно активовано   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
@@ -952,20 +958,7 @@ Save Tender
 Видалити лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}
   Switch browser   ${username}
-  Fail  temporary not working
-#  Open Tender
-#  Click Element  xpath=//a[contains(@href, '/tender/cancel?id=')]
-#  Wait Until Page Contains  Скасування закупівлі  10
-
-#  Select From List By Label  xpath=//select[@id='cancellationform-related_of']  Лот
-#  Click Element  xpath=//select[@id='cancellationform-related_lot']
-#  Click Element  xpath=//select[@id='cancellationform-related_lot']//option[contains(text(), '${lot_id}')]
-#  Click Element  xpath=//input[@value='123']
-#  Input text  xpath=//textarea[contains(@id, 'cancellationform-reason')]  test
-
-#  Click Element   xpath=//button[contains(text(), 'Скасувати закупівлю')]
-#  Sleep  1
-#  Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
+  Fail  delete lot not supported
 
 Додати неціновий показник на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${feature}

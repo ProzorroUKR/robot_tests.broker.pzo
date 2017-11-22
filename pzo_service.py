@@ -90,10 +90,10 @@ def convert_float_to_string(number):
     return format(number, '.2f')
 
 def convert_date_for_compare_ex(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def convert_date_for_compare_ex2(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def download_file(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
