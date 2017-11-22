@@ -1607,6 +1607,10 @@ Save Proposal
   Run Keyword And Return If   'awards[0].suppliers[0].contactPoint.name' == '${arguments[2]}'   Get invisible text by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.organization-contact-point-name
   Run Keyword If   'contracts[0].status' == '${arguments[2]}'   JsOpenContractByIndex  0
   Run Keyword And Return If   'contracts[0].status' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.status-source
+#
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Click Element    xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]
+  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]//span[contains(@class,'title')]
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
 
@@ -1673,7 +1677,7 @@ Save Proposal
   Run Keyword If   '${MODE}' == 'negotiation' and 'unit.code' == '${arguments[2]}'   JsOpenItemByContainsText  ${arguments[1]}
   Run Keyword And Return If   '${MODE}' == 'negotiation' and 'unit.code' == '${arguments[2]}'   Get invisible text by locator  jquery=.panel-lot-collapse.in .panel-item-collapse.in .item-info-wrapper p.unit-code-source
   Run Keyword If   '${MODE}' == 'negotiation' and 'deliveryDate.endDate' == '${arguments[2]}'   JsOpenItemByContainsText  ${arguments[1]}
-  Run Keyword And Return If   '${MODE}' == 'negotiation' and 'deliveryDate.endDate' == '${arguments[2]}'   Get invisible text by locator  jquery=.panel-lot-collapse.in .panel-item-collapse.in .item-info-wrapper p.delivery-end-date
+  Run Keyword And Return If   '${MODE}' == 'negotiation' and 'deliveryDate.endDate' == '${arguments[2]}'   Отримати інформацію із предмету deliveryDate.endDateEx
   Run Keyword If   '${MODE}' == 'negotiation' and 'deliveryAddress.countryName' == '${arguments[2]}'   JsOpenItemByContainsText  ${arguments[1]}
   Run Keyword And Return If   '${MODE}' == 'negotiation' and 'deliveryAddress.countryName' == '${arguments[2]}'   Get invisible text by locator  jquery=.panel-lot-collapse.in .panel-item-collapse.in .item-info-wrapper p.delivery-country
   Run Keyword If   '${MODE}' == 'negotiation' and 'deliveryAddress.postalCode' == '${arguments[2]}'   JsOpenItemByContainsText  ${arguments[1]}
@@ -2070,6 +2074,11 @@ Get invisible text boolean by locator
   ${return_value}=  convert_date_for_compare_ex  ${return_value}
   Collapse Product  ${product_id}
   Collapse Single Lot
+  [return]  ${return_value}
+
+Отримати інформацію із предмету deliveryDate.endDateEx
+  ${return_value}=  Get invisible text by locator  jquery=.panel-lot-collapse.in .panel-item-collapse.in .item-info-wrapper p.delivery-end-date
+  ${return_value}=  convert_date_for_compare_ex  ${return_value}
   [return]  ${return_value}
 
 Отримати інформацію із предмету deliveryAddress.countryName
