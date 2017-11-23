@@ -4,6 +4,7 @@ from datetime import datetime
 from robot.libraries.BuiltIn import BuiltIn
 from robot.output import librarylogger
 import urllib
+import urllib3
 
 def get_library():
     return BuiltIn().get_library_instance('Selenium2Library')
@@ -74,7 +75,7 @@ def get_invisible_text(locator):
     element = get_library()._element_find(locator, False, True)
     text = get_webdriver_instance().execute_script('return jQuery(arguments[0]).text();', element)
     return text
-    
+  
 
 def get_text_excluding_children(locator):
     element = get_library()._element_find(locator, False, True)
@@ -89,10 +90,10 @@ def convert_float_to_string(number):
     return format(number, '.2f')
 
 def convert_date_for_compare_ex(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def convert_date_for_compare_ex2(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def download_file(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
@@ -100,3 +101,7 @@ def download_file(url, file_name, output_dir):
 def multiply_hundred(number):
     return number*100
 
+def inject_urllib3():
+    import urllib3.contrib.pyopenssl
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+ 
