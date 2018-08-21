@@ -1,5 +1,5 @@
 *** Settings ***
-Library  Selenium2Screenshots
+#Library  Selenium2Screenshots
 Library  String
 Library  DateTime
 Library  pzo_service.py
@@ -40,8 +40,8 @@ ${locator.questions[0].description}                            xpath=//p[@class=
 ${locator.questions[0].date}                                   xpath=//p[@class='data-published']//*[@class='value']
 ${locator.questions[0].answer}                                 xpath=//p[@class='answer']//*[@class='value']
 ${locator.status}                                              xpath=//*[contains(@class, 'hidden opstatus')]
-${tender_page_prefix}=                                         http://dev.pzo.com.ua/tender/view?id=
-${tender_sync_prefix}=                                         http://dev.pzo.com.ua/utils/tender-sync?pk=
+${tender_page_prefix}=                                         http://prozakup.iovzt.info/tender/view?id=
+${tender_sync_prefix}=                                         http://prozakup.iovzt.info/utils/tender-sync?pk=
 ${tender_sync_postfix}=                                        ?psw=369369
 ${pzo_proc_type}=                                              unknown
 
@@ -109,9 +109,9 @@ Login
   ${lots_title_en}=  Get From Dictionary  ${lots[0]}  title_en
   ${lots_description}=   Get From Dictionary   ${lots[0]}         description
 
-#  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=360
-  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=1080
+#  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://prozakup.iovzt.info/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://prozakup.iovzt.info/utils/config?tacceleration=360
+  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  http://prozakup.iovzt.info/utils/config?tacceleration=1080
 
   Selenium2Library.Switch Browser    ${user}
   Go To                             ${USERS.users['${user}'].homepage}
@@ -361,6 +361,7 @@ Input Additional Classifications
 
   ${count}=  Get Length  ${ARGUMENTS[0]}
   : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   Continue For Loop If  '${ARGUMENTS[0][${INDEX}].scheme}' == 'ДКПП'
   \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${ARGUMENTS[0][${INDEX}].scheme}"]
   \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
   \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${ARGUMENTS[0][${INDEX}].id}
@@ -484,7 +485,7 @@ Load And Wait Text
   ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
   Selenium2Library.Switch browser   ${ARGUMENTS[0]}
 
-  Go To  http://dev.pzo.com.ua/utils/tender-sync?tenderid=${ARGUMENTS[1]}
+  Go To  http://prozakup.iovzt.info/utils/tender-sync?tenderid=${ARGUMENTS[1]}
 #  Sleep  10
 
   Load And Wait Text  ${BROKERS['pzo'].homepage}  Публічні закупівлі  4
@@ -983,7 +984,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showfeaturebytext:${feature_id}
+  Go To  http://prozakup.iovzt.info/tender/update?id=${tender_id}#showfeaturebytext:${feature_id}
   Sleep  2
 
   Click Element  xpath=//li[contains(@data-title, '${feature_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний неціновий критерій?']
@@ -1014,7 +1015,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showitembytext:${item_id}
+  Go To  http://prozakup.iovzt.info/tender/update?id=${tender_id}#showitembytext:${item_id}
   Sleep  2
   Add Feature  ${feature}  0  ${procurementMethodType}  div[contains(@class, 'form-group tender${pzo_proc_type}form-lots-dynamic-forms-wrapper')]//div[contains(@class, 'active')]//div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]//div[contains(@class, 'item${pzo_proc_type}form-features-dynamic-forms-wrapper')]  item
   
@@ -1027,7 +1028,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/question-answer?id=${tender_id}
+  Go To  http://prozakup.iovzt.info/tender/question-answer?id=${tender_id}
   Click Element  xpath=//select[@id='questionanswerform-question']
   Click Element  xpath=//select[@id='questionanswerform-question']//option[contains(text(), '${question_id}')]
   Input text  xpath=//textarea[contains(@id, 'questionanswerform-answer')]  ${answer.data.answer}
@@ -1043,7 +1044,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/complaint-answer?id=${tender_id}
+  Go To  http://prozakup.iovzt.info/tender/complaint-answer?id=${tender_id}
 #  Click Element  xpath=//select[@id='complaintanswerform-complaint']
 #  Click Element  xpath=//select[@id='complaintanswerform-complaint']//option[contains(text(), '${claim_id}')]
   Input text  xpath=//textarea[contains(@id, 'complaintanswerform-resolution')]  ${answer.data.resolution}
@@ -1262,7 +1263,7 @@ Wait For Complaints Sync
   Switch browser  ${username}
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Open Tender
-  Go To  http://dev.pzo.com.ua/tender/complaint-resolve?id=${tender_id}
+  Go To  http://prozakup.iovzt.info/tender/complaint-resolve?id=${tender_id}
   Wait Until Page Contains Element  xpath=//select[@id='complaintresolveform-complaint']  10
   Click Element  xpath=//select[@id='complaintresolveform-complaint']
   Click Element  xpath=//select[@id='complaintresolveform-complaint']//option[@data-complaintid='${claim}']
@@ -1325,7 +1326,7 @@ Wait For Complaints Sync
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
   \   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
-  \   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${lots[${INDEX}].relatedLot}
+  \   Go To  http://prozakup.iovzt.info/tender/bid?id=${tender_id}#showlotbykey:${lots[${INDEX}].relatedLot}
   \   Sleep  2
   \   Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Input text  xpath=//div[contains(@class, 'active')]//textarea[contains(@id, '-subcontracting_details')]  ${bid.data.tenderers[0].name}
@@ -1341,7 +1342,7 @@ Wait For Complaints Sync
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Open Tender
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
+  Go To  http://prozakup.iovzt.info/tender/bid?id=${tender_id}
   Sleep  2
   ${amount}=  convert_float_to_string  ${bid.data.value.amount}
   Input text  xpath=//input[contains(@id, '-value_amount')]  ${amount}
@@ -1386,12 +1387,12 @@ Start Edit Proposal
 
 Start Edit Proposal Whole
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
+  Go To  http://prozakup.iovzt.info/tender/bid?id=${tender_id}
 
 Start Edit Proposal Lot
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${last_proposal_lotid}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${last_proposal_lotid}
+  Go To  http://prozakup.iovzt.info/tender/bid?id=${tender_id}#showlotbykey:${last_proposal_lotid}
 
 Save Proposal
   Click Element   xpath=//button[contains(text(), 'Редагувати пропозицію')]
