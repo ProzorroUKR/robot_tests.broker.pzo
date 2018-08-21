@@ -696,7 +696,7 @@ Load Sign Data
   Run Keyword If  '${status_info_check}' == '0'  Choose File   id=PKeyFileInput     ${CURDIR}/Key-6.dat
   Run Keyword If  '${status_info_check}' == '0'  Sleep  2
   Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyPassword  20
-  Run Keyword If  '${status_info_check}' == '0'  Input Text    id=PKeyPassword     qwerty
+  Run Keyword If  '${status_info_check}' == '0'  Input Text    id=PKeyPassword     12345677
   Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyReadButton  20
   Run Keyword If  '${status_info_check}' == '0'  Click Element   id=PKeyReadButton
   Run Keyword If  '${status_info_check}' == '0'  Sleep  1
