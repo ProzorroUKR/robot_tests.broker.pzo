@@ -1493,7 +1493,8 @@ Save Proposal
   Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
   Choose File  xpath=//input[@type='file']  ${doc_name}
   Sleep  2
-  Select From List By Label  xpath=//select[contains(@id, '-document_type')]  Повідомлення про рішення
+  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']  
+  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
 
   Click Button  xpath=//*[text()='Підтвердити рішення']
   Wait Until Page Contains  Пропозиція прийнята  10
@@ -2474,4 +2475,252 @@ Switch To Complaints
   Run Keyword If  'None' == '${complaint_id}'  Collapse Single Complaint
   [return]  ${return_value}
 
+### BOF - PLANNING ###
 
+Створити план
+  [Arguments]  ${user}  ${plan_data}
+  ${data}=  Get From Dictionary  ${plan_data}  data
+  ${data_keys}=  Get Dictionary Keys  ${data}
+  ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
+  ${budget_amount}=  Convert To String  ${data.budget.amount}
+  ${classificationWrapper}=  Set Variable  \#collapseGeneral  
+  ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
+
+  ## preparing
+  UserChageOrgnizationInfo  ${data.procuringEntity}
+
+  ## load form page  
+  Go To  ${BROKERS['pzo'].basepage}/plan/create
+  Wait Until Page Contains  Створення плану   10
+  Sleep  1
+
+  ## filling form
+  Select From List By Value  id=planform-procurement_method_type  ${data.tender.procurementMethodType}
+  JsInputHiddenText  \#planform-budget_id  ${data.budget.id}
+  Input text  id=planform-title  ${data.budget.description}
+  Input text  id=planform-value_amount  ${budget_amount}
+  Select From List By Value  id=planform-value_currency  ${data.budget.currency}
+  JsInputHiddenText  \#planform-project_id  ${data.budget.project.id}
+  JsInputHiddenText  \#planform-project_name  ${data.budget.project.name}
+  Input text  id=planform-tender_start_date  ${start_date}
+  InputClassificationByWrapper  ${classificationWrapper}  ${data.classification.id}  
+  Run Keyword If  'additionalClassifications' in ${data_keys}  InputAdditionalClassificationsByWrapper  ${classificationWrapper}  ${data.additionalClassifications}  
+  Run Keyword If  'items' in ${data_keys}  InputPlanItems  ${data}
+
+  ## submit form
+  Click Element   xpath=//*[@id='submitBtn']
+  Sleep  1
+  Wait Until Page Contains   План закупівлі створений, дочекайтесь опублікування на сайті уповноваженого органу.   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Wait For Sync Tender  60
+  ${plan_id}  Get Text  jquery=.content-part .plan-info-wrapper .plan-id .value
+  [Return]  ${plan_id}
+
+Пошук плану по ідентифікатору
+  [Arguments]  ${username}  ${tenderId}  
+
+  Run Keyword If  '${ROLE}' == 'viewer'  Go To  ${BROKERS['pzo'].basepage}/utils/queue-plan-update
+  Run Keyword If  '${ROLE}' == 'viewer'  Sleep  30
+
+  Go To  ${BROKERS['pzo'].basepage}/plans  
+  Wait Until Page Contains Element    id=plansearchform-query    10
+  Input Text    id=plansearchform-query    ${tenderId}
+  Click Element  jquery=#plan-search-form .js-submit-btn
+  Sleep  1
+  Wait Until Page Does Not Contain Element  jquery=#plan-list-pjax.loading-wrapper
+  Capture Page Screenshot
+  Click Element    xpath=(//div[@id='plan-list-pjax'])//a[contains(@href, '/plan/')][1]
+  Sleep  5
+
+Оновити сторінку з планом
+  [Arguments]  ${username}  ${tenderId}
+
+  Reload Page
+  Sleep  2s
+
+Внести зміни в план
+  [Arguments]  @{ARGUMENTS}
+  [Documentation]
+  ...      ${ARGUMENTS[0]} =  username
+  ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
+  ...      ${ARGUMENTS[2]} =  key
+  ...      ${ARGUMENTS[3]} =  value
+  
+  PlanFormOpenByUAID  ${ARGUMENTS[1]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'budget.amount'  Input text  id=planform-value_amount  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'budget.description'  Input text  id=planform-title  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].deliveryDate.endDateitem'  
+  ...  PlanUpdateItemDeliveryEndDate  \#collapseItems .tab-content .tab-pane:first  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'  JsCollapseShowAndScroll  \#collapseItems
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'  JsTabShowAndScroll  \#collapseItems .nav li:first a  
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'
+  ...  PlanUpdateItemQuantity  \#collapseItems .tab-content .tab-pane:first  ${ARGUMENTS[3]}
+  PlanUpdateSave
+  
+Додати предмет закупівлі в план
+  [Arguments]  ${username}  ${uaid}  ${item_data}
+  
+  PlanFormOpenByUAID  ${uaid}
+  InputPlanOneItem  ${item_data}
+  PlanUpdateSave
+
+Видалити предмет закупівлі плану
+  [Arguments]  ${username}  ${uaid}  ${item_key}
+
+  PlanFormOpenByUAID  ${uaid}
+  JsCollapseShowAndScroll  \#collapseItems
+  Click Element   jquery=#collapseItems .nav li[data-title^='${item_key}'] .js-dynamic-form-remove
+  Wait Until Page Contains   Ви впевнені що бажаєте видали обрану номенклатуру?   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  PlanUpdateSave
+
+Отримати інформацію із плану
+  [Arguments]  ${username}  ${uaid}  ${key}
+
+  PlanOpenByUAID  ${uaid}
+  #Run Keyword And Return If   '${key}' == 'tender.procurementMethodType'   
+
+### EOF - PLANNING ###  
+
+### BOF - HELPERS ###
+
+UserChageOrgnizationInfo
+  [Arguments]  ${data}
+
+  Go To  ${BROKERS['pzo'].basepage}/user/profile
+  Wait Until Page Contains  Інформація про компанію   10
+  Sleep  1
+
+  Input text  id=profileform-organization_name  ${data.name}
+  Input text  id=profileform-organization_edrpou  ${data.identifier.id}
+
+  JsSetScrollToElementBySelector  \#user-profile-form .js-submit-btn
+  Click Element   jquery=\#user-profile-form .js-submit-btn
+  Sleep  1
+  Wait Until Page Contains   Контактна інформація успішно оновлена   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]  
+
+InputClassificationByWrapper
+  [Arguments]  ${wrapper}  ${classification_id}
+
+  Click Element                      jquery=${wrapper} a[href='#classification']
+  Wait Until Element Is Visible      xpath=//div[contains(@id, 'classification-modal')]//h4[contains(@id, 'classificationModalLabel')]
+  Sleep  1
+  Input text                         xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  ${classification_id}
+  Press key                          xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  \\13
+  Sleep  1
+  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//strong[contains(., '${classification_id}')]  20
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//i[@class='jstree-icon jstree-checkbox']
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//button[contains(@class, 'btn btn-default waves-effect waves-light js-submit')]
+  Sleep  1
+
+InputAdditionalClassificationsByWrapper
+  [Arguments]  ${wrapper}  ${additionalClassifications}
+
+  Click Element  jquery=${wrapper} a[href='#additionalclassification']
+  Wait Until Element Is Visible  xpath=//div[contains(@id, 'additional-classification-modal')]//h4[contains(@id, 'additionalClassificationModalLabel')]
+  Sleep  1
+
+  ${count}=  Get Length  ${additionalClassifications}
+  : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ДКПП'
+  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'INN'
+  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ATC'
+  \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${additionalClassifications[${INDEX}].scheme}"]
+  \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
+  \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${additionalClassifications[${INDEX}].id}
+  \   Press key      jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  \\13
+  \   Sleep  2
+  \   Wait Until Page Contains Element   jquery=#additional-classification-modal .tab-pane.tree-wrapper.active .tree.js-search-tree strong:contains("${additionalClassifications[${INDEX}].id}")  20
+  \   Click Element  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active .tree.js-search-tree li:first i.jstree-checkbox
+
+  Click Element  xpath=//div[contains(@id, 'additional-classification-modal')]//button[contains(@class, 'js-submit')]
+  Sleep  1
+
+InputPlanItems
+  [Arguments]  ${data}
+  ${items}=  Get From Dictionary   ${data}  items  
+  ${count}=  Get Length  ${items}  
+
+  : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   InputPlanOneItem  ${items[${INDEX}]}
+
+InputPlanOneItem
+  [Arguments]  ${data}
+  ${wrapper}=  Set Variable  \#collapseItems .tab-content .tab-pane.active  
+  ${keys}=  Get Dictionary Keys  ${data}
+
+  JsCollapseShowAndScroll  \#collapseItems
+  Click Element  jquery=#collapseItems a[href="#add-items"]
+  Sleep  2  
+  Input text  jquery=${wrapper} [id$='-description']  ${data.description}
+  PlanUpdateItemQuantity  ${wrapper}  ${data.quantity}
+  JsSetScrollToElementBySelector  ${wrapper} [id$='-unit_id']
+  Select From List By Label  jquery=${wrapper} [id$='-unit_id']  ${data.unit.name}
+  InputClassificationByWrapper  ${wrapper}  ${data.classification.id}
+  Run Keyword If  'additionalClassifications' in ${keys}  
+  ...  InputAdditionalClassificationsByWrapper  ${wrapper}  ${data.additionalClassifications}
+  PlanUpdateItemDeliveryEndDate  ${wrapper}  ${data.deliveryDate.endDate}
+
+PlanOpenByUAID
+  [Arguments]  ${uaid}
+
+  Go To  ${BROKERS['pzo'].basepage}/plan/${uaid}
+  Wait Until Page Contains    План ${uaid}    10
+
+PlanFormOpenByUAID
+  [Arguments]  ${uaid}
+
+  PlanOpenByUAID  ${uaid}
+  Click Element  xpath=//a[contains(@href, '/plan/update')][1]
+  Wait Until Page Contains  Редагування   10
+  Sleep  1
+
+PlanUpdateItemQuantity
+  [Arguments]  ${wrapper}  ${quantity}
+  ${quantity_srt}=  Convert To String  ${quantity}
+  
+  JsSetScrollToElementBySelector  ${wrapper} [id$='-quantity']
+  Input text  jquery=${wrapper} [id$='-quantity']  ${quantity_srt}
+
+PlanUpdateItemDeliveryEndDate
+  [Arguments]  ${wrapper}  ${delivery_end_date}
+  ${date}=  convert_isodate_to_site_datetime  ${delivery_end_date}
+
+  JsInputHiddenText  ${wrapper} [id$='-delivery_end_date']  ${date}
+
+PlanUpdateSave
+
+  JsSetScrollToElementBySelector  \#submitBtn
+  Click Element   xpath=//*[@id='submitBtn']
+  Sleep  1
+  Wait Until Page Contains   План оновлений, дочекайтесь опублікування на сайті уповноваженого органу.   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Wait For Sync Tender  60
+
+JsInputHiddenText
+  [Arguments]  ${selector}  ${text}
+
+  Execute JavaScript  jQuery("${selector}").val("${text}");
+
+JsSetScrollToElementBySelector
+  [Arguments]  ${selector}
+
+  Execute JavaScript  scrollToElement("${selector}");
+  Sleep  1
+
+JsCollapseShowAndScroll
+  [Arguments]  ${selector}
+
+  Execute JavaScript  jQuery("${selector}").collapse("show");
+  Sleep  1  
+  JsSetScrollToElementBySelector  ${selector}
+
+JsTabShowAndScroll
+  [Arguments]  ${selector}
+
+  Execute JavaScript  jQuery("${selector}").tab("show");
+  Sleep  1  
+  JsSetScrollToElementBySelector  ${selector}
+
+### EOF - HELPERS ###

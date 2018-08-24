@@ -19,6 +19,15 @@ def convert_datetime_for_delivery(isodate):
     date_string = iso_dt.strftime("%Y-%m-%d %H:%M")
     return date_string
 
+def convert_isodate_to_site_date(isodate):
+    iso_dt = parse_date(isodate)
+    date_string = iso_dt.strftime("%d.%m.%Y")
+    return date_string
+
+def convert_isodate_to_site_datetime(isodate):
+    iso_dt = parse_date(isodate)
+    date_string = iso_dt.strftime("%d.%m.%Y %H:%M")
+    return date_string
 
 def convert_date_for_compare(datestr):
     return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M")
