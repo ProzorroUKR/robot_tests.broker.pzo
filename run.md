@@ -2,8 +2,8 @@
 
 Single Item Tender
 
-- bin/op_tests -s openProcedure -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__openProcedure -v number_of_lots:1
-- bin/op_tests -s auction -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__auction
++ bin/op_tests -s openProcedure -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__openProcedure -v number_of_lots:1
++ bin/op_tests -s auction -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__auction -v number_of_lots:1
 - bin/op_tests -s qualification -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner_qualification
 - bin/op_tests -s contract_signing -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner_contractSigning
 
@@ -19,12 +19,12 @@ Single Item Tender
 
 Planning
 
-- bin/op_tests -s planning -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/planning__owner
++ bin/op_tests -s planning -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/planning__owner
 - bin/op_tests -s planning -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/planning__viewer
 
 Reporting
 
-- bin/op_tests -s reporting -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/reporting__owner -v number_of_lots:1
+- bin/op_tests -s reporting -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/reporting__owner
 - bin/op_tests -s reporting -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/reporting__viewer
 
 Below Funders
