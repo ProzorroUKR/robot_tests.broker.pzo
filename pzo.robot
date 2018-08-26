@@ -361,8 +361,7 @@ Input Additional Classifications
 
   ${count}=  Get Length  ${ARGUMENTS[0]}
   : FOR    ${INDEX}    IN RANGE    0    ${count}
-  \   Continue For Loop If  '${ARGUMENTS[0][${INDEX}].scheme}' == 'ДКПП'
-  \   Continue For Loop If  '${ARGUMENTS[0][${INDEX}].scheme}' == 'INN'
+  \   Continue For Loop If  '${ARGUMENTS[0][${INDEX}].scheme}' == 'ДКПП'  
   \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${ARGUMENTS[0][${INDEX}].scheme}"]
   \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
   \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${ARGUMENTS[0][${INDEX}].id}
@@ -759,7 +758,7 @@ Wait user action
   Input text  id=tender${pzo_proc_type}form-tender_period_end_date  ${converted_date}
 
 Отримати посилання на аукціон для глядача
-  [Arguments]  ${username}  ${tenderId}
+  [Arguments]  ${username}  @{arguments}  
   Selenium2Library.Switch browser  ${username}
   Wait For Status  active.auction  ${username}  100000
   Open Tender
@@ -767,7 +766,7 @@ Wait user action
   [return]  ${return_value}
 
 Отримати посилання на аукціон для учасника
-  [Arguments]  ${username}  ${tenderId}
+  [Arguments]  ${username}  @{arguments}
   Selenium2Library.Switch browser  ${username}
   Wait For Status  active.auction  ${username}  100000
   ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  100000 s  0 s  Search Participation Url
@@ -1527,6 +1526,8 @@ Save Proposal
 #  Log To Console  ${arguments[1]}
 #  Log To Console  ${arguments[2]}
 
+  Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
+  Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-end-date
   Run Keyword And Return If   'deliveryLocation.longitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
   Run Keyword And Return If   'deliveryLocation.latitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
   Run Keyword And Return If   'tenderPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.startDate
@@ -1565,7 +1566,7 @@ Save Proposal
   Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}'  Open Tender
   ${Result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=div.award-list-wrapper .panel-heading:eq(0) a[data-toggle="collapse"]
   Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  JsOpenAwardByIndex  0
-  Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  Capture Page Screenshot
+  Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  JsSetScrollToElementBySelector  div.award-list-wrapper  
   Run Keyword And Return If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}   Get text date by locator  jquery=div.award-list-wrapper .panel-collapse.collapse.in p.complaint-period span.end-date
   ${Result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=#tender-contract-form .js-award-complaint-period-wrapper span.end-date  
   Run Keyword And Return If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}   Get text date by locator  jquery=#tender-contract-form .js-award-complaint-period-wrapper span.end-date
@@ -2523,8 +2524,11 @@ Switch To Complaints
 Пошук плану по ідентифікатору
   [Arguments]  ${username}  ${tenderId}  
 
-  Run Keyword If  '${ROLE}' == 'viewer'  Go To  ${BROKERS['pzo'].basepage}/utils/queue-plan-update
-  Run Keyword If  '${ROLE}' == 'viewer'  Sleep  30
+  Run Keyword If  '${ROLE}' == 'viewer'  Go To  ${BROKERS['pzo'].basepage}/utils/plan-sync?planid=${tenderId}
+  Run Keyword If  '${ROLE}' == 'viewer'  Sleep  5
+  ${planNotSynced}=  Run Keyword And Return Status  Page Should Contain  fail
+  Run Keyword If  '${ROLE}' == 'viewer' and ${planNotSynced}  Go To  ${BROKERS['pzo'].basepage}/utils/queue-plan-update
+  Run Keyword If  '${ROLE}' == 'viewer' and ${planNotSynced}  Sleep  30  
 
   Go To  ${BROKERS['pzo'].basepage}/plans  
   Wait Until Page Contains Element    id=plansearchform-query    10
@@ -2580,7 +2584,8 @@ Switch To Complaints
 
 Отримати інформацію із плану
   [Arguments]  ${username}  ${uaid}  ${key}
-  ${item0Wrapper}=  Set Variable  \#accordionItems .panel:first .panel-collapse:first
+  ${item0Wrapper}=  Set Variable  \#accordionItems .panel:nth(0) .panel-collapse:first
+  ${item1Wrapper}=  Set Variable  \#accordionItems .panel:nth(1) .panel-collapse:first
 
   PlanOpenByUAID  ${uaid}
   Run Keyword And Return If   '${key}' == 'tender.procurementMethodType'  get_invisible_text  jquery=#general-info .procurement-method-type  
@@ -2597,15 +2602,26 @@ Switch To Complaints
   Run Keyword And Return If   '${key}' == 'classification.scheme'   get_invisible_text  jquery=#general-info .main-classification-scheme
   Run Keyword And Return If   '${key}' == 'classification.id'   get_invisible_text  jquery=#general-info .main-classification-code
   Run Keyword And Return If   '${key}' == 'tender.tenderPeriod.startDate'   get_invisible_text  jquery=#general-info .tender-start-date-source
-  Run Keyword And Return If   '${key}' == 'items[0].description'    JsCollapseShowAndScroll  ${item0Wrapper}
+  ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[0]
+  Run Keyword If   ${item0NeedToBeVisible}    JsCollapseShowAndScroll  ${item0Wrapper}
   Run Keyword And Return If   '${key}' == 'items[0].description'    get_text  jquery=${item0Wrapper} .item-info-wrapper .title .value
-  #Run Keyword And Return If   '${key}' == 'items[0].quantity'    
-  #Run Keyword And Return If   '${key}' == 'items[0].deliveryDate.endDate'    
-  #Run Keyword And Return If   '${key}' == 'items[0].unit.code'    
-  #Run Keyword And Return If   '${key}' == 'items[0].unit.name'    
-  #Run Keyword And Return If   '${key}' == 'items[0].classification.description'    
-  #Run Keyword And Return If   '${key}' == 'items[0].classification.scheme'    
-  #Run Keyword And Return If   '${key}' == 'items[0].classification.id'    
+  Run Keyword And Return If   '${key}' == 'items[0].quantity'    Get invisible text number by locator  jquery=${item0Wrapper} .item-info-wrapper .quantity-source
+  Run Keyword And Return If   '${key}' == 'items[0].deliveryDate.endDate'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   '${key}' == 'items[0].unit.code'   get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   '${key}' == 'items[0].unit.name'   get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   '${key}' == 'items[0].classification.description'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   '${key}' == 'items[0].classification.scheme'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   '${key}' == 'items[0].classification.id'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-code
+  ${item1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[1]
+  Run Keyword If   ${item1NeedToBeVisible}    JsCollapseShowAndScroll  ${item1Wrapper}
+  Run Keyword And Return If   '${key}' == 'items[1].description'    get_text  jquery=${item1Wrapper} .item-info-wrapper .title .value
+  Run Keyword And Return If   '${key}' == 'items[1].quantity'    Get invisible text number by locator  jquery=${item1Wrapper} .item-info-wrapper .quantity-source
+  Run Keyword And Return If   '${key}' == 'items[1].deliveryDate.endDate'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   '${key}' == 'items[1].unit.code'   get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   '${key}' == 'items[1].unit.name'   get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   '${key}' == 'items[1].classification.description'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   '${key}' == 'items[1].classification.scheme'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   '${key}' == 'items[1].classification.id'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-code
   Fail  NotImplemented
 
 ### EOF - PLANNING ###  
@@ -2651,9 +2667,7 @@ InputAdditionalClassificationsByWrapper
 
   ${count}=  Get Length  ${additionalClassifications}
   : FOR    ${INDEX}    IN RANGE    0    ${count}
-  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ДКПП'
-  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'INN'
-  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ATC'
+  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ДКПП'  
   \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${additionalClassifications[${INDEX}].scheme}"]
   \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
   \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${additionalClassifications[${INDEX}].id}
