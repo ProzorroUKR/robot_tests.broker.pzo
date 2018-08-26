@@ -148,6 +148,10 @@ Login
   Select Checkbox  id=tender${pzo_proc_type}form-quick_mode
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Select Checkbox  id=tender${pzo_proc_type}form-auction_skip_mode
 
+  ### BOF - BelowFunders ###
+  Run Keyword If  'funders' in ${tender_data_keys}  Створити тендер Funder  ${tender_data.data.funders[0]}
+  ### EOF - BelowFunders ###
+
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  1
   Click Element  xpath=//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний лот?']
@@ -208,6 +212,12 @@ Login
   ${date}=  convert_datetime_for_delivery  ${date}
   ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
   Input text  id=tender${pzo_proc_type}form-tender_period_end_date  ${date}
+
+Створити тендер Funder
+  [Arguments]  ${funderData}
+  Click Element   id=tenderbelowthresholdform-is_donor
+  Click Element   id=tenderbelowthresholdform-funder_organization_id
+  Click Element   jquery=#tenderbelowthresholdform-funder_organization_id option[data-identifier-code=${funderData.identifier.id}]
 
 Додати лот
   [Arguments]  @{arguments}
@@ -507,6 +517,19 @@ Load And Wait Text
   Wait Until Page Contains    ${ARGUMENTS[1]}   60
   Save Tender ID
   Capture Page Screenshot
+
+Пошук тендера за кошти донора
+  [Arguments]  ${username}  @{arguments}
+  ${identifier}=  Set Variable  ${arguments[0]}
+
+  Go To  ${BROKERS['pzo'].basepage}/tenders?funder_organization=${identifier}
+  Wait Until Page Contains Element    id=tender-list    30
+  Capture Page Screenshot  tender_with_funders_search_result
+  Sleep  5
+
+  # redirect to tender view for getting data
+  Go To  ${BROKERS['pzo'].basepage}/tender/${TENDER.TENDER_UAID}
+  Wait Until Page Contains    ${TENDER.TENDER_UAID}    10
 
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
@@ -1618,6 +1641,21 @@ Save Proposal
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Click Element    xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]
   Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]//span[contains(@class,'title')]
+
+  ### BOF - BelowFunders ###
+  ${funderWrapper}=  Set Variable  \#funderorganizationinfo
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].name'  get_invisible_text  jquery=${funderWrapper} .name.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.countryName'  get_invisible_text  jquery=${funderWrapper} .country.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.locality'  get_invisible_text  jquery=${funderWrapper} .locality.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.postalCode'  get_invisible_text  jquery=${funderWrapper} .postalcode.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.region'  get_invisible_text  jquery=${funderWrapper} .region.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.streetAddress'  get_invisible_text  jquery=${funderWrapper} .street-address.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].contactPoint.url'  Fail  Контактні дані не відображаються
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.id'  get_invisible_text  jquery=${funderWrapper} .identifier-code.hidden
+  Run Keyword If   '${arguments[2]}' == 'funders[0].identifier.legalName'  JsSetScrollToElementBySelector    ${funderWrapper}
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.legalName'  get_text  jquery=${funderWrapper} .legal-name .value
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.scheme'  get_invisible_text  jquery=${funderWrapper} .identifier-scheme.hidden
+  ### EOF - BelowFunders ###
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
 
