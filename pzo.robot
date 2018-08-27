@@ -103,11 +103,6 @@ Login
   ${description}=   Get From Dictionary   ${tender_data.data}               description
   ${description_ru}=  Get From Dictionary  ${tender_data.data}  description_ru
   ${description_en}=  Get From Dictionary  ${tender_data.data}  description_en
-  #
-  ${lots_title}=  Get From Dictionary  ${lots[0]}  title
-  ${lots_title_ru}=  Get From Dictionary  ${lots[0]}  title_ru
-  ${lots_title_en}=  Get From Dictionary  ${lots[0]}  title_en
-  ${lots_description}=   Get From Dictionary   ${lots[0]}         description
 
 #  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
@@ -218,6 +213,9 @@ Login
   Click Element   id=tenderbelowthresholdform-is_donor
   Click Element   id=tenderbelowthresholdform-funder_organization_id
   Click Element   jquery=#tenderbelowthresholdform-funder_organization_id option[data-identifier-code=${funderData.identifier.id}]
+
+Створити тендер Лоти
+  [Arguments]  ${funderData}
 
 Додати лот
   [Arguments]  @{arguments}
@@ -882,6 +880,7 @@ Start Edit Lot
 
 Save Tender
   Sleep  1
+  JsSetScrollToElementBySelector  \#submitBtn
   Click Button  xpath=//*[text()='Зберегти зміни']
   Wait Until Page Contains  Закупівля оновлена  10
   Sleep  1
@@ -1509,7 +1508,9 @@ Save Proposal
   [Arguments]  ${username}  ${tender_uaid}  ${award_index}
   Switch browser   ${username}
 
-  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_isset}=  GetDictionaryKeyExist  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  GetValueFromDictionaryByKey  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ...  ELSE  GenerateFakeDocument
 
   Open Tender
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
@@ -2518,6 +2519,26 @@ Switch To Complaints
   Run Keyword If  'None' == '${complaint_id}'  Collapse Single Complaint
   [return]  ${return_value}
 
+### BOF - BELOW FUNDERS ###
+Видалити донора
+  [Arguments]  ${username}  @{arguments}
+  ${tenderid}=  Set Variable  ${arguments[0]}
+
+  TenderFormOpenByUAID  ${tenderid}
+  Click Element   id=tenderbelowthresholdform-is_donor
+  Save Tender
+
+Додати донора
+  [Arguments]  ${username}  @{arguments}
+  ${tenderid}=  Set Variable  ${arguments[0]}
+  ${funder_data}=  Set Variable  ${arguments[1]}
+
+  TenderFormOpenByUAID  ${tenderid}
+  Створити тендер Funder  ${funder_data}
+  Save Tender
+
+### EOF - BELOW FUNDERS ###
+
 ### BOF - PLANNING ###
 
 Створити план
@@ -2742,6 +2763,20 @@ InputPlanOneItem
   ...  InputAdditionalClassificationsByWrapper  ${wrapper}  ${data.additionalClassifications}
   PlanUpdateItemDeliveryEndDate  ${wrapper}  ${data.deliveryDate.endDate}
 
+TenderOpenByUAID
+  [Arguments]  ${uaid}
+
+  Go To  ${BROKERS['pzo'].basepage}/tender/${uaid}
+  Wait Until Page Contains    Закупівля ${uaid}    10
+
+TenderFormOpenByUAID
+  [Arguments]  ${uaid}
+
+    TenderOpenByUAID  ${uaid}
+    Click Element  xpath=//a[contains(@href, '/tender/update')][1]
+    Wait Until Page Contains  Редагування   10
+    Sleep  1
+
 PlanOpenByUAID
   [Arguments]  ${uaid}
 
@@ -2802,5 +2837,17 @@ JsTabShowAndScroll
   Execute JavaScript  jQuery("${selector}").tab("show");
   Sleep  1  
   JsSetScrollToElementBySelector  ${selector}
+
+GetDictionaryKeyExist           [Arguments]     ${Dictionary Name}      ${Key}
+  Run Keyword And Return Status       Dictionary Should Contain Key       ${Dictionary Name}      ${Key}
+
+GetValueFromDictionaryByKey      [Arguments]     ${Dictionary Name}      ${Key}
+  ${KeyIsPresent}=    Run Keyword And Return Status       Dictionary Should Contain Key       ${Dictionary Name}      ${Key}
+  ${Value}=           Run Keyword If      ${KeyIsPresent}     Get From Dictionary             ${Dictionary Name}      ${Key}
+  Return From Keyword         ${Value}
+
+GenerateFakeDocument
+  ${file_path}  ${file_name}  ${file_content}=  op_robot_tests.tests_files.service_keywords.Create Fake Doc
+  [return]  ${file_path}
 
 ### EOF - HELPERS ###

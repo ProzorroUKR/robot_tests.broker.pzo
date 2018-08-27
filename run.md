@@ -29,9 +29,9 @@ bin/op_tests -s reporting -v broker:pzo -v role:viewer -v api_version:2.4 -d tes
 
 Below Funders
 
-- bin/op_tests -s openProcedure -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__openProcedure -v number_of_lots:1
-bin/op_tests -s auction -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__auction
-bin/op_tests -s qualification -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__qualification
++/- bin/op_tests -s openProcedure -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__openProcedure -v number_of_lots:1
++ bin/op_tests -s auction -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__auction
++ bin/op_tests -s qualification -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__qualification
 bin/op_tests -s contract_signing -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/belowFunders__owner__contractSigning
 
 bin/op_tests -s openProcedure -A robot_tests_arguments/below_funders.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/belowFunders__viewer__openProcedure -v number_of_lots:1
