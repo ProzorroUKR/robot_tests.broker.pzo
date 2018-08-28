@@ -828,7 +828,7 @@ Open Tender
   ${no_id}=  Run Keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Return From Keyword If  ${no_id}
   Wait For All Transfer Complete
-  Sync Tender
+  Run Keyword If  '${ROLE}' != 'tender_owner'  Sync Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}  
   Go To  ${tender_url}
@@ -981,7 +981,18 @@ Save Tender
 Видалити лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}
   Switch browser   ${username}
-  Fail  delete lot not supported
+  #Fail  delete lot not supported
+
+  Start Edit Lot  ${lot_id}  # open tender form and open lots
+
+  Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  # open needed lot
+  Sleep  500ms
+  Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab'] .js-dynamic-form-remove  # click button to remove lot
+  Wait Until Page Contains  Ви впевнені що бажаєте видалити поточний лот?  3
+  Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]  # confrim deleting
+  Wait Until Page Contains Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
+
+  Save Tender
 
 Додати неціновий показник на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${feature}
