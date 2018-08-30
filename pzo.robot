@@ -1140,7 +1140,7 @@ Save Tender
   Wait Until Page Contains Element  id=prequalificationform-description
   Run Keyword And Ignore Error  Click Element   jquery=#prequalificationform-title option.js-cancel:first
   Input text  id=prequalificationform-description  GenerateFakeText
-  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
 
 Підтвердити кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${proposal_id}
@@ -1183,6 +1183,14 @@ Save Tender
 
   [return]  ${doc_name}
 
+Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
+  Click Button  xpath=//*[text()='Підтвердити рішення']
+  Sleep  1
+  Wait Until Page Contains  Рішення підтверджене  10
+  Sleep  3
+
+  Open Tender
+
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
   JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  xpath=//*[text()='Завантажити рішення']
@@ -1199,12 +1207,7 @@ Save Tender
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
-  Click Button  xpath=//*[text()='Підтвердити рішення']
-  Sleep  1
-  Wait Until Page Contains  Рішення підтверджене  10
-  Sleep  3
-
-  Open Tender
+  Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
 
 Затвердити остаточне рішення кваліфікації
   [Arguments]  ${username}  ${tender_uaid}
