@@ -105,7 +105,7 @@ Login
   ${description_en}=  Get From Dictionary  ${tender_data.data}  description_en
 
 #  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints' and '${procurementMethodType}' == 'belowThreshold'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
   Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=1080
 
   Selenium2Library.Switch Browser    ${user}
@@ -990,7 +990,7 @@ Save Tender
   Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab'] .js-dynamic-form-remove  # click button to remove lot
   Wait Until Page Contains  Ви впевнені що бажаєте видалити поточний лот?  3
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]  # confrim deleting
-  Wait Until Page Contains Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
+  Wait Until Page Does Not Contain Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
 
   Save Tender
 
@@ -1216,15 +1216,23 @@ Wait For Complaints Sync
   Switch browser  ${username}
   Open Tender
   Capture Page Screenshot
-  Click Element  xpath=//a[contains(@href, '/tender/complaint-create?id=')]
-  Run Keyword And Ignore Error  Wait Until Page Contains Element  xpath=//select[@id='complaintform-related_of']  10
+  Click Element  xpath=//a[contains(@href, '/tender/complaint-create?id=')]  
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'complaint-create-form-wrapper')]  10
+  # fill complaintform
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'tender'  Select From List By Label  xpath=//select[@id='complaintform-related_of']  Закупівля
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Select From List By Label  xpath=//select[@id='complaintform-related_of']  Лот
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Click Element  xpath=//select[@id='complaintform-related_lot']
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Click Element  xpath=//select[@id='complaintform-related_lot']//option[contains(text(), '${type_id}')]
   Run Keyword And Ignore Error  Select From List By Label  xpath=//select[@id='complaintform-type']  Вимога
-  Input text  xpath=//input[contains(@id, 'complaintform-title')]  ${claim.data.title}
-  Input text  xpath=//textarea[contains(@id, 'complaintform-description')]  ${claim.data.description}
+  Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'complaintform-title')]  ${claim.data.title}
+  Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'complaintform-description')]  ${claim.data.description}
+  # fill awardcomplaintform
+  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner'  Click Element  jquery=#awardcomplaintform-award
+  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner'  Click Element  jquery=#awardcomplaintform-award option:first
+  Run Keyword And Ignore Error  Select From List By Label  xpath=//select[@id='awardcomplaintform-type']  Вимога
+  Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'awardcomplaintform-title')]  ${claim.data.title}
+  Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'awardcomplaintform-description')]  ${claim.data.description}
+  # upload document
   Run Keyword If  '${doc_name}' != 'null'  Click Element  xpath=//a[contains(@data-url, '/tender/get-complaint-document-form')]
   Run Keyword If  '${doc_name}' != 'null'  Wait Until Page Contains Element  xpath=//input[@type='file']  10
   Run Keyword If  '${doc_name}' != 'null'  Choose File  xpath=//input[@type='file']  ${doc_name}
