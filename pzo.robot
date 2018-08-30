@@ -559,9 +559,9 @@ Wait For Sync Tender
   Run Keyword Unless  ${passed}  Fatal Error  Sync Finish not finish in ${timeout} sec
 
 Wait For Sync Tender Finish
-  Sleep  5
+  Sleep  3
   Reload Page
-  Page Should Not Contain  Синхронізація з ЦБД  
+  Page Should Not Contain Element  id=tender-sync-info
 
 Створити постачальника, додати документацію і підтвердити його
   [Arguments]  @{ARGUMENTS}
@@ -699,7 +699,7 @@ Wait For Sync Tender Finish
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
 
 Load Sign
-  ${status}=  Run keyword And Return Status  Wait Until Page Contains   Горобець Сергій Миколайович   20
+  ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
   Run Keyword If  ${status} == False  Load Sign Data
   Click Element   id=SignDataButton
   Sleep  1    
@@ -721,7 +721,7 @@ Load Sign Data
   Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyReadButton  20
   Run Keyword If  '${status_info_check}' == '0'  Click Element   id=PKeyReadButton
   Run Keyword If  '${status_info_check}' == '0'  Sleep  1
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains   Горобець Сергій Миколайович   20
+  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains   Серійний номер   20
   Run Keyword If  '${status_info_check}' == '0'  Sleep  2
   Wait Until Page Contains Element  id=SignDataButton  20
   Click Element   id=SignDataButton
@@ -737,6 +737,10 @@ Wait user action
   [Documentation]
   ...      ${ARGUMENTS[0]} =  username
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
+ 
+  # open for owner without syncing
+  Run Keyword And Return If  '${ROLE}' == 'tender_owner'  Go To  ${BROKERS['pzo'].basepage}/tender/${ARGUMENTS[1]}
+
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Sync Tender
   Open Tender
@@ -832,17 +836,17 @@ Open Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}  
   Go To  ${tender_url}
-  Sleep  1
+  Wait Until Page Contains Element  id=tender-general-info  3
 
 Wait For All Transfer Complete
   ${sync_passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  100 s  0 s  Wait For Transfer Complete
   Run Keyword Unless  ${sync_passed}  Fatal Error  Sync not finish in 100 sec
 
 Wait For Transfer Complete
-  Sleep  3
-  Reload Page
-  Run Keyword And Ignore Error  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
-  Sleep  1
+  Sleep  2
+  Reload Page  
+  Run Keyword If  '${ROLE}' == 'provider'  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
+  Run Keyword If  '${ROLE}' == 'provider'  Sleep  500ms
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
 Звірити статус тендераa
@@ -990,9 +994,9 @@ Save Tender
   Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab'] .js-dynamic-form-remove  # click button to remove lot
   Wait Until Page Contains  Ви впевнені що бажаєте видалити поточний лот?  3
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]  # confrim deleting
-  Wait Until Page Contains Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
+  Wait Until Page Does Not Contain Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
 
-  Save Tender
+  Save Tender  
 
 Додати неціновий показник на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${feature}
@@ -1207,7 +1211,7 @@ Save Tender
   Задати запитання  ${username}  ${tender_uaid}  item  ${item_id}  ${question}
 
 Wait For Complaints Sync
-  Sleep  5
+  Sleep  3
   Reload Page
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
@@ -2512,7 +2516,7 @@ Switch To Complaints
 
 Отримати інформацію із тендера questions[0].title
   [Arguments]  ${username}  ${tender_uaid}
-  ${return_value}=  Отримати інформацію із запитання  ${username}  ${tender_uaid}  0  title
+  ${return_value}=  pzo.Отримати інформацію із запитання  ${username}  ${tender_uaid}  0  title
   Open Tender
   [return]  ${return_value}
 
