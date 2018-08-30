@@ -1168,6 +1168,8 @@ Save Tender
   Click Element  jquery=select#prequalificationform-qualification option:eq(${proposal_index})
   Sleep  2
 
+  JsSetScrollToElementBySelector  \#prequalificationform-decision
+
 Завантажити збережений документ у форму кваліфікації
   [Arguments]  ${proposal_index}
 
@@ -1175,12 +1177,14 @@ Save Tender
   ${doc_contents}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document_contents
   Create File  ${doc_name}  ${doc_contents}
 
+  JsSetScrollToElementBySelector  \#prequalification-documents
   Choose File  xpath=//div[contains(@id, 'fileuploadbtnwrapper')]//input[@type='file']  ${doc_name}
   Sleep  2
 
   [return]  ${doc_name}
 
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  xpath=//*[text()='Завантажити рішення']
   Wait Until Page Contains  Рішення завантажене  10
   Sleep  1
