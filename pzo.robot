@@ -845,7 +845,7 @@ Wait For All Transfer Complete
 Wait For Transfer Complete
   Sleep  2
   Reload Page
-  Run Keyword If  '${ROLE}' == 'provider'  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
+  Run Keyword And Ignore Error  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
   Run Keyword If  '${ROLE}' == 'provider'  Sleep  500ms
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
@@ -1273,9 +1273,10 @@ Wait For Complaints Sync
   Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'complaintform-title')]  ${claim.data.title}
   Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'complaintform-description')]  ${claim.data.description}
   # fill awardcomplaintform
-  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner'  Click Element  jquery=#awardcomplaintform-award
-  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner'  Click Element  jquery=#awardcomplaintform-award option:first
+  Run Keyword And Ignore Error  Click Element  jquery=#awardcomplaintform-award
+  Run Keyword And Ignore Error  Click Element  jquery=#awardcomplaintform-award option:first
   Run Keyword And Ignore Error  Select From List By Label  xpath=//select[@id='awardcomplaintform-type']  Вимога
+  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner_complaint'  Select From List By Label  xpath=//select[@id='awardcomplaintform-type']  Скарга
   Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'awardcomplaintform-title')]  ${claim.data.title}
   Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'awardcomplaintform-description')]  ${claim.data.description}
   # upload document
@@ -1319,6 +1320,10 @@ Wait For Complaints Sync
 Створити чернетку вимоги про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${proposal_id}
   Run Keyword And Return  Створити вимогу  ${username}  ${tender_uaid}  winner  ${proposal_id}  ${claim}  null
+
+Створити скаргу про виправлення визначення переможця
+  [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${proposal_id}  ${doc_name}
+  Run Keyword And Return  Створити вимогу  ${username}  ${tender_uaid}  winner_complaint  ${proposal_id}  ${claim}  ${doc_name}
 
 Скасувати вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${data}  ${award_index}
@@ -1405,6 +1410,7 @@ Wait For Complaints Sync
   Switch browser  ${username}
 
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
+  ${bid_data_keys}=  Get Dictionary Keys  ${bid.data}
   ${lots}=  Get From Dictionary  ${bid.data}  lotValues
   ${lots_length}=  Get Length  ${lots}
 
@@ -1419,7 +1425,7 @@ Wait For Complaints Sync
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Input text  xpath=//div[contains(@class, 'active')]//textarea[contains(@id, '-subcontracting_details')]  ${bid.data.tenderers[0].name}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_eligible')]
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_qualified')]
-  \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Подати цінову пропозицію Features  ${bid.data.parameters}
+  \   Run Keyword If  'parameters' in ${bid_data_keys}  Подати цінову пропозицію Features  ${bid.data.parameters}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Run Keyword If  '${procurementMethodType}' != 'aboveThresholdUA'  Подати цінову пропозицію FakeDocs
 
 Подати цінову пропозицію No Lots
