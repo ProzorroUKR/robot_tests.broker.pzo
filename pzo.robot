@@ -1564,26 +1564,69 @@ Save Proposal
   ${doc_name}=  Run Keyword If  ${doc_isset}  GetValueFromDictionaryByKey  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
   ...  ELSE  GenerateFakeDocument
 
-  Open Tender
-  Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
-  Wait Until Page Contains  Кваліфікація  10
-  Click Element  id=qualificationform-award
-  Click Element  jquery=select#qualificationform-award option:eq(0)
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
   Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
+
+  JsSetScrollToElementBySelector  \#qualification-documents
   Choose File  xpath=//input[@type='file']  ${doc_name}
   Sleep  2
   JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
   Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
 
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-eligible
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-qualified
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+
+  Підтвердити рішення кваліфікації переможця
+  Open Tender
+
+Скасування рішення кваліфікаційної комісії
+  [Arguments]  ${username}  ${tender_uaid}  ${award_index}
+  Switch browser   ${username}
+
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
+  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Скасувати рішення
+  Input text  id=qualificationform-description  GenerateFakeText
+
+  Підтвердити рішення кваліфікації переможця
+  Open Tender
+
+Відкрити форму кваліфікації переможця і потрібну кваліфікацію
+  [Arguments]  ${proposal_index}
+
+  Open Tender
+  Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
+  Wait Until Page Contains  Кваліфікація  10
+  Click Element  id=qualificationform-award
+  Click Element  jquery=select#qualificationform-award option:eq(${proposal_index})
+  Sleep  2
+
+  JsSetScrollToElementBySelector  \#qualificationform-decision
+
+Підтвердити рішення кваліфікації переможця
+  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+
   Click Button  xpath=//*[text()='Підтвердити рішення']
-  Wait Until Page Contains  Пропозиція прийнята  10
-  Sleep  1
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  5
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
+Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
 
+  Click Button  xpath=//*[text()='Завантажити рішення']
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  5
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  Sleep  3
 
-
+  Click Button  xpath=//*[text()='Накласти ЕЦП']
+  Sleep  1
+  Load Sign
+  Wait Until Page Contains  ЕЦП успішно накладено  10
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  Sleep  3
 
 # --------------------------------------------------------- #
 
