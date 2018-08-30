@@ -1185,18 +1185,17 @@ Save Tender
 
 Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
   JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
-  Click Button  xpath=//*[text()='Підтвердити рішення']
-  Sleep  1
-  Wait Until Page Contains  Рішення підтверджене  10
+  Click Button  jquery=#tender-prequalification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
   Open Tender
 
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
-  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
-  Click Button  xpath=//*[text()='Завантажити рішення']
-  Wait Until Page Contains  Рішення завантажене  10
-  Sleep  1
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn  
+  Click Button  jquery=#tender-prequalification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20 
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1204,7 +1203,7 @@ Save Tender
   Click Button  xpath=//*[text()='Накласти ЕЦП']
   Sleep  1
   Load Sign
-  Wait Until Page Contains  ЕЦП успішно накладено на рішення  10
+  Wait Until Page Contains  ЕЦП успішно накладено на рішення  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1218,7 +1217,7 @@ Save Tender
   Click Element  xpath=//a[contains(@href, '/tender/prequalification-approve?id=')]
   Sleep  1
   Click Button  xpath=//*[text()='Так']
-  Wait Until Page Contains  Прекваліфікація підтверджена  10
+  Wait Until Page Contains  Прекваліфікація підтверджена  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
 
 Задати запитання
@@ -1593,8 +1592,11 @@ Save Proposal
   Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
 
   Select From List By Label  xpath=//select[@id='qualificationform-decision']  Скасувати рішення
-  Input text  id=qualificationform-description  GenerateFakeText
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-title
+  Run Keyword And Ignore Error  Click Element  jquery=#qualificationform-title option.js-cancel:first
+  Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
 
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
   Підтвердити рішення кваліфікації переможця
   Open Tender
 
@@ -1612,24 +1614,22 @@ Save Proposal
 
 Підтвердити рішення кваліфікації переможця
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
-
-  Click Button  xpath=//*[text()='Підтвердити рішення']
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  5
+  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
 Завантажити рішення кваліфікації переможця і накласти ЕЦП
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
-
-  Click Button  xpath=//*[text()='Завантажити рішення']
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  5
+  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
   Click Button  xpath=//*[text()='Накласти ЕЦП']
   Sleep  1
   Load Sign
-  Wait Until Page Contains  ЕЦП успішно накладено  10
+  Wait Until Page Contains  ЕЦП успішно накладено  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
