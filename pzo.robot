@@ -1184,6 +1184,7 @@ Save Tender
   [return]  ${doc_name}
 
 Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  xpath=//*[text()='Підтвердити рішення']
   Sleep  1
   Wait Until Page Contains  Рішення підтверджене  10
