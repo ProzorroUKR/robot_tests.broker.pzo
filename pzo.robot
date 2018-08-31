@@ -121,13 +121,11 @@ Login
   Sleep  1
   Wait Until Page Contains          Створення закупівлі  10
 
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Відкриті торги з публікацією англ.мовою
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdUA'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Відкриті торги
-  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Переговорна процедура закупівлі
-  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Допорогова закупівля
-  Sleep  3
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Select From List By Value  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  ${procurementMethodType}
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Sleep  3
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Input text  id=tender${pzo_proc_type}form-title  ${title}
   Run Keyword If  'cause' in ${tender_data_keys}  Select From List By Value  id=tender${pzo_proc_type}form-cause  ${tender_data.data.cause}
@@ -229,6 +227,7 @@ Login
   Додати лот Ex  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${items_length}=  Get Length  ${arguments[3]}
 
@@ -248,6 +247,7 @@ Login
 
   ${lot_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${pzo_proc_type}=   Convert_to_Lowercase   ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=   Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${budget}=          Get From Dictionary   ${arguments[0].value}   amount
   ${budget}=          convert_float_to_string  ${budget}
@@ -275,6 +275,7 @@ Login
   Додати лот Ex  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${items_length}=  Get Length  ${arguments[3]}
 
@@ -293,6 +294,7 @@ Login
 
   ${item_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${ARGUMENTS[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Convert To String  div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]
 
@@ -326,6 +328,7 @@ Login
   ${delivery_start}=  Convert Date 	${delivery_start} 	%d.%m.%Y %H:%M
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${ARGUMENTS[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Convert To String  div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]
 
@@ -435,6 +438,7 @@ Add Feature Ex
 
   ${featureOf}=  Set Variable If  '${arguments[4]}' == 'tenderer'  ${EMPTY}  ${arguments[4]}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'abovethresholdua'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Set Variable If  '${pzo_proc_type}' == ''  form-group field-${featureOf}featureform  form-group field-feature${pzo_proc_type}form
@@ -758,6 +762,7 @@ Wait user action
 
   ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
 #  Log To Console  ${ARGUMENTS[0]}
 #  Log To Console  ${ARGUMENTS[1]}
@@ -778,6 +783,7 @@ Wait user action
 Внести зміни в тендер tenderPeriod.endDate
   [Arguments]  ${value}  ${procurementMethodType}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${converted_date}=  convert_datetime_for_delivery  ${value}
   ${converted_date}=  Convert Date  ${converted_date}  %d.%m.%Y %H:%M
   Input text  id=tender${pzo_proc_type}form-tender_period_end_date  ${converted_date}
@@ -898,6 +904,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
 
@@ -916,6 +923,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
 
@@ -941,6 +949,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
@@ -960,6 +969,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
   Click Element  xpath=//div[contains(@class, 'active')]//a[@href='#add-items']
@@ -1004,6 +1014,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
@@ -1037,6 +1048,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
   Add Feature  ${feature}  0  ${procurementMethodType}  div[contains(@class, 'form-group tender${pzo_proc_type}form-lots-dynamic-forms-wrapper')]//div[contains(@class, 'active')]//div[contains(@class, 'form-group lot${pzo_proc_type}form-features-dynamic-forms-wrapper')]  lot
@@ -1049,6 +1061,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
