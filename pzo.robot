@@ -3105,6 +3105,7 @@ GetPageSyncingStatus
 Input DateTime
   [Arguments]  ${input_jquery_selector}  ${date}
   ${date}=  convert_datetime_for_delivery  ${date}
+  ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
   Input Text  jquery=${input_jquery_selector}  ${date}
 
 ### EOF - HELPERS ###
