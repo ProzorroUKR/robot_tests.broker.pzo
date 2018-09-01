@@ -731,21 +731,23 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Завантаження контракту  10
   Перевірити неможливість підписання контракту
-  Input Text    id=contractform-contract_number  1234567890
+  ${contract_number}=  Get Value  id=contractform-contract_number
+  Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
   ${date_start}=  Get Current Date  increment=02:00:00  result_format=%d.%m.%Y %H:%M
-  Input Text    id=contractform-date_start  ${date_start}
+  ${contract_date_start}=  Get Value  id=contractform-date_start
+  Run Keyword If  '${contract_date_start}' == ''  Input Text  id=contractform-date_start  ${date_start}
   ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
-  Input Text    id=contractform-date_end  ${date_end}
-  ${file_path_t}  ${file_name_t}  ${file_content_t}=  create_fake_doc
-  Choose File   jquery=#tender-contract-form .documents-dynamic-forms-wrapper .item-wrapper.active[data-type="contractdocument"] input[type=file]  ${file_path_t}
-  Wait Until Page Contains  ${file_name_t}  20
+  ${contract_date_end}=  Get Value  id=contractform-date_end
+  Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
+  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
+  Run Keyword If  ${document_isset} == False  Завантажити у відкриту форму редагування угоди документ  Fake
 
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
   Wait Until Page Contains   Контракт успішно завантажений   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  WaitPageSyncing  62
 
-  Sleep  62
   Wait Until Page Contains   Активувати контракт   10
   Click Element  xpath=//a[contains(@href, '/tender/contract-activate?id=')]
   Sleep  1
@@ -808,7 +810,7 @@ Wait For Sync Tender Finish
 Load Sign
   ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
   Run Keyword If  ${status} == False  Load Sign Data
-  Click Element   id=SignDataButton
+  Run Keyword If  ${status}  Click Element   id=SignDataButton
   Sleep  1
 
 Load Sign Data
