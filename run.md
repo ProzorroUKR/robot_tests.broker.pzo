@@ -13,8 +13,8 @@ Planning
 
 Reporting
 
-bin/op_tests -s reporting -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/reporting__owner
-bin/op_tests -s reporting -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/reporting__viewer
++ bin/op_tests -s reporting -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/reporting__owner
++ bin/op_tests -s reporting -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/reporting__viewer
 
 Below Funders
 
@@ -32,7 +32,7 @@ bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_si
 OpenUA
 
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/openua_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/openUA__owner__all -v number_of_lots:1
-bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/openua_testing.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/openUA__provider__all
++ bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/openua_testing.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/openUA__provider__all
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/openua_testing.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/openUA__viewer__all -v number_of_lots:1
 
 Negotiation
