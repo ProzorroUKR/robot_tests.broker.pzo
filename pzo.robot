@@ -655,6 +655,11 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Завантаження контракту  10
 
+  # wait complaint period ended
+  JsSetScrollToElementBySelector  .js-award-complaint-period-wrapper
+  ${complaint_period_end_date}=  get_invisible_text  jquery=.js-award-complaint-period-wrapper .award-complaint-period-end-date-source.hidden
+  Wait date  ${complaint_period_end_date}
+
   Встановити поле відкритої форми редагування угоди  ${field}  ${value}
   Run Keyword If  ${arguments_length} > 6  Встановити поле відкритої форми редагування угоди  ${arguments[5]}  ${arguments[6]}
 
@@ -670,7 +675,7 @@ Wait For Sync Tender Finish
   ${contract_date_end}=  Get Value  id=contractform-date_end
   Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
   ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
-  Run Keyword If  !${document_isset}  Завантажити у відкриту форму редагування угоди документ  Fake
+  Run Keyword If  ${document_isset} == False  Завантажити у відкриту форму редагування угоди документ  Fake
 
   # click save button
   JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
@@ -690,7 +695,7 @@ Wait For Sync Tender Finish
   ...      ${arguments[2]} =  ${contract_index}
   ...      ${arguments[3]} =  ${date_signed}
 
-  Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  dateSigned  ${arguments[3]}
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  dateSigned  ${arguments[3]}
 
 Вказати період дії угоди
   [Arguments]  @{arguments}
@@ -701,7 +706,7 @@ Wait For Sync Tender Finish
   ...      ${arguments[3]} =  ${date_start}
   ...      ${arguments[4]} =  ${date_end}
 
-  Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  period.startDate  ${arguments[3]}  period.endDate  ${arguments[4]}
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  period.startDate  ${arguments[3]}  period.endDate  ${arguments[4]}
 
 Завантажити документ в угоду
   [Arguments]  @{arguments}
@@ -711,7 +716,7 @@ Wait For Sync Tender Finish
   ...      ${arguments[2]} =  ${tender_uaid}
   ...      ${arguments[3]} =  ${contract_index}
 
-  Редагувати угоду  ${arguments[0]}  ${arguments[2]}  ${arguments[3]}  document  ${arguments[1]}
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[2]}  ${arguments[3]}  document  ${arguments[1]}
 
 Підтвердити підписання контракту
   [Arguments]  @{ARGUMENTS}
@@ -3095,7 +3100,7 @@ GetPageSyncingStatus
   Sleep  2
   Reload Page
   Sleep  1
-  Page Should Not Contain Element  jquery=.fa.fa-refresh
+  Page Should Not Contain Element  jquery=.wrapper .card-box .fa.fa-refresh
 
 Input DateTime
   [Arguments]  ${input_jquery_selector}  ${date}
