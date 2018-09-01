@@ -674,7 +674,7 @@ Wait For Sync Tender Finish
   ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
   ${contract_date_end}=  Get Value  id=contractform-date_end
   Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
-  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
+  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
   Run Keyword If  ${document_isset} == False  Завантажити у відкриту форму редагування угоди документ  Fake
 
   # click save button
@@ -803,8 +803,7 @@ Wait For Sync Tender Finish
 
   JsSetScrollToElementBySelector  \#contractform-documents
   Choose File  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list .js-item.active .js-fileupload-input-wrapper .js-btn-upload input[type=file]  ${filename}
-  Sleep  1
-  Wait Until Page Contains  ${filename}  10
+  Sleep  3
 
 Load Sign
   ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
