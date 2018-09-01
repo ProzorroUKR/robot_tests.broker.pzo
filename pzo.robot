@@ -639,6 +639,82 @@ Wait For Sync Tender Finish
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_contact_point_phone"]    ${ARGUMENTS[1].suppliers[0].contactPoint.telephone}
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_value_amount"]    ${ARGUMENTS[1].value.amount}
 
+Редагувати угоду
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ${field}=  Set Variable  ${arguments[3]}
+  ${value}=  Set Variable  ${arguments[4]}
+
+  # open contract form
+  Open Tender
+  Click Element  xpath=//a[contains(@href, '/tender/contract?id=')]
+  Sleep  1
+  Wait Until Page Contains  Завантаження контракту  10
+
+  JsSetScrollToElementBySelector  \#contractform-contract_number
+  Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
+  Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
+  Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
+  Run Keyword And Ignore Error  '${arguments[5]}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${arguments[6]}
+  Run Keyword If  '${field}' == 'document'  Завантажити у відкриту форму редагування угоди документ  ${value}
+  ${contract_number}=  Get Value  id=contractform-contract_number
+  Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
+  ${date_signed}=  Get Current Date  result_format=%d.%m.%Y %H:%M
+  ${contract_date_signed}=  Get Value  id=contractform-date_signed
+  Run Keyword If  '${contract_date_signed}' == ''  Input Text  id=contractform-date_signed  ${date_signed}
+  ${date_start}=  Get Current Date  increment=02:00:00  result_format=%d.%m.%Y %H:%M
+  ${contract_date_start}=  Get Value  id=contractform-date_start
+  Run Keyword If  '${contract_date_start}' == ''  Input Text  id=contractform-date_start  ${date_start}
+  ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
+  ${contract_date_end}=  Get Value  id=contractform-date_end
+  Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
+  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
+  Run Keyword If  !${document_isset}  Завантажити у відкриту форму редагування угоди документ  Fake
+
+  # click save button
+  JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  Click Element   jquery=\#tender-contract-form .js-submit-btn
+  Sleep  1
+  Wait Until Page Contains   Контракт успішно завантажений   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+
+  # wait sync
+  WaitPageSyncing  60
+
+Встановити дату підписання угоди
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ...      ${arguments[3]} =  ${date_signed}
+
+  Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  dateSigned  ${arguments[3]}
+
+Вказати період дії угоди
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ...      ${arguments[3]} =  ${date_start}
+  ...      ${arguments[4]} =  ${date_end}
+
+  Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  period.startDate  ${arguments[3]}  period.endDate  ${arguments[4]}
+
+Завантажити документ в угоду
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${filename}
+  ...      ${arguments[2]} =  ${tender_uaid}
+  ...      ${arguments[3]} =  ${contract_index}
+
+  Редагувати угоду  ${arguments[0]}  ${arguments[2]}  ${arguments[3]}  document  ${arguments[1]}
+
 Підтвердити підписання контракту
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -701,6 +777,17 @@ Wait For Sync Tender Finish
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
   ${status}=  Run keyword And Return Status  Page Should Contain  Контракт можна буде підписати після
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
+
+Завантажити у відкриту форму редагування угоди документ
+  [Arguments]  ${filename}
+
+  # resolve filename
+  ${filename}=  Run Keyword If  '${filename}' == 'Fake'  GenerateFakeDocument
+  ...  ELSE  ${filename}
+
+  JsSetScrollToElementBySelector  \#contractform-documents
+  Choose File  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list .js-item.active .js-fileupload-input-wrapper .js-btn-upload input[type=file]  ${filename}
+  Sleep  2
 
 Load Sign
   ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
@@ -1086,6 +1173,7 @@ Save Tender
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
   Sleep  1
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
+  Sleep  2
 
 Відповісти на вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}  ${award_index}
@@ -1106,6 +1194,7 @@ Save Tender
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
   Sleep  1
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
+  Sleep  2
 
 Відповісти на вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}
@@ -1624,7 +1713,7 @@ Save Proposal
   Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
 
   Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
-  Підтвердити рішення кваліфікації переможця
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
   Open Tender
 
 Відкрити форму кваліфікації переможця і потрібну кваліфікацію
@@ -1784,6 +1873,14 @@ Save Proposal
   Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.legalName'  get_text  jquery=${funderWrapper} .legal-name .value
   Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.scheme'  get_invisible_text  jquery=${funderWrapper} .identifier-scheme.hidden
   ### EOF - BelowFunders ###
+
+  ### BOF - OpenUaDefense ###
+  Run Keyword And Return If   '${arguments[2]}' == 'enquiryPeriod.clarificationsUntil'  get_invisible_text  jquery=.enquiry-period-clarifications-until.hidden
+  ### EOF - OpenUaDefense ###
+
+  ### BOF - OpenEU ###
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
+  ### EOF - OpenEU ###
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
 
@@ -2980,5 +3077,21 @@ GenerateFakeDocument
 GenerateFakeText
   ${text}= Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
   [return] ${text}
+
+WaitPageSyncing
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetPageSyncingStatus
+  Run Keyword Unless  ${passed}  Fatal Error  Sync Finish not finish in ${timeout} sec
+
+GetPageSyncingStatus
+  Sleep  2
+  Reload Page
+  Sleep  1
+  Page Should Not Contain Element  jquery=.fa.fa-refresh
+
+Input DateTime
+  [Arguments]  ${input_jquery_selector}  ${date}
+  ${date}=  convert_datetime_for_delivery  ${date}
+  Input Text  jquery=${input_jquery_selector}  ${date}
 
 ### EOF - HELPERS ###
