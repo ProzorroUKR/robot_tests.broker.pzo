@@ -777,7 +777,8 @@ Wait For Sync Tender Finish
 
 Перевірити неможливість підписання контракту
   ${date_sign}=  Get Current Date  local  0  %d.%m.%Y %H:%M
-  Input Text    id=contractform-date_signed  '${date_sign}'
+  ${contract_date_signed}=  Get Value  id=contractform-date_signed
+  Run Keyword If  '${contract_date_signed}' == ''  Input Text  id=contractform-date_signed  ${date_sign}
   Execute JavaScript    $('#contractform-date_signed').blur();
   Sleep  3
   Capture Page Screenshot
