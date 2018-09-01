@@ -681,6 +681,7 @@ Wait For Sync Tender Finish
   JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
   Click Element   jquery=\#tender-contract-form .js-submit-btn
   Sleep  1
+  Capture Page Screenshot
   Wait Until Page Contains   Контракт успішно завантажений   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
 
@@ -749,10 +750,12 @@ Wait For Sync Tender Finish
   Click Element  xpath=//a[contains(@href, '/tender/contract-activate?id=')]
   Sleep  1
   Wait Until Page Contains  Активація контракту  10
+  JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  ${sign_needed}=  Run keyword And Return Status  Page Should Contain  Накласти ЕЦП
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
 
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation' or ${sign_needed}
   ...  Run Keywords
   ...  Load Sign
   ...  AND
@@ -796,11 +799,12 @@ Wait For Sync Tender Finish
 
   # resolve filename
   ${filename}=  Run Keyword If  '${filename}' == 'Fake'  GenerateFakeDocument
-  ...  ELSE  ${filename}
+  ...  ELSE  Set Variable  ${filename}
 
   JsSetScrollToElementBySelector  \#contractform-documents
   Choose File  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list .js-item.active .js-fileupload-input-wrapper .js-btn-upload input[type=file]  ${filename}
-  Sleep  2
+  Sleep  1
+  Wait Until Page Contains  ${filename}  10
 
 Load Sign
   ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
