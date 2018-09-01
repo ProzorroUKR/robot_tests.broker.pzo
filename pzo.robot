@@ -655,12 +655,9 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Завантаження контракту  10
 
-  JsSetScrollToElementBySelector  \#contractform-contract_number
-  Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
-  Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
-  Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
-  Run Keyword And Ignore Error  ${arguments_length} > 6 and '${arguments[5]}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${arguments[6]}
-  Run Keyword If  '${field}' == 'document'  Завантажити у відкриту форму редагування угоди документ  ${value}
+  Встановити поле відкритої форми редагування угоди  ${field}  ${value}
+  Run Keyword If  ${arguments_length} > 6  Встановити поле відкритої форми редагування угоди  ${arguments[5]}  ${arguments[6]}
+
   ${contract_number}=  Get Value  id=contractform-contract_number
   Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
   ${date_signed}=  Get Current Date  result_format=%d.%m.%Y %H:%M
@@ -778,6 +775,16 @@ Wait For Sync Tender Finish
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
   ${status}=  Run keyword And Return Status  Page Should Contain  Контракт можна буде підписати після
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
+
+Встановити поле відкритої форми редагування угоди
+  [Arguments]  ${field}  ${value}
+
+  JsSetScrollToElementBySelector  \#contractform-contract_number
+  Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
+  Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
+  Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
+  Run Keyword If  '${field}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${value}
+  Run Keyword If  '${field}' == 'document'  Завантажити у відкриту форму редагування угоди документ  ${value}
 
 Завантажити у відкриту форму редагування угоди документ
   [Arguments]  ${filename}
