@@ -646,7 +646,8 @@ Wait For Sync Tender Finish
   ...      ${arguments[1]} =  ${tender_uaid}
   ...      ${arguments[2]} =  ${contract_index}
   ${field}=  Set Variable  ${arguments[3]}
-  ${value}=  Set Variable  ${arguments[4]}
+  ${value}=  Convert To String  ${arguments[4]}
+  ${arguments_length}=  Get Length  ${arguments}
 
   # open contract form
   Open Tender
@@ -658,7 +659,7 @@ Wait For Sync Tender Finish
   Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
   Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
   Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
-  Run Keyword And Ignore Error  '${arguments[5]}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${arguments[6]}
+  Run Keyword And Ignore Error  ${arguments_length} > 6 and '${arguments[5]}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${arguments[6]}
   Run Keyword If  '${field}' == 'document'  Завантажити у відкриту форму редагування угоди документ  ${value}
   ${contract_number}=  Get Value  id=contractform-contract_number
   Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
