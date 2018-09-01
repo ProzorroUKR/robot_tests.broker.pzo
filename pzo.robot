@@ -105,19 +105,16 @@ Login
   ### EOF - Reporting ###
 
   ${title}=         Get From Dictionary   ${tender_data.data}               title
-  ${title_en}=      Get From Dictionary  ${tender_data.data}  title_en
   ${description}=   Get From Dictionary   ${tender_data.data}               description
-  ${description_en}=  Get From Dictionary  ${tender_data.data}  description_en
-
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
   ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Input text  id=tender${pzo_proc_type}form-title  ${title}
   Run Keyword If  'cause' in ${tender_data_keys}  Select From List By Value  id=tender${pzo_proc_type}form-cause  ${tender_data.data.cause}
   Run Keyword If  'causeDescription' in ${tender_data_keys}  Input text  id=tender${pzo_proc_type}form-cause_description  ${tender_data.data.causeDescription}
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Input text  id=tender${pzo_proc_type}form-title_en  ${title_en}
+  Run Keyword If  'title_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-title_en  ${tender_data.data.title_en}
   Input text  id=tender${pzo_proc_type}form-description  ${description}
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Input text  id=tender${pzo_proc_type}form-description_en  ${description_en}
+  Run Keyword If  'description_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-description_en  ${tender_data.data.description_en}
   Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.startDate}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.endDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.endDate}
@@ -279,9 +276,9 @@ Login
   ${budget}=          convert_float_to_string  ${budget}
 
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-title')]  ${arguments[0].title}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
+  Run Keyword If  'title_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-title_en']  ${arguments[0].title_en}
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//textarea[contains(@id, '-description')]  ${arguments[0].description}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//textarea[contains(@id, '-description_en')]  ${arguments[0].description}
+  Run Keyword If  'description_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-description_en']  ${arguments[0].description_en}
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-value_amount')]  ${budget}
   Run Keyword If  'minimalStep' in ${lot_keys}  Додати лот Ex step_rate  ${pzo_proc_type}  ${arguments[0].minimalStep.amount}
 
@@ -347,7 +344,6 @@ Login
   ${delivery_end}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  endDate
   ${delivery_end}=  convert_datetime_for_delivery  ${delivery_end}
   ${delivery_end} =   Convert Date 	${delivery_end} 	%d.%m.%Y %H:%M
-  ${description_en}=  Get From Dictionary   ${ARGUMENTS[0]}  description_en
   ${delivery_start}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  startDate
   ${delivery_start}=  convert_datetime_for_delivery  ${delivery_start}
   ${delivery_start}=  Convert Date 	${delivery_start} 	%d.%m.%Y %H:%M
@@ -356,9 +352,11 @@ Login
   ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Convert To String  div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]
+  ${jqueryWrapper}=  Set Variable  \#collapseLots div[data-type='lot'].active div[data-type='item'].active div[class^='form-group field-item${pzo_proc_type}form']
 
   Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-description')]  ${description}
-  Run Keyword If  '${ARGUMENTS[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-description_en')]  ${description_en}
+  Run Keyword If  'description_en' in ${item_keys}
+  ...  Input Text With Checking Input Isset  ${jqueryWrapper} input[id$='-description_en']  ${ARGUMENTS[0].description_en}
   Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-quantity')]  ${quantity}
   Select From List By Label          xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-unit_id')]  ${unit}
 
@@ -502,6 +500,7 @@ Add Feature Ex
   ...      ${arguments[3]} ==  wraper
   ...      ${arguments[4]} ==  featureOf
 
+  ${feature_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${featureOf}=  Set Variable If  '${arguments[4]}' == 'tenderer'  ${EMPTY}  ${arguments[4]}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
   ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
@@ -512,9 +511,11 @@ Add Feature Ex
   ${options}=  Get From Dictionary  ${arguments[0]}  enum
 
   Input text                         xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title')]  ${arguments[0].title}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
+  Run Keyword If  'title_en' in ${feature_keys}
+    ...  Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
   Input text                         xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description')]  ${arguments[0].description}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description_en')]  ${arguments[0].description}
+  Run Keyword If  'description_en' in ${feature_keys}
+      ...  Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description_en')]  ${arguments[0].description_en}
 
   ${options_length}=  Get Length  ${options}
 
@@ -522,7 +523,7 @@ Add Feature Ex
   \   Click Element  xpath=//${arguments[3]}//div[contains(@class, 'active')]//a[@href='#add-enums']
   \   Sleep  2
   \   Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title')]  ${options[${INDEX}].title}
-  \   Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title_en')]  ${options[${INDEX}].title}
+  \   Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title_en')]  ${options[${INDEX}].title}
   \   ${value}=  convert_float_to_string  ${options[${INDEX}].value}
   \   ${value}=  Convert To Number  ${value}
   \   ${value}=  multiply_hundred  ${value}
@@ -3229,6 +3230,12 @@ Input Text With Checking Input Isset
   Log  ${input_jquery_selector}
   ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  jquery=${input_jquery_selector}
   Run Keyword If  ${input_isset}  Input Text  jquery=${input_jquery_selector}  ${text}
+
+Input Text With Checking Input Isset XPath
+  [Arguments]  ${input_selector}  ${text}
+  Log  ${input_selector}
+  ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//${input_selector}
+  Run Keyword If  ${input_isset}  Input Text  xpath=//${input_selector}  ${text}
 
 GetInputProcTypeByProcurementMethodType
   [Arguments]  ${procurementMethodType}

@@ -74,7 +74,7 @@ bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_si
 
 CompetitiveDialogueEU
 
-bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:tender_owner -v api_version:2.4  -d test_output/competitiveDialogueEU__owner__openProcedure
+? bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:tender_owner -v api_version:2.4  -d test_output/competitiveDialogueEU__owner__openProcedure
 bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:provider -v api_version:2.4  -d test_output/competitiveDialogueEU__provider__openProcedure
 bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:viewer -v api_version:2.4  -d test_output/competitiveDialogueEU__viewer__openProcedure
 
