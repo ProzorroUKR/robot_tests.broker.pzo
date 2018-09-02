@@ -115,6 +115,8 @@ Login
   Run Keyword If  'title_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-title_en  ${tender_data.data.title_en}
   Input text  id=tender${pzo_proc_type}form-description  ${description}
   Run Keyword If  'description_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-description_en  ${tender_data.data.description_en}
+  Run Keyword If  'fundingKind' in ${tender_data_keys}  Select From List By Value  id=tender${pzo_proc_type}form-funding_kind  ${tender_data.data.fundingKind}
+  Run Keyword If  'NBUdiscountRate' in ${tender_data_keys}  Input Float Multiply100  \#tender${pzo_proc_type}form-nbu_discount_rate  ${tender_data.data.NBUdiscountRate}
   Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.startDate}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.endDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.endDate}
@@ -272,14 +274,14 @@ Login
   ${pzo_proc_type}=   Convert_to_Lowercase   ${arguments[2]}
   ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=   Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
-  ${budget}=          Get From Dictionary   ${arguments[0].value}   amount
-  ${budget}=          convert_float_to_string  ${budget}
 
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-title')]  ${arguments[0].title}
   Run Keyword If  'title_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-title_en']  ${arguments[0].title_en}
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//textarea[contains(@id, '-description')]  ${arguments[0].description}
   Run Keyword If  'description_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-description_en']  ${arguments[0].description_en}
-  Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-value_amount')]  ${budget}
+  Run Keyword If  'minimalStepPercentage' in ${lot_keys}  Input Float Multiply100  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-min_step_percentage']  ${arguments[0].minimalStepPercentage}
+  Run Keyword If  'yearlyPaymentsPercentageRange' in ${lot_keys}  Input Float Multiply100  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-yearly_payments_percentage_range']  ${arguments[0].yearlyPaymentsPercentageRange}
+  Run Keyword If  'value' in ${lot_keys}  Input Float  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-value_amount']  ${arguments[0].value.amount}
   Run Keyword If  'minimalStep' in ${lot_keys}  Додати лот Ex step_rate  ${pzo_proc_type}  ${arguments[0].minimalStep.amount}
 
 Додати лот Ex step_rate
@@ -341,12 +343,6 @@ Login
   ${street}=        Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  streetAddress
   ${code}=          Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  postalCode
   ${code}=          Convert To String     ${code}
-  ${delivery_end}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  endDate
-  ${delivery_end}=  convert_datetime_for_delivery  ${delivery_end}
-  ${delivery_end} =   Convert Date 	${delivery_end} 	%d.%m.%Y %H:%M
-  ${delivery_start}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  startDate
-  ${delivery_start}=  convert_datetime_for_delivery  ${delivery_start}
-  ${delivery_start}=  Convert Date 	${delivery_start} 	%d.%m.%Y %H:%M
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${ARGUMENTS[2]}
   ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
@@ -357,8 +353,8 @@ Login
   Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-description')]  ${description}
   Run Keyword If  'description_en' in ${item_keys}
   ...  Input Text With Checking Input Isset  ${jqueryWrapper} input[id$='-description_en']  ${ARGUMENTS[0].description_en}
-  Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-quantity')]  ${quantity}
-  Select From List By Label          xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-unit_id')]  ${unit}
+  Input Text With Checking Input Isset XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-quantity')]  ${quantity}
+  Select From List By Label With Checking Input Isset XPath          div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-unit_id')]  ${unit}
 
   Click Element                      xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//a[contains(@href, '#classification')]
   Wait Until Element Is Visible      xpath=//div[contains(@id, 'classification-modal')]//h4[contains(@id, 'classificationModalLabel')]
@@ -381,8 +377,8 @@ Login
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_locality')]  ${locality}
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_street_address')]  ${street}
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_postal_code')]  ${code}
-  Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${delivery_start}
-  Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${delivery_end}
+  Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${ARGUMENTS[0].deliveryDate.startDate}
+  Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${ARGUMENTS[0].deliveryDate.endDate}
 
 Додати предмет By Wrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
@@ -1980,7 +1976,7 @@ Save Proposal
   Run Keyword And Return If   'value.currency' == '${arguments[2]}'   Отримати інформацію із тендера value.currency
   Run Keyword And Return If   'value.valueAddedTaxIncluded' == '${arguments[2]}'   Отримати інформацію із тендера value.valueAddedTaxIncluded
   Run Keyword And Return If   'tenderID' == '${arguments[2]}'   Отримати інформацію із тендера tenderID
-  Run Keyword And Return If   'stage2TenderID' == '${arguments[2]}'   Get invisible text by locator  jquery=.stage2-tender-id.hidden
+  Run Keyword And Return If   'stage2TenderID' == '${arguments[2]}'   Отримати інформацію із тендера stage2tenderID
   Run Keyword And Return If   'procuringEntity.name' == '${arguments[2]}'   Отримати інформацію із тендера procuringEntity.name
   Run Keyword And Return If   'minimalStep.amount' == '${arguments[2]}'   Отримати інформацію із тендера minimalStep.amount
   Run Keyword And Return If   'bids' == '${arguments[2]}'   Fail  Unable to see bids
@@ -2053,8 +2049,9 @@ Save Proposal
   Run Keyword And Return If   'contracts[0].status' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.status-source
 #
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
-  Run Keyword If   'items[0].description' == '${arguments[2]}'  Click Element    xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]
-  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]//span[contains(@class,'title')]
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Sleep  2
+  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//div[contains(@id,'collapseItem')]//div[contains(@class,'item-info-wrapper')]//p[contains(@class,'title')]//span[contains(@class,'value')]
 
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
@@ -2078,6 +2075,11 @@ Save Proposal
   ### BOF - OpenEU ###
   Run Keyword And Return If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
   ### EOF - OpenEU ###
+
+  ### BOF - Esco ###
+  Run Keyword And Return If   '${arguments[2]}' == 'minimalStepPercentage'  get_invisible_text  jquery=.minimal-step-percentage-source.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'yearlyPaymentsPercentageRange'  get_invisible_text  jquery=.yearly-payments-percentage-range-source.hidden
+  ### EOF - Esco ###
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
 
@@ -2879,6 +2881,15 @@ Switch To Complaints
   ${return_value}=  get_text  xpath=//*[contains(@class, 'tender-id')]//*[@class='value']
   [return]  ${return_value}
 
+Отримати інформацію із тендера stage2tenderID
+  ${result}=  Run Keywork And Return Status  Page Should Contain Element  jquery=.stage2-tender-id.hidden
+  Run Keyword If  ${result} == False  Sleep  120
+  Run Keyword If  ${result} == False  Reload Page
+  Run Keyword If  ${result} == False  Sleep  1
+  Capture Page Screenshot  getStage2tenderid
+  ${return_value}=  Get invisible text by locator  jquery=.stage2-tender-id.hidden
+  [return]  ${return_value}
+
 Отримати інформацію із тендера procuringEntity.name
   ${return_value}=  get_text  xpath=//*[contains(@class, 'legal-name')]//*[@class='value']
   [return]  ${return_value}
@@ -3286,11 +3297,27 @@ GetPageSyncingStatus
   Sleep  1
   Page Should Not Contain Element  jquery=.wrapper .card-box .fa.fa-refresh
 
+Input Float
+  [Arguments]  ${input_jquery_selector}  ${value}
+  ${value}=          Convert To String  ${value}
+  Input Text  jquery=${input_jquery_selector}  ${value}
+
+Input Float Multiply100
+  [Arguments]  ${input_jquery_selector}  ${value}
+  ${value}=  multiply_hundred  ${value}
+  Input Float  ${input_jquery_selector}  ${value}
+
 Input DateTime
   [Arguments]  ${input_jquery_selector}  ${date}
   ${date}=  convert_datetime_for_delivery  ${date}
   ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
   Input Text  jquery=${input_jquery_selector}  ${date}
+
+Input DateTime XPath
+  [Arguments]  ${input_selector}  ${date}
+  ${date}=  convert_datetime_for_delivery  ${date}
+  ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
+  Input Text  xpath=//${input_selector}  ${date}
 
 Input Text With Checking Input Isset
   [Arguments]  ${input_jquery_selector}  ${text}
@@ -3303,6 +3330,12 @@ Input Text With Checking Input Isset XPath
   Log  ${input_selector}
   ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//${input_selector}
   Run Keyword If  ${input_isset}  Input Text  xpath=//${input_selector}  ${text}
+
+Select From List By Label With Checking Input Isset XPath
+  [Arguments]  ${input_selector}  ${text}
+  Log  ${input_selector}
+  ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//${input_selector}
+  Run Keyword If  ${input_isset}  Select From List By Label  xpath=//${input_selector}  ${text}
 
 GetInputProcTypeByProcurementMethodType
   [Arguments]  ${procurementMethodType}

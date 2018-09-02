@@ -225,7 +225,7 @@ bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt 
 
 ESCO
 
-bin/op_tests -s openProcedure -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__openProcedure
+bin/op_tests -s openProcedure -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__openProcedure -v BROKERS_PARAMS:'{"pzo": {"intervals": {"esco": {"tender": [0, 35]}}}}'
 bin/op_tests -s auction -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__auction
 bin/op_tests -s qualification -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__qualification
 bin/op_tests -s contract_signing -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__contractSigning
