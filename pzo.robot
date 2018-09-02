@@ -1466,6 +1466,7 @@ Save Tender
   Sleep  2
   WaitPageSyncing  300
 
+### BOF - Competitive Dialogue ###
 Перевести тендер на статус очікування обробки мостом
   [Arguments]  ${username}  ${tender_uaid}
   Switch browser   ${username}
@@ -1492,6 +1493,29 @@ GetIsTenderReadyForStage2
   Reload Page
   Sleep  1
   Page Should Contain  Підтвердження другого епату
+
+Отримати тендер другого етапу та зберегти його
+  [Arguments]  ${username}  ${stage2_tender_uaid}
+  Switch browser   ${username}
+
+  Set To Dictionary  ${TENDER}  TENDER_UAID=${stage2_tender_uaid}
+  Add id to tender
+
+активувати другий етап
+  [Arguments]  ${username}  ${stage2_tender_uaid}
+  Switch browser   ${username}
+
+  Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
+  Wait Until Page Contains  Основна інформація  10
+
+  ${tender_end_date}=  Get Current Date  increment=00:09:00  result_format=%d.%m.%Y %H:%M
+  JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
+  Input Text  id=tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
+  Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
+
+  Save Tender
+
+### EOF - Competitive Dialogue ###
 
 Задати запитання
   [Arguments]  ${username}  ${tender_uaid}  ${type}  ${type_id}  ${question}
