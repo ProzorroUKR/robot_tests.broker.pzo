@@ -1955,6 +1955,7 @@ Save Proposal
   Run Keyword And Return If   'value.currency' == '${arguments[2]}'   Отримати інформацію із тендера value.currency
   Run Keyword And Return If   'value.valueAddedTaxIncluded' == '${arguments[2]}'   Отримати інформацію із тендера value.valueAddedTaxIncluded
   Run Keyword And Return If   'tenderID' == '${arguments[2]}'   Отримати інформацію із тендера tenderID
+  Run Keyword And Return If   'stage2TenderID' == '${arguments[2]}'   Get invisible text by locator  jquery=.stage2-tender-id.hidden
   Run Keyword And Return If   'procuringEntity.name' == '${arguments[2]}'   Отримати інформацію із тендера procuringEntity.name
   Run Keyword And Return If   'minimalStep.amount' == '${arguments[2]}'   Отримати інформацію із тендера minimalStep.amount
   Run Keyword And Return If   'bids' == '${arguments[2]}'   Fail  Unable to see bids
