@@ -1464,7 +1464,7 @@ Save Tender
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
 
   Sleep  2
-  WaitPageSyncing
+  WaitPageSyncing  300
 
 Перевести тендер на статус очікування обробки мостом
   [Arguments]  ${username}  ${tender_uaid}
@@ -1480,7 +1480,7 @@ Save Tender
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
 
   Sleep  2
-  WaitPageSyncing
+  WaitPageSyncing  300
 
 WaitTenderStage2
   [Arguments]  ${timeout}
@@ -1491,7 +1491,7 @@ GetIsTenderReadyForStage2
   Sleep  30
   Reload Page
   Sleep  1
-  Page Should Contain Підтвердження другого епату
+  Page Should Contain  Підтвердження другого епату
 
 Задати запитання
   [Arguments]  ${username}  ${tender_uaid}  ${type}  ${type_id}  ${question}
