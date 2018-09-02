@@ -1341,6 +1341,11 @@ Save Tender
 Завантажити документ у кваліфікацію
   [Arguments]  ${username}  ${doc_name}  ${tender_uaid}  ${proposal_id}
   Switch browser   ${username}
+
+  #workaround
+  ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
+
   ${doc_contents}=  Get File  ${doc_name}
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document=${doc_name}
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document_contents=${doc_contents}
@@ -1351,6 +1356,7 @@ Save Tender
 
   #workaround
   ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
 
   Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
   Click Element   id=prequalificationform-decision
@@ -1380,6 +1386,7 @@ Save Tender
 
   #workaround
   ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
 
   Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
   Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
@@ -1405,9 +1412,12 @@ Save Tender
 Завантажити збережений документ у форму кваліфікації
   [Arguments]  ${proposal_index}
 
-  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document
-  ${doc_contents}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document_contents
-  Create File  ${doc_name}  ${doc_contents}
+  ${doc_isset}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document
+  ${doc_contents}=  Run Keyword If  ${doc_isset}  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document_contents
+  Run Keyword If  ${doc_isset}  Create File  ${doc_name}  ${doc_contents}
+  ${doc_name}=  Run Keyword If  ${doc_isset} == False  GenerateFakeDocument
+    ...  ELSE  Set Variable  ${doc_name}
 
   JsSetScrollToElementBySelector  \#prequalification-documents
   Choose File  xpath=//div[contains(@id, 'fileuploadbtnwrapper')]//input[@type='file']  ${doc_name}
