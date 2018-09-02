@@ -1456,11 +1456,42 @@ Save Tender
   Switch browser   ${username}
 
   Open Tender
+
   Click Element  xpath=//a[contains(@href, '/tender/prequalification-approve?id=')]
   Sleep  1
   Click Button  xpath=//*[text()='Так']
   Wait Until Page Contains  Прекваліфікація підтверджена  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+
+  Sleep  2
+  WaitPageSyncing
+
+Перевести тендер на статус очікування обробки мостом
+  [Arguments]  ${username}  ${tender_uaid}
+  Switch browser   ${username}
+
+  Open Tender
+  WaitTenderStage2  1800
+
+  Click Element  xpath=//a[contains(@href, '/tender/confirm-stage2?id=')]
+  Sleep  1
+  Click Button  xpath=//*[text()='Так']
+  Wait Until Page Contains  Підтвердження успішно надане  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+
+  Sleep  2
+  WaitPageSyncing
+
+WaitTenderStage2
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetIsTenderReadyForStage2
+  Run Keyword Unless  ${passed}  Fatal Error  Tender stage2 was not appeared in ${timeout} sec
+
+GetIsTenderReadyForStage2
+  Sleep  30
+  Reload Page
+  Sleep  1
+  Page Should Contain Підтвердження другого епату
 
 Задати запитання
   [Arguments]  ${username}  ${tender_uaid}  ${type}  ${type_id}  ${question}
