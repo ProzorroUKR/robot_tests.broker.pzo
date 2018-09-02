@@ -1249,7 +1249,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}#showfeaturebytext:${feature_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}\#showfeaturebytext:${feature_id}
   Sleep  2
 
   Click Element  xpath=//li[contains(@data-title, '${feature_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний неціновий критерій?']
@@ -1282,7 +1282,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}#showitembytext:${item_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}\#showitembytext:${item_id}
   Sleep  2
   Add Feature  ${feature}  0  ${procurementMethodType}  div[contains(@class, 'form-group tender${pzo_proc_type}form-lots-dynamic-forms-wrapper')]//div[contains(@class, 'active')]//div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]//div[contains(@class, 'item${pzo_proc_type}form-features-dynamic-forms-wrapper')]  item
 
@@ -1691,9 +1691,9 @@ Wait For Complaints Sync
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
   \   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
-  \   Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}#showlotbykey:${lots[${INDEX}].relatedLot}
+  \   Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}\#showlotbykey:${lots[${INDEX}].relatedLot}
   \   Sleep  2
-  \   Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
+  \   Run Keyword And Ignore Error  Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Input text  xpath=//div[contains(@class, 'active')]//textarea[contains(@id, '-subcontracting_details')]  ${bid.data.tenderers[0].name}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_eligible')]
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_qualified')]
@@ -1757,7 +1757,7 @@ Start Edit Proposal Whole
 Start Edit Proposal Lot
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${last_proposal_lotid}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
-  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}#showlotbykey:${last_proposal_lotid}
+  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}\#showlotbykey:${last_proposal_lotid}
 
 Save Proposal
   Click Element   xpath=//button[contains(text(), 'Редагувати пропозицію')]
