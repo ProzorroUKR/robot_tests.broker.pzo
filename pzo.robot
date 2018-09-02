@@ -916,33 +916,21 @@ Wait For Sync Tender Finish
   Sleep  3
 
 Load Sign
-  ${status}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   20
-  Run Keyword If  ${status} == False  Load Sign Data
-  Run Keyword If  ${status}  Click Element   id=SignDataButton
+  ${loadingKey}=  Run keyword And Return Status  Wait Until Page Contains   Зчитування ключа   20
+  Run Keyword If  ${loadingKey} == False  Load Sign Data
+  Wait Until Page Contains   Серійний номер   60
+  Click Element   id=SignDataButton
   Sleep  5
 
 Load Sign Data
-  Wait Until Page Contains   Оберіть ЦСК:   10
-  Wait Until Page Contains Element   id=CAsServersSelect   20
-  Sleep  15
-  ${status_info}=  get_text  xpath=//div[@id='PKStatusInfo']
-  @{status_info_split}=  Split String  ${status_info}
-  ${status_info_check}=  Set Variable If  '@{status_info_split}[0]' != 'Оберіть'  1  0
-  Run Keyword If  '${status_info_check}' == '0'  Select From List By Label   id=CAsServersSelect     Тестовий ЦСК АТ "ІІТ"
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyFileInput  20
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Run Keyword If  '${status_info_check}' == '0'  Choose File   id=PKeyFileInput     ${CURDIR}/Key-6.dat
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyPassword  20
-  Run Keyword If  '${status_info_check}' == '0'  Input Text    id=PKeyPassword     12345677
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyReadButton  20
-  Run Keyword If  '${status_info_check}' == '0'  Click Element   id=PKeyReadButton
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  1
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains   Серійний номер   20
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Wait Until Page Contains Element  id=SignDataButton  20
-  Click Element   id=SignDataButton
-  Sleep  1
+  Wait Until Page Contains Element   id=CAsServersSelect   60
+  Select From List By Label   id=CAsServersSelect     Тестовий ЦСК АТ "ІІТ"
+  Wait Until Page Contains Element  id=PKeyFileInput  10
+  Choose File   id=PKeyFileInput     ${CURDIR}/Key-6.dat
+  Wait Until Page Contains Element  id=PKeyPassword  10
+  Input Text    id=PKeyPassword     12345677
+  Wait Until Page Contains Element  id=PKeyReadButton  10
+  Click Element   id=PKeyReadButton
 
 Wait user action
   [Arguments]  @{ARGUMENTS}
