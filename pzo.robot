@@ -1965,7 +1965,7 @@ Save Proposal
   Run Keyword And Return If   'tenderPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.endDate
   Run Keyword And Return If   'procurementMethodType' == '${arguments[2]}'   Отримати інформацію із тендера procurementMethodType
   Run Keyword And Return If   'value.amount' == '${arguments[2]}'   Отримати інформацію із тендера value.amount
-  Run Keyword And Return If   'status' == '${arguments[2]}'   Get invisible text by locator  jquery=.aside-part .opstatus.hidden
+  #Run Keyword And Return If   'status' == '${arguments[2]}'   Get invisible text by locator  jquery=.aside-part .opstatus.hidden
   Run Keyword And Return If   'status' == '${arguments[2]}'   Отримати інформацію із тендера status
   Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.startDate
   Run Keyword And Return If   'enquiryPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.endDate
