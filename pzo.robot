@@ -1763,7 +1763,8 @@ Wait For Complaints Sync
   Sleep  2
   Choose File  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//input[@type='file']  ${file_path_2}
   Sleep  2
-  Select From List By Label  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  Кошторис
+  ${result}=  Run Keyword And Return Status  Select From List By Label  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  Кошторис
+  Run Keyword If  ${result} == False  Select From List By Value  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  technicalSpecifications
   Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//textarea[contains(@id, '-description')]  test2
   Sleep  1
 
