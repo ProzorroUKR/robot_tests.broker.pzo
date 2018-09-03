@@ -2091,6 +2091,18 @@ Save Proposal
   Run Keyword If   ${item1NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(1);
   Run Keyword If   ${item1NeedToBeVisible}  Sleep  2
   Run Keyword And Return If   'items[1].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
+  Run Keyword And Return If   'items[1].classification.scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   'items[1].classification.id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-code
+  Run Keyword And Return If   'items[1].classification.description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   'items[1].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
+  Run Keyword And Return If   'items[1].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   'items[1].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   'items[1].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   'items[1].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
+  Run Keyword And Return If   'items[1].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
+  Run Keyword And Return If   'items[1].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
+  Run Keyword And Return If   'items[1].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
+  Run Keyword And Return If   'items[1].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
 
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
@@ -2112,10 +2124,14 @@ Save Proposal
   ### EOF - OpenUaDefense ###
 
   ### BOF - OpenEU ###
+  Run Keyword If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  JsOpenAwardByIndex  1
   Run Keyword And Return If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
+  Run Keyword If   '${arguments[2]}' == 'awards[2].complaintPeriod.endDate'  JsOpenAwardByIndex  2
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[2].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
   ### EOF - OpenEU ###
 
   ### BOF - Esco ###
+  Run Keyword If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  JsOpenAwardByIndex  4
   Run Keyword And Return If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'minimalStepPercentage'  get_invisible_text  jquery=.minimal-step-percentage-source.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'yearlyPaymentsPercentageRange'  get_invisible_text  jquery=.yearly-payments-percentage-range-source.hidden
