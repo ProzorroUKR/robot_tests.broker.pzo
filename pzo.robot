@@ -2870,8 +2870,8 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера stage2tenderID
-  ${result}=  Run Keywork And Return Status  Page Should Contain Element  jquery=.stage2-tender-id.hidden
-  Run Keyword If  ${result} == False  Sleep  120
+  ${result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=.stage2-tender-id.hidden
+  Run Keyword If  ${result} == False  Sleep  125
   Run Keyword If  ${result} == False  Reload Page
   Run Keyword If  ${result} == False  Sleep  1
   Capture Page Screenshot  getStage2tenderid
