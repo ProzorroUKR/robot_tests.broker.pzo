@@ -1018,7 +1018,8 @@ Switch To Questions
 
 Save tender ID
   ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  Run Keyword If  ${status}  Add id to tender
+  ${procurementMethodType}=  Run Keyword And Ignore Error  Отримати інформацію із тендера procurementMethodType
+  Run Keyword If  ${status} or '${procurementMethodType}' == 'competitiveDialogueUA.stage2' or '${procurementMethodType}' == 'competitiveDialogueEU.stage2'  Add id to tender
 
 Add id to tender
   ${url}=   Log Location
