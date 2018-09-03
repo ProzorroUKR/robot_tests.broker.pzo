@@ -827,7 +827,7 @@ Wait For Sync Tender Finish
   [Arguments]  @{ARGUMENTS}
   [Documentation]
   ...      ${ARGUMENTS[0]} =  ${username}
-  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
+  ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Sleep  61
   Open Tender
@@ -1879,6 +1879,30 @@ Save Proposal
   Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
 
   Підтвердити рішення кваліфікації переможця
+  Open Tender
+
+Дискваліфікувати постачальника
+  [Arguments]  ${username}  ${tender_uaid}  ${award_index}
+  Switch browser   ${username}
+
+  ${doc_isset}=  GetDictionaryKeyExist  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  GetValueFromDictionaryByKey  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ...  ELSE  GenerateFakeDocument
+
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
+  Select From List By Value   id=qualificationform-decision  decline
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-title
+  Run Keyword And Ignore Error  Click Element  jquery=#qualificationform-title option.js-cancel:first
+  Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
+  JsSetScrollToElementBySelector  \#qualification-documents
+  Choose File  xpath=//input[@type='file']  ${doc_name}
+  Sleep  2
+  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
+  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
+
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
   Open Tender
 
 Скасування рішення кваліфікаційної комісії
