@@ -763,7 +763,6 @@ Wait For Sync Tender Finish
   JsSetScrollToElementBySelector  .js-award-complaint-period-wrapper
   ${complaint_period_end_date}=  get_invisible_text  jquery=.js-award-complaint-period-wrapper .award-complaint-period-end-date-source.hidden
   Wait date  ${complaint_period_end_date}
-  Sleep  60
 
   Встановити поле відкритої форми редагування угоди  ${field}  ${value}
   Run Keyword If  ${arguments_length} > 6  Встановити поле відкритої форми редагування угоди  ${arguments[5]}  ${arguments[6]}
@@ -1011,6 +1010,7 @@ Wait date
   [Arguments]  ${date}
   ${sleep}=  wait_to_date  ${date}
   Run Keyword If  ${sleep} > 0  Sleep  ${sleep}
+  Run Keyword If  ${sleep} > 0  Sleep  60
 
 Switch To Questions
   Click Element                      xpath=//a[contains(@href, '/tender/questions?id=')]
