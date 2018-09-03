@@ -916,7 +916,7 @@ Wait For Sync Tender Finish
   Sleep  3
 
 Load Sign
-  ${loadingKey}=  Run keyword And Return Status  Wait Until Page Contains   Зчитування ключа   20
+  ${loadingKey}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   40
   Run Keyword If  ${loadingKey} == False  Load Sign Data
   Wait Until Page Contains   Серійний номер   60
   Click Element   id=SignDataButton
