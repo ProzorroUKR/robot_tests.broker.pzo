@@ -2071,6 +2071,27 @@ Save Proposal
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Sleep  2
   Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
 
+  ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[0]
+  Run Keyword If   ${item0NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
+  Run Keyword If   ${item0NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'items[0].classification.scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   'items[0].classification.id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-code
+  Run Keyword And Return If   'items[0].classification.description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   'items[0].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
+  Run Keyword And Return If   'items[0].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   'items[0].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   'items[0].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   'items[0].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
+  Run Keyword And Return If   'items[0].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
+  Run Keyword And Return If   'items[0].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
+  Run Keyword And Return If   'items[0].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
+  Run Keyword And Return If   'items[0].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
+
+  ${item1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[1]
+  Run Keyword If   ${item1NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(1);
+  Run Keyword If   ${item1NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'items[1].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
+
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
   Run Keyword And Return If   '${arguments[2]}' == 'funders[0].name'  get_invisible_text  jquery=${funderWrapper} .name.hidden
