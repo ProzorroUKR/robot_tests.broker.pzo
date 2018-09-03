@@ -3087,6 +3087,8 @@ Switch To Complaints
 
   PlanFormOpenByUAID  ${uaid}
   JsCollapseShowAndScroll  \#collapseItems
+  Click Element   jquery=#collapseItems .nav li[data-title^='${item_key}']
+  Sleep  1
   Click Element   jquery=#collapseItems .nav li[data-title^='${item_key}'] .js-dynamic-form-remove
   Wait Until Page Contains   Ви впевнені що бажаєте видали обрану номенклатуру?   10
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
