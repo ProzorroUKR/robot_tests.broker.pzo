@@ -3098,10 +3098,11 @@ Switch To Complaints
   [Arguments]  ${username}  ${uaid}  ${key}
   ${item0Wrapper}=  Set Variable  \#accordionItems .panel:nth(0) .panel-collapse:first
   ${item1Wrapper}=  Set Variable  \#accordionItems .panel:nth(1) .panel-collapse:first
+  ${budget}=  get_invisible_text  jquery=#general-info .budget-amount
 
   PlanOpenByUAID  ${uaid}
   Run Keyword And Return If   '${key}' == 'tender.procurementMethodType'  get_invisible_text  jquery=#general-info .procurement-method-type
-  Run Keyword And Return If   '${key}' == 'budget.amount'   get_invisible_text  jquery=#general-info .budget-amount
+  Run Keyword And Return If   '${key}' == 'budget.amount'   Convert To Number  ${budget}
   Run Keyword And Return If   '${key}' == 'budget.description'   get_text  jquery=#general-info .budget-description .value
   Run Keyword And Return If   '${key}' == 'budget.currency'   get_invisible_text  jquery=#general-info .budget-currency
   Run Keyword And Return If   '${key}' == 'budget.id'   get_text  jquery=#general-info .budget-id .value
