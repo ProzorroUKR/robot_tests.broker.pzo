@@ -1018,7 +1018,7 @@ Switch To Questions
 
 Save tender ID
   ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  ${procurementMethodType}=  Run Keyword And Ignore Error  Отримати інформацію із тендера procurementMethodType
+  ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   Run Keyword If  ${status} or '${procurementMethodType}' == 'competitiveDialogueUA.stage2' or '${procurementMethodType}' == 'competitiveDialogueEU.stage2'  Add id to tender
 
 Add id to tender
@@ -1878,8 +1878,8 @@ Save Proposal
   Run Keyword And Ignore Error  Click Element  id=qualificationform-eligible
   Run Keyword And Ignore Error  Click Element  id=qualificationform-qualified
   Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
 
-  Підтвердити рішення кваліфікації переможця
   Open Tender
 
 Дискваліфікувати постачальника

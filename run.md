@@ -2,13 +2,13 @@
 
 Single Item Tender
 
-? bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__all -v number_of_lots:1
++ bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/singleItem__owner__all -v number_of_lots:1
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/singleItem__provider__all
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/single_item_tender.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/singleItem__viewer__all -v number_of_lots:1
 
 Planning
 
-bin/op_tests -s planning -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/planning__owner
+? bin/op_tests -s planning -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/planning__owner
 bin/op_tests -s planning -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/planning__viewer
 
 Reporting
