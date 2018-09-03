@@ -1980,8 +1980,8 @@ Save Proposal
   Run Keyword And Return If   'tenderPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.endDate
   Run Keyword And Return If   'procurementMethodType' == '${arguments[2]}'   Отримати інформацію із тендера procurementMethodType
   Run Keyword And Return If   'value.amount' == '${arguments[2]}'   Отримати інформацію із тендера value.amount
-  Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Reload Page
-  Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Sleep  3
+  Run Keyword If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Reload Page
+  Run Keyword If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Sleep  3
   Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   get_invisible_text  xpath=//*[contains(@class, 'hidden stage2.opstatus')]
   Run Keyword And Return If   'status' == '${arguments[2]}'   Отримати інформацію із тендера status
   Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.startDate
@@ -2094,6 +2094,7 @@ Save Proposal
   ### EOF - OpenEU ###
 
   ### BOF - Esco ###
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse:first .complaint-period-end-date.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'minimalStepPercentage'  get_invisible_text  jquery=.minimal-step-percentage-source.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'yearlyPaymentsPercentageRange'  get_invisible_text  jquery=.yearly-payments-percentage-range-source.hidden
   ### EOF - Esco ###
