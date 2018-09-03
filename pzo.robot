@@ -2069,7 +2069,7 @@ Save Proposal
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Sleep  2
-  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//div[contains(@id,'collapseItem')]//div[contains(@class,'item-info-wrapper')]//p[contains(@class,'title')]//span[contains(@class,'value')]
+  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
 
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
