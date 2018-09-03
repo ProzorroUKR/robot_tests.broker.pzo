@@ -1491,7 +1491,7 @@ GetIsTenderReadyForStage2
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Wait Until Page Contains  Основна інформація  10
 
-  ${tender_end_date}=  Get Current Date  increment=00:09:00  result_format=%d.%m.%Y %H:%M
+  ${tender_end_date}=  Get Current Date  increment=00:18:00  result_format=%d.%m.%Y %H:%M
   JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
   Input Text  id=tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
   Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
@@ -1945,6 +1945,8 @@ Save Proposal
 #  Log To Console  ${arguments[1]}
 #  Log To Console  ${arguments[2]}
 
+  ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
+
   Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
   Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-end-date
   Run Keyword And Return If   'deliveryLocation.longitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
@@ -1953,7 +1955,7 @@ Save Proposal
   Run Keyword And Return If   'tenderPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.endDate
   Run Keyword And Return If   'procurementMethodType' == '${arguments[2]}'   Отримати інформацію із тендера procurementMethodType
   Run Keyword And Return If   'value.amount' == '${arguments[2]}'   Отримати інформацію із тендера value.amount
-  #Run Keyword And Return If   'status' == '${arguments[2]}'   Get invisible text by locator  jquery=.aside-part .opstatus.hidden
+  Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   get_invisible_text  xpath=//*[contains(@class, 'hidden stage2.opstatus')]
   Run Keyword And Return If   'status' == '${arguments[2]}'   Отримати інформацію із тендера status
   Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.startDate
   Run Keyword And Return If   'enquiryPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.endDate
