@@ -763,6 +763,7 @@ Wait For Sync Tender Finish
   JsSetScrollToElementBySelector  .js-award-complaint-period-wrapper
   ${complaint_period_end_date}=  get_invisible_text  jquery=.js-award-complaint-period-wrapper .award-complaint-period-end-date-source.hidden
   Wait date  ${complaint_period_end_date}
+  Sleep  60
 
   Встановити поле відкритої форми редагування угоди  ${field}  ${value}
   Run Keyword If  ${arguments_length} > 6  Встановити поле відкритої форми редагування угоди  ${arguments[5]}  ${arguments[6]}
@@ -1010,7 +1011,6 @@ Wait date
   [Arguments]  ${date}
   ${sleep}=  wait_to_date  ${date}
   Run Keyword If  ${sleep} > 0  Sleep  ${sleep}
-  Run Keyword If  ${sleep} > 0  Sleep  60
 
 Switch To Questions
   Click Element                      xpath=//a[contains(@href, '/tender/questions?id=')]
@@ -2086,8 +2086,8 @@ Save Proposal
   Run Keyword And Return If   'items[0].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
   Run Keyword And Return If   'items[0].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
   Run Keyword And Return If   'items[0].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
-  Run Keyword And Return If   'items[0].deliveryLocation.latitude' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
-  Run Keyword And Return If   'items[0].deliveryLocation.longitude' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
+  Run Keyword And Return If   'items[0].deliveryLocation.latitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
+  Run Keyword And Return If   'items[0].deliveryLocation.longitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
 
   ${item1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[1]
   Run Keyword If   ${item1NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(1);
@@ -2105,8 +2105,8 @@ Save Proposal
   Run Keyword And Return If   'items[1].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
   Run Keyword And Return If   'items[1].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
   Run Keyword And Return If   'items[1].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
-  Run Keyword And Return If   'items[1].deliveryLocation.latitude' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
-  Run Keyword And Return If   'items[1].deliveryLocation.longitude' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
+  Run Keyword And Return If   'items[1].deliveryLocation.latitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
+  Run Keyword And Return If   'items[1].deliveryLocation.longitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
 
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
