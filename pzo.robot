@@ -1974,6 +1974,8 @@ Save Proposal
   ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
 
   Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
+  Run Keyword And Return If   'lots[0].auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-start-date.hidden
+  Run Keyword And Return If   'lots[0].auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-end-date.hidden
   Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-end-date
   Run Keyword And Return If   'deliveryLocation.longitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
   Run Keyword And Return If   'deliveryLocation.latitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
@@ -2077,6 +2079,9 @@ Save Proposal
   Run Keyword And Return If   'items[0].classification.scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-scheme
   Run Keyword And Return If   'items[0].classification.id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-code
   Run Keyword And Return If   'items[0].classification.description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   'items[0].additionalClassifications[0].scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-scheme.hidden:first
+  Run Keyword And Return If   'items[0].additionalClassifications[0].id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-code.hidden:first
+  Run Keyword And Return If   'items[0].additionalClassifications[0].description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-description.hidden:first
   Run Keyword And Return If   'items[0].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
   Run Keyword And Return If   'items[0].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
   Run Keyword And Return If   'items[0].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
