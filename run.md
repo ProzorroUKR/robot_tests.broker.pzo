@@ -69,13 +69,13 @@ bin/op_tests -s 01openProcedure -s 03qualification -s 04contract_signing -A robo
 CompetitiveDialogueUA
 
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/competitiveDialogueUA__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"open_competitive_dialogue": {"tender": [0, 35]}}}}'
-bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/competitiveDialogueUA__provider__all
++ bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/competitiveDialogueUA__provider__all
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/competitiveDialogueUA__viewer__all
 
 CompetitiveDialogueEU
 
 bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:tender_owner -v api_version:2.4  -d test_output/competitiveDialogueEU__owner__openProcedure -v BROKERS_PARAMS:'{"pzo": {"intervals": {"open_competitive_dialogue": {"tender": [0, 40]}}}}'
-? bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:provider -v api_version:2.4  -d test_output/competitiveDialogueEU__provider__openProcedure
+bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:provider -v api_version:2.4  -d test_output/competitiveDialogueEU__provider__openProcedure
 bin/op_tests -s openProcedure -A robot_tests_arguments/competitive_dialogue.txt -v broker:pzo -v role:viewer -v api_version:2.4  -d test_output/competitiveDialogueEU__viewer__openProcedure
 
 ESCO
