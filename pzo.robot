@@ -2943,7 +2943,7 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера tenderID
-  ${return_value}=  get_text  xpath=//*[contains(@class, 'tender-id')]//*[@class='value']
+  ${return_value}=  Get invisible text by locator  jquery=.aside-part .tenderuaid.hidden
   [return]  ${return_value}
 
 Отримати інформацію із тендера stage2tenderID
