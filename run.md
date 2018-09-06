@@ -44,7 +44,7 @@ Complaints
 
 + bin/op_tests -s complaints -A robot_tests_arguments/below_tender_lot_complaint.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__below
 + bin/op_tests -s complaints -A robot_tests_arguments/below_before_resolved_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__below_before_resolved_award
-- bin/op_tests -s complaints -A robot_tests_arguments/below_after_resolved_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__below_after_resolved_award
+? bin/op_tests -s complaints -A robot_tests_arguments/below_after_resolved_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__below_after_resolved_award
 +/- bin/op_tests -s complaints -A robot_tests_arguments/openua_tender_lot_complaint.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__openua
 +/- bin/op_tests -s complaints -A robot_tests_arguments/openua_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/complaints__owner__openua_award
 
@@ -52,9 +52,9 @@ Complaints
 + bin/op_tests -s complaints -A robot_tests_arguments/below_before_resolved_award_complaint.txt -v accelerator:720 -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/complaints__provider__below_before_resolved_award
 - bin/op_tests -s complaints -A robot_tests_arguments/below_after_resolved_award_complaint.txt -v accelerator:360 -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/complaints__provider__below_after_resolved_award
 + bin/op_tests -s complaints -A robot_tests_arguments/openua_tender_lot_complaint.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/complaints__provider__openua
-? bin/op_tests -s complaints -A robot_tests_arguments/openua_award_complaint.txt -v accelerator:720 -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/complaints__provider__openua_award
++ bin/op_tests -s complaints -A robot_tests_arguments/openua_award_complaint.txt -v accelerator:720 -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/complaints__provider__openua_award
 
-? bin/op_tests -s complaints -A robot_tests_arguments/below_tender_lot_complaint.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/complaints__viewer__below
++ bin/op_tests -s complaints -A robot_tests_arguments/below_tender_lot_complaint.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/complaints__viewer__below
 bin/op_tests -s complaints -A robot_tests_arguments/below_before_resolved_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/complaints__viewer__below_before_resolved_award
 bin/op_tests -s complaints -A robot_tests_arguments/below_after_resolved_award_complaint.txt -v accelerator:number_of_accelerator -v submissionMethodDetails:"quick(mode:fast-forward)" -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/complaints__viewer__below_after_resolved_award
 bin/op_tests -s complaints -A robot_tests_arguments/openua_tender_lot_complaint.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/complaints__viewer__openua
@@ -62,13 +62,13 @@ bin/op_tests -s complaints -A robot_tests_arguments/openua_award_complaint.txt -
 
 Open Defense
 
-- bin/op_tests -s 01openProcedure -s 03qualification -s 04contract_signing -A robot_tests_arguments/openUAdefense_one_bid.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/openDefense__owner__all
+? bin/op_tests -s 01openProcedure -s 03qualification -s 04contract_signing -A robot_tests_arguments/openUAdefense_one_bid.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/openDefense__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"openua_defense": {"tender": [0, 35]}}}}'
 + bin/op_tests -s 01openProcedure -s 03qualification -s 04contract_signing -A robot_tests_arguments/openUAdefense_one_bid.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/openDefense__provider__all
 bin/op_tests -s 01openProcedure -s 03qualification -s 04contract_signing -A robot_tests_arguments/openUAdefense_one_bid.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/openDefense__viewer__all
 
 CompetitiveDialogueUA
 
-bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/competitiveDialogueUA__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"open_competitive_dialogue": {"tender": [0, 35]}}}}'
+? bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/competitiveDialogueUA__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"open_competitive_dialogue": {"tender": [0, 35]}}}}'
 + bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/competitiveDialogueUA__provider__all
 bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/competitive_dialogue_UA.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/competitiveDialogueUA__viewer__all
 
