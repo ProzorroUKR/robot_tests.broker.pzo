@@ -1490,6 +1490,10 @@ GetIsTenderReadyForStage2
   [Arguments]  ${username}  ${stage2_tender_uaid}
   Switch browser   ${username}
 
+  ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
+  Run Keyword If  '${current_tender_uaid}' != '${stage2_tender_uaid}'  Go To  ${BROKERS['pzo'].basepage}/tender/${stage2_tender_uaid}
+  WaitTenderStage2Update  1800
+
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Wait Until Page Contains  Основна інформація  10
 
@@ -1499,6 +1503,17 @@ GetIsTenderReadyForStage2
   Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
 
   Save Tender
+
+WaitTenderStage2Update
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetIsTenderReadyForStage2Update
+  Run Keyword Unless  ${passed}  Fatal Error  Tender stage2 can not be updated in ${timeout} sec
+
+GetIsTenderReadyForStage2Update
+  Sleep  30
+  Reload Page
+  Sleep  1
+  Page Should Contain Element  xpath=//a[contains(@href, '/tender/update?id=')]
 
 ### EOF - Competitive Dialogue ###
 
