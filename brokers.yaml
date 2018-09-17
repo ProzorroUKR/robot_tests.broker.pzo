@@ -1,0 +1,29 @@
+pzo:
+    intervals:
+        default:
+            enquiry: [0, 20]
+            tender:  [0, 20]
+            accelerator: 1440
+        belowThreshold:
+            enquiry: [0, 25]
+            tender:  [0, 25]
+            accelerator: 1440
+        openua:
+            tender:  [0, 25]
+            accelerator: 1440
+        openeu:
+            tender:  [0, 25]
+            accelerator: 1440
+        open_competitive_dialogue:
+            accelerator: 1440
+            tender:  [0, 35]
+    keywords_file: pzo
+    basepage: 'http://pzo.com.ua'
+    homepage: 'http://pzo.com.ua/tenders'
+    syncpage: 'http://pzo.com.ua/develop/sync?psw=369369'
+    roles:
+        provider:       pzo_Provider1
+        provider1:      pzo_Provider2
+        tender_owner:   pzo_Owner
+        viewer:         pzo_Viewer
+    timeout_on_wait: 1

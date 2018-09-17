@@ -2159,6 +2159,7 @@ Save Proposal
   Run Keyword And Return If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse.in .complaint-period-end-date.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'minimalStepPercentage'  get_invisible_text  jquery=.minimal-step-percentage-source.hidden
   Run Keyword And Return If   '${arguments[2]}' == 'yearlyPaymentsPercentageRange'  get_invisible_text  jquery=.yearly-payments-percentage-range-source.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'fundingKind'  get_invisible_text  jquery=.funding-kind-source.hidden
   ### EOF - Esco ###
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
