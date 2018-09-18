@@ -1,5 +1,4 @@
 *** Settings ***
-#Library  Selenium2Screenshots
 Library  String
 Library  DateTime
 Library  pzo_service.py
@@ -1299,8 +1298,6 @@ Save Tender
 
   Sync Tender
   Go To  ${BROKERS['pzo'].basepage}/tender/complaint-answer?id=${tender_id}
-#  Click Element  xpath=//select[@id='complaintanswerform-complaint']
-#  Click Element  xpath=//select[@id='complaintanswerform-complaint']//option[contains(text(), '${claim_id}')]
   Input text  xpath=//textarea[contains(@id, 'complaintanswerform-resolution')]  ${answer.data.resolution}
   Run Keyword If  '${answer.data.resolutionType}' == 'resolved'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Задоволено
   Run Keyword If  '${answer.data.resolutionType}' == 'declined'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Відхилено
