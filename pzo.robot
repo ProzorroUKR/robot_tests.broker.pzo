@@ -1,5 +1,4 @@
 *** Settings ***
-Library  Selenium2Screenshots
 Library  String
 Library  DateTime
 Library  pzo_service.py
@@ -40,8 +39,8 @@ ${locator.questions[0].description}                            xpath=//p[@class=
 ${locator.questions[0].date}                                   xpath=//p[@class='data-published']//*[@class='value']
 ${locator.questions[0].answer}                                 xpath=//p[@class='answer']//*[@class='value']
 ${locator.status}                                              xpath=//*[contains(@class, 'hidden opstatus')]
-${tender_page_prefix}=                                         http://dev.pzo.com.ua/tender/view?id=
-${tender_sync_prefix}=                                         http://dev.pzo.com.ua/utils/tender-sync?pk=
+${tender_page_prefix}=                                         ${BROKERS['pzo'].basepage}/tender/view?id=
+${tender_sync_prefix}=                                         ${BROKERS['pzo'].basepage}/utils/tender-sync?pk=
 ${tender_sync_postfix}=                                        ?psw=369369
 ${pzo_proc_type}=                                              unknown
 
@@ -80,66 +79,43 @@ Login
   [Arguments]  ${user}  ${tender_data}
   ${tender_data}=   procuring_entity_name  ${tender_data}
   ${tender_data_keys}=  Get Dictionary Keys  ${tender_data.data}
-  ${items}=         Get From Dictionary   ${tender_data.data}               items
-  ${lots}=          Get From Dictionary   ${tender_data.data}               lots
-  ${budget}=        Get From Dictionary   ${tender_data.data.value}         amount
-  ${budget}=        convert_float_to_string  ${budget}
-  ${quantity}=      Get From Dictionary   ${items[0]}                        quantity
-  ${quantity}=      Convert To String     ${quantity}
-  ${cpv}=           Get From Dictionary   ${items[0].classification}         id
-  ${unit}=          Get From Dictionary   ${items[0].unit}                   name
-  ${latitude}       Get From Dictionary   ${items[0].deliveryLocation}    latitude
-  ${longitude}      Get From Dictionary   ${items[0].deliveryLocation}    longitude
-  ${postalCode}    Get From Dictionary   ${items[0].deliveryAddress}     postalCode
-  ${streetAddress}    Get From Dictionary   ${items[0].deliveryAddress}     streetAddress
-  ${deliveryDate}   Get From Dictionary   ${items[0].deliveryDate}        endDate
   ${procurementMethodType} =  Set Variable If  'procurementMethodType' in ${tender_data_keys}  ${tender_data.data.procurementMethodType}  belowThreshold
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype=${procurementMethodType}
-  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  lots=${lots}
-  #
-  ${title}=         Get From Dictionary   ${tender_data.data}               title
-  ${title_ru}=      Get From Dictionary  ${tender_data.data}  title_ru
-  ${title_en}=      Get From Dictionary  ${tender_data.data}  title_en
-  ${description}=   Get From Dictionary   ${tender_data.data}               description
-  ${description_ru}=  Get From Dictionary  ${tender_data.data}  description_ru
-  ${description_en}=  Get From Dictionary  ${tender_data.data}  description_en
-  #
-  ${lots_title}=  Get From Dictionary  ${lots[0]}  title
-  ${lots_title_ru}=  Get From Dictionary  ${lots[0]}  title_ru
-  ${lots_title_en}=  Get From Dictionary  ${lots[0]}  title_en
-  ${lots_description}=   Get From Dictionary   ${lots[0]}         description
 
-#  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=360
-  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  http://dev.pzo.com.ua/utils/config?tacceleration=1080
+#  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints' and '${procurementMethodType}' == 'belowThreshold'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
+  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=1080
 
   Selenium2Library.Switch Browser    ${user}
   Go To                             ${USERS.users['${user}'].homepage}
   Wait Until Page Contains          Мої закупівлі   10
   Sleep  1
 
-#  Log To Console  ${BROKERS['pzo'].intervals.belowThreshold.accelerator}
-#  Log To Console  ${MODE}
-
   Run Keyword And Ignore Error  Click Element                     xpath=//*[contains(@href, '/tender/create')]
   Run Keyword And Ignore Error  Click Element                     xpath=//ol[contains(@class, 'breadcrumb')]//*[contains(@href, '/tender/create')]
   Sleep  1
   Wait Until Page Contains          Створення закупівлі  10
 
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Відкриті торги з публікацією англ.мовою
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdUA'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Відкриті торги
-  Run Keyword If  '${procurementMethodType}' == 'negotiation'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Переговорна процедура закупівлі
-  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Select From List By Label  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  Допорогова закупівля
-  Sleep  3 
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Select From List By Value  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  ${procurementMethodType}
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Sleep  3
 
+  ### BOF - Reporting ###
+  Run Keyword And Return If  '${procurementMethodType}' == 'reporting'  Створити тендер без лотів  ${user}  ${tender_data}
+  ### EOF - Reporting ###
+
+  ${title}=         Get From Dictionary   ${tender_data.data}               title
+  ${description}=   Get From Dictionary   ${tender_data.data}               description
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Input text  id=tender${pzo_proc_type}form-title  ${title}
   Run Keyword If  'cause' in ${tender_data_keys}  Select From List By Value  id=tender${pzo_proc_type}form-cause  ${tender_data.data.cause}
   Run Keyword If  'causeDescription' in ${tender_data_keys}  Input text  id=tender${pzo_proc_type}form-cause_description  ${tender_data.data.causeDescription}
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Input text  id=tender${pzo_proc_type}form-title_en  ${title_en}
+  Run Keyword If  'title_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-title_en  ${tender_data.data.title_en}
   Input text  id=tender${pzo_proc_type}form-description  ${description}
-  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdEU'  Input text  id=tender${pzo_proc_type}form-description_en  ${description_en}
+  Run Keyword If  'description_en' in ${tender_data_keys}  Input Text With Checking Input Isset  \#tender${pzo_proc_type}form-description_en  ${tender_data.data.description_en}
+  Run Keyword If  'fundingKind' in ${tender_data_keys}  Select From List By Value  id=tender${pzo_proc_type}form-funding_kind  ${tender_data.data.fundingKind}
+  Run Keyword If  'NBUdiscountRate' in ${tender_data_keys}  Input Float Multiply100  \#tender${pzo_proc_type}form-nbu_discount_rate  ${tender_data.data.NBUdiscountRate}
   Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.startDate}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.endDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.endDate}
@@ -148,10 +124,18 @@ Login
   Select Checkbox  id=tender${pzo_proc_type}form-quick_mode
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Select Checkbox  id=tender${pzo_proc_type}form-auction_skip_mode
 
+  ### BOF - BelowFunders ###
+  Run Keyword If  'funders' in ${tender_data_keys}  Створити тендер Funder  ${tender_data.data.funders[0]}
+  ### EOF - BelowFunders ###
+
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  1
   Click Element  xpath=//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний лот?']
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+
+  ${items}=         Get From Dictionary   ${tender_data.data}               items
+  ${lots}=          Get From Dictionary   ${tender_data.data}               lots
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  lots=${lots}
   ${lots_length}=  Get Length  ${lots}
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
@@ -168,6 +152,46 @@ Login
   Sleep  1
   Run Keyword If  'features' in ${tender_data_keys}  Add Features Ex  ${tender_data.data.features}  tenderer  ${procurementMethodType}  div[@id='collapseFeatures']
 
+  ${Ids}=  Створити тендер Збереження форми
+  [return]  ${Ids}
+
+Створити тендер без лотів
+  [Arguments]  ${user}  ${tender_data}
+  ${tender_data_keys}=  Get Dictionary Keys  ${tender_data.data}
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
+  ${budget}=          convert_float_to_string  ${tender_data.data.value.amount}
+  ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
+
+  # fill general data
+  Input text  id=tender${pzo_proc_type}form-title  ${tender_data.data.title}
+  Input text  id=tender${pzo_proc_type}form-description  ${tender_data.data.description}
+  Input text  id=tender${pzo_proc_type}form-value_amount  ${budget}
+  Select From List By Value  id=tender${pzo_proc_type}form-value_currency  ${tender_data.data.value.currency}
+  Run Keyword If  ${tender_data.data.value.valueAddedTaxIncluded}  Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
+
+  # fill items
+  Click Element  xpath=//*[contains(@href, '#collapseItems')]
+  Sleep  1
+  Click Element  xpath=//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний товар/послугу?']
+  Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+
+  ${items}=         Get From Dictionary   ${tender_data.data}               items
+  ${items_length}=  Get Length  ${items}
+
+  : FOR    ${INDEX}    IN RANGE    0    ${items_length}
+  \   JsSetScrollToElementBySelector  \#collapseItems a[href='#add-items']
+  \   Click Element  jquery=#collapseItems a[href="#add-items"]
+  \   Sleep  2
+  \   Додати предмет By Wrapper  \#collapseItems div[data-type='item'].active  ${items[${INDEX}]}  ${procurementMethodType}
+
+  Run Keyword If  '${procurementMethodType}' == 'reporting'  Додати постачальника For Reporting Fake
+
+  ${Ids}=  Створити тендер Збереження форми
+  [return]  ${Ids}
+
+Створити тендер Збереження форми
+  JsSetScrollToElementBySelector  \#submitBtn
   Click Element   xpath=//*[@id='submitBtn']
   Sleep  1
   Wait Until Page Contains   Закупівля створена, дочекайтесь опублікування на сайті уповноваженого органу.   10
@@ -177,7 +201,7 @@ Login
   Wait For Sync Tender  360
 
   ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  360 s  0 s  Wait For UAID
-  Run Keyword Unless  ${passed}  Fatal Error  UAID not found in 360 sec  
+  Run Keyword Unless  ${passed}  Fatal Error  UAID not found in 360 sec
   ${tender_UAid}=  Get Text  xpath=//*[contains(@class, 'tender-id')]//*[@class='value']
 
   ${Ids}=   Convert To String   ${tender_UAid}
@@ -209,6 +233,12 @@ Login
   ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
   Input text  id=tender${pzo_proc_type}form-tender_period_end_date  ${date}
 
+Створити тендер Funder
+  [Arguments]  ${funderData}
+  Click Element   id=tenderbelowthresholdform-is_donor
+  Click Element   id=tenderbelowthresholdform-funder_organization_id
+  Click Element   jquery=#tenderbelowthresholdform-funder_organization_id option[data-identifier-code=${funderData.identifier.id}]
+
 Додати лот
   [Arguments]  @{arguments}
   [Documentation]
@@ -221,6 +251,7 @@ Login
   Додати лот Ex  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${items_length}=  Get Length  ${arguments[3]}
 
@@ -240,15 +271,16 @@ Login
 
   ${lot_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${pzo_proc_type}=   Convert_to_Lowercase   ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=   Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
-  ${budget}=          Get From Dictionary   ${arguments[0].value}   amount
-  ${budget}=          convert_float_to_string  ${budget}
 
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-title')]  ${arguments[0].title}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
+  Run Keyword If  'title_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-title_en']  ${arguments[0].title_en}
   Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//textarea[contains(@id, '-description')]  ${arguments[0].description}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//textarea[contains(@id, '-description_en')]  ${arguments[0].description}
-  Input text                         xpath=//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-lot${pzo_proc_type}form')]//input[contains(@id, '-value_amount')]  ${budget}
+  Run Keyword If  'description_en' in ${lot_keys}  Input Text With Checking Input Isset  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-description_en']  ${arguments[0].description_en}
+  Run Keyword If  'minimalStepPercentage' in ${lot_keys}  Input Float Multiply100  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-min_step_percentage']  ${arguments[0].minimalStepPercentage}
+  Run Keyword If  'yearlyPaymentsPercentageRange' in ${lot_keys}  Input Float Multiply100  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-yearly_payments_percentage_range']  ${arguments[0].yearlyPaymentsPercentageRange}
+  Run Keyword If  'value' in ${lot_keys}  Input Float  \#collapseLots .tab-pane.active[data-type='lot'] div[class^='form-group field-lot${pzo_proc_type}form'] input[id$='-value_amount']  ${arguments[0].value.amount}
   Run Keyword If  'minimalStep' in ${lot_keys}  Додати лот Ex step_rate  ${pzo_proc_type}  ${arguments[0].minimalStep.amount}
 
 Додати лот Ex step_rate
@@ -267,13 +299,14 @@ Login
   Додати лот Ex  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${items_length}=  Get Length  ${arguments[3]}
 
   : FOR    ${INDEX}    IN RANGE    0    ${items_length}
   \   Run Keyword If  '${arguments[0].id}' == '${arguments[3][${INDEX}].relatedLot}'  Click Element  jquery=div[data-type="lot"].active a[href="#add-items"]
   \   Run Keyword If  '${arguments[0].id}' == '${arguments[3][${INDEX}].relatedLot}'  Sleep  2
-  \   Run Keyword If  '${arguments[0].id}' == '${arguments[3][${INDEX}].relatedLot}'  Додати предмет Ex  ${arguments[3][${INDEX}]}  ${INDEX}  ${arguments[2]}  
+  \   Run Keyword If  '${arguments[0].id}' == '${arguments[3][${INDEX}].relatedLot}'  Додати предмет Ex  ${arguments[3][${INDEX}]}  ${INDEX}  ${arguments[2]}
 
 Додати предмет
   [Arguments]  @{ARGUMENTS}
@@ -285,6 +318,7 @@ Login
 
   ${item_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${ARGUMENTS[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Convert To String  div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]
 
@@ -308,24 +342,19 @@ Login
   ${street}=        Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  streetAddress
   ${code}=          Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  postalCode
   ${code}=          Convert To String     ${code}
-  ${delivery_end}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  endDate
-  ${delivery_end}=  convert_datetime_for_delivery  ${delivery_end}
-  ${delivery_end} =   Convert Date 	${delivery_end} 	%d.%m.%Y %H:%M
-  ${description_ru}=  Get From Dictionary   ${ARGUMENTS[0]}  description_ru
-  ${description_en}=  Get From Dictionary   ${ARGUMENTS[0]}  description_en
-  ${delivery_start}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  startDate
-  ${delivery_start}=  convert_datetime_for_delivery  ${delivery_start}
-  ${delivery_start}=  Convert Date 	${delivery_start} 	%d.%m.%Y %H:%M
 
   ${pzo_proc_type}=  Convert_to_Lowercase  ${ARGUMENTS[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Convert To String  div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]
+  ${jqueryWrapper}=  Set Variable  \#collapseLots div[data-type='lot'].active div[data-type='item'].active div[class^='form-group field-item${pzo_proc_type}form']
 
   Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-description')]  ${description}
-  Run Keyword If  '${ARGUMENTS[2]}' == 'aboveThresholdEU'  Input text  xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-description_en')]  ${description_en}
-  Input text                         xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-quantity')]  ${quantity}
-  Select From List By Label          xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-unit_id')]  ${unit}
-  
+  Run Keyword If  'description_en' in ${item_keys}
+  ...  Input Text With Checking Input Isset  ${jqueryWrapper} input[id$='-description_en']  ${ARGUMENTS[0].description_en}
+  Input Text With Checking Input Isset XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-quantity')]  ${quantity}
+  Select From List By Label With Checking Input Isset XPath          div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-unit_id')]  ${unit}
+
   Click Element                      xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//a[contains(@href, '#classification')]
   Wait Until Element Is Visible      xpath=//div[contains(@id, 'classification-modal')]//h4[contains(@id, 'classificationModalLabel')]
   Sleep  1
@@ -336,7 +365,7 @@ Login
   Click Element                      xpath=//div[contains(@id, 'classification-modal')]//i[@class='jstree-icon jstree-checkbox']
   Click Element                      xpath=//div[contains(@id, 'classification-modal')]//button[contains(@class, 'btn btn-default waves-effect waves-light js-submit')]
   Sleep  1
-  
+
   Run Keyword If  'additionalClassifications' in ${item_keys}  Input Additional Classifications  ${ARGUMENTS[0].additionalClassifications}  ${wraper}
   Run Keyword If  'additionalClassifications' in ${item_keys}  Sleep  1
 
@@ -347,8 +376,49 @@ Login
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_locality')]  ${locality}
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_street_address')]  ${street}
   Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_postal_code')]  ${code}
-  Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${delivery_start}
-  Input Text                        xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${delivery_end}
+  Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${ARGUMENTS[0].deliveryDate.startDate}
+  Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${ARGUMENTS[0].deliveryDate.endDate}
+
+Додати предмет By Wrapper
+  [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
+  ${data_keys}=  Get Dictionary Keys  ${data}
+  ${quantity_srt}=  Convert To String  ${data.quantity}
+  ${pzo_proc_type}=  GetInputProcTypeByProcurementMethodType  ${procurementMethodType}
+
+  JsSetScrollToElementBySelector  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-description']
+  Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-description']  ${data.description}
+  Run Keyword If  'description_en' in ${data_keys}  Input Text With Checking Input Isset  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-description_en']  ${data.description_en}
+  JsSetScrollToElementBySelector  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-quantity']
+  Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-quantity']  ${quantity_srt}
+  Select From List By Label  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] select[id$='-unit_id']  ${data.unit.name}
+  InputClassificationByWrapper  ${wrapper}  ${data.classification.id}
+  Run Keyword If  'additionalClassifications' in ${data_keys}
+  ...  InputAdditionalClassificationsByWrapper  ${wrapper}  ${data.additionalClassifications}
+  Run Keyword If  'deliveryAddress' in ${data_keys}
+  ...  InputItemDeliveryAddressByWrapper  ${wrapper}  ${data.deliveryAddress}  ${procurementMethodType}
+  Run Keyword If  'deliveryDate' in ${data_keys}
+  ...  InputItemDeliveryDateByWrapper  ${wrapper}  ${data.deliveryDate}  ${procurementMethodType}
+
+InputItemDeliveryAddressByWrapper
+  [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
+  ${pzo_proc_type}=  GetInputProcTypeByProcurementMethodType  ${procurementMethodType}
+
+  JsSetScrollToElementBySelector  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_region_id']
+  Select From List By Label  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] select[id$='-delivery_region_id']  ${data.region}
+  Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_postal_code']  ${data.postalCode}
+  Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_locality']  ${data.locality}
+  Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_street_address']  ${data.streetAddress}
+
+InputItemDeliveryDateByWrapper
+  [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
+  ${data_keys}=  Get Dictionary Keys  ${data}
+  ${pzo_proc_type}=  GetInputProcTypeByProcurementMethodType  ${procurementMethodType}
+
+  JsSetScrollToElementBySelector  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_start_date']
+  Run Keyword If  'startDate' in ${data_keys}
+  ...  Input DateTime  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_start_date']  ${data.startDate}
+  Run Keyword If  'endDate' in ${data_keys}
+  ...  Input DateTime  ${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_end_date']  ${data.endDate}
 
 Input Additional Classifications
   [Arguments]  @{ARGUMENTS}
@@ -361,6 +431,7 @@ Input Additional Classifications
 
   ${count}=  Get Length  ${ARGUMENTS[0]}
   : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   Continue For Loop If  '${ARGUMENTS[0][${INDEX}].scheme}' == 'ДКПП'
   \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${ARGUMENTS[0][${INDEX}].scheme}"]
   \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
   \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${ARGUMENTS[0][${INDEX}].id}
@@ -404,7 +475,7 @@ Add Feature
   ...      ${arguments[0]} ==  feature
   ...      ${arguments[1]} ==  index
   ...      ${arguments[2]} ==  procurementMethodType
-  ...      ${arguments[3]} ==  wraper  
+  ...      ${arguments[3]} ==  wraper
   ...      ${arguments[4]} ==  featureOf
 
   Click Element  xpath=//${arguments[3]}//a[@href='#add-features']
@@ -424,8 +495,10 @@ Add Feature Ex
   ...      ${arguments[3]} ==  wraper
   ...      ${arguments[4]} ==  featureOf
 
+  ${feature_keys}=  Get Dictionary Keys  ${arguments[0]}
   ${featureOf}=  Set Variable If  '${arguments[4]}' == 'tenderer'  ${EMPTY}  ${arguments[4]}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${arguments[2]}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
   ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'abovethresholdua'  ${EMPTY}  ${pzo_proc_type}
   ${wraper}=  Set Variable If  '${pzo_proc_type}' == ''  form-group field-${featureOf}featureform  form-group field-feature${pzo_proc_type}form
@@ -433,9 +506,11 @@ Add Feature Ex
   ${options}=  Get From Dictionary  ${arguments[0]}  enum
 
   Input text                         xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title')]  ${arguments[0].title}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
+  Run Keyword If  'title_en' in ${feature_keys}
+    ...  Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-title_en')]  ${arguments[0].title_en}
   Input text                         xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description')]  ${arguments[0].description}
-  Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description_en')]  ${arguments[0].description}
+  Run Keyword If  'description_en' in ${feature_keys}
+      ...  Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper}')]//input[contains(@id, '-description_en')]  ${arguments[0].description_en}
 
   ${options_length}=  Get Length  ${options}
 
@@ -443,7 +518,7 @@ Add Feature Ex
   \   Click Element  xpath=//${arguments[3]}//div[contains(@class, 'active')]//a[@href='#add-enums']
   \   Sleep  2
   \   Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title')]  ${options[${INDEX}].title}
-  \   Run Keyword If  '${arguments[2]}' == 'aboveThresholdEU'  Input text  xpath=//${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title_en')]  ${options[${INDEX}].title}
+  \   Input Text With Checking Input Isset XPath  ${arguments[3]}//div[contains(@class, 'active')]//div[contains(@class, '${wraper2}')]//div[contains(@class, 'active')]//input[contains(@id, '-title_en')]  ${options[${INDEX}].title}
   \   ${value}=  convert_float_to_string  ${options[${INDEX}].value}
   \   ${value}=  Convert To Number  ${value}
   \   ${value}=  multiply_hundred  ${value}
@@ -484,7 +559,7 @@ Load And Wait Text
   ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
   Selenium2Library.Switch browser   ${ARGUMENTS[0]}
 
-  Go To  http://dev.pzo.com.ua/utils/tender-sync?tenderid=${ARGUMENTS[1]}
+  Go To  ${BROKERS['pzo'].basepage}/utils/tender-sync?tenderid=${ARGUMENTS[1]}
 #  Sleep  10
 
   Load And Wait Text  ${BROKERS['pzo'].homepage}  Публічні закупівлі  4
@@ -506,6 +581,19 @@ Load And Wait Text
   Wait Until Page Contains    ${ARGUMENTS[1]}   60
   Save Tender ID
   Capture Page Screenshot
+
+Пошук тендера за кошти донора
+  [Arguments]  ${username}  @{arguments}
+  ${identifier}=  Set Variable  ${arguments[0]}
+
+  Go To  ${BROKERS['pzo'].basepage}/tenders?funder_organization=${identifier}
+  Wait Until Page Contains Element    id=tender-list    30
+  Capture Page Screenshot  tender_with_funders_search_result
+  Sleep  5
+
+  # redirect to tender view for getting data
+  Go To  ${BROKERS['pzo'].basepage}/tender/${TENDER.TENDER_UAID}
+  Wait Until Page Contains    ${TENDER.TENDER_UAID}    10
 
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
@@ -529,7 +617,7 @@ Load And Wait Text
   Choose File  xpath=//input[@type='file']  ${ARGUMENTS[1]}
   Sleep  2
 
-  Save Tender  
+  Save Tender
 
 Wait For Sync Tender
   [Arguments]  ${timeout}
@@ -537,9 +625,9 @@ Wait For Sync Tender
   Run Keyword Unless  ${passed}  Fatal Error  Sync Finish not finish in ${timeout} sec
 
 Wait For Sync Tender Finish
-  Sleep  5
+  Sleep  3
   Reload Page
-  Page Should Not Contain  Синхронізація з ЦБД  
+  Page Should Not Contain Element  id=tender-sync-info
 
 Створити постачальника, додати документацію і підтвердити його
   [Arguments]  @{ARGUMENTS}
@@ -555,24 +643,36 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Редагування закупівлі  10
 
-  Click Element   xpath=//*[@class='panel-heading']//*[@href='#collapseAward']
-  Sleep  1
+  ### BOF - Reporting ###
+  ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
+  Run Keyword If  '${procurementMethodType}' == 'reporting'  Додати постачальника For Reporting  ${ARGUMENTS[2].data.value.amount}  ${ARGUMENTS[2].data.suppliers[0]}
+  ### EOF - Reporting ###
 
-  Click Element  jquery=div.awards-dynamic-forms-wrapper .nav a.js-dynamic-form-add
-  Sleep  2
-  Додати постачальника  ${ARGUMENTS[2].data.lotID}  ${ARGUMENTS[2].data}
+  Run Keyword If  '${procurementMethodType}' != 'reporting'  Click Element   xpath=//*[@class='panel-heading']//*[@href='#collapseAward']
+  Run Keyword If  '${procurementMethodType}' != 'reporting'  Sleep  1
+
+  Run Keyword If  '${procurementMethodType}' != 'reporting'  Click Element  jquery=div.awards-dynamic-forms-wrapper .nav a.js-dynamic-form-add
+  Run Keyword If  '${procurementMethodType}' != 'reporting'  Sleep  2
+  Run Keyword If  '${procurementMethodType}' != 'reporting'  Додати постачальника  ${ARGUMENTS[2].data.lotID}  ${ARGUMENTS[2].data}
 
   Save Tender
 
   Click Element   jquery=#tender-part-pjax .list-group-item[href*="tender/qualification"]
   Sleep  1
-  Wait Until Page Contains  Кваліфікація  10  
+  Wait Until Page Contains  Кваліфікація  10
   Select From List By Value  id=qualificationform-decision  accept
+
+  ### BOF - Reporting ###
+  Run Keyword If  '${procurementMethodType}' == 'reporting'  Click Element   jquery=#qualification-documents a.js-dynamic-form-add[href="#add-documents"]
+  Run Keyword If  '${procurementMethodType}' == 'reporting'  Sleep  2
+  JsSetScrollToElementBySelector  \#qualification-documents
+  ### EOF - Reporting ###
+
   Choose File  jquery=div.documents-dynamic-forms-wrapper div[data-type="awarddocument"].active div.fileupload-input-wrapper input[type="file"]  ${ARGUMENTS[3]}
   Sleep  2
   Wait Until Page Contains Element  jquery=div.documents-dynamic-forms-wrapper div[data-type="awarddocument"].active div.fileupload-input-wrapper div.btn.item  60
-  Click Element   id=qualificationform-qualified
-  
+  Run Keyword And Ignore Error  Click Element   id=qualificationform-qualified
+
   Click Element   jquery=#tender-qualification-form .js-submit-btn
   Sleep  1
   Wait Until Page Contains   Рішення завантажене, тепер потрібно накласти ЕЦП.   60
@@ -581,14 +681,14 @@ Wait For Sync Tender Finish
 
   Click Element   jquery=#tender-qualification-form .js-submit-btn
   Sleep  1
-  Load Sign  
-  Wait Until Page Contains   ЕЦП успішно накладено на рішення, тепер потрібно підтвердити рішення.   10
+  Load Sign
+  Wait Until Page Contains   ЕЦП успішно накладено на рішення, тепер потрібно підтвердити рішення.   20
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
   Sleep  1
 
   Click Element   jquery=#tender-qualification-form .js-submit-btn
   Sleep  1
-  Wait Until Page Contains   Рішення підтверджене, очікує опублікування на сайті уповноваженого органу.   10
+  Wait Until Page Contains   Рішення підтверджене, очікує опублікування на сайті уповноваженого органу.   20
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
   Sleep  1
 
@@ -611,12 +711,123 @@ Wait For Sync Tender Finish
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_contact_point_name"]    ${ARGUMENTS[1].suppliers[0].contactPoint.name}
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_contact_point_email"]    ${ARGUMENTS[1].suppliers[0].contactPoint.email}
   Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_organization_contact_point_phone"]    ${ARGUMENTS[1].suppliers[0].contactPoint.telephone}
-  Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_value_amount"]    ${ARGUMENTS[1].value.amount}  
+  Input Text    jquery=div.awards-dynamic-forms-wrapper div.dynamic-forms-list div[data-type="award"].active input[id$="-award_value_amount"]    ${ARGUMENTS[1].value.amount}
+
+Додати постачальника For Reporting
+  [Arguments]  ${budget}  ${data}
+  ${wrapper}=  Set Variable  \#collapseAward
+  ${budget}=  Convert To String  ${budget}
+
+  JsSetScrollToElementBySelector  \#collapseAward
+  Click Element  jquery=.panel-title a[data-toggle="collapse"][href="#collapseAward"]
+  Sleep  2
+  JsSetScrollToElementBySelector  ${wrapper} \#tenderreportingform-award_organization_name
+
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_name  ${data.name}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_edrpou  ${data.identifier.id}
+  JsSetScrollToElementBySelector  ${wrapper} \#tenderreportingform-award_organization_region_id
+  Select From List By Label    jquery=${wrapper} \#tenderreportingform-award_organization_region_id  ${data.address.region}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_postal_code  ${data.address.postalCode}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_locality  ${data.address.locality}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_street_address  ${data.address.streetAddress}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_name  ${data.contactPoint.name}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_email  ${data.contactPoint.email}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_phone  ${data.contactPoint.telephone}
+  Input Text    jquery=${wrapper} \#tenderreportingform-award_value_amount  ${budget}
+
+Додати постачальника For Reporting Fake
+  ${identifier}  Create Dictionary    id=1234567890
+  ${address}  Create Dictionary    region=місто Київ  postalCode=123  locality=Київ  streetAddress=address
+  ${contactPoint}  Create Dictionary    name=name  email=test@test.ru  telephone=123123
+  ${data}    Create Dictionary    name=Organization    identifier=${identifier}  address=${address}  contactPoint=${contactPoint}
+  Додати постачальника For Reporting  1  ${data}
+
+Редагувати угоду
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ${field}=  Set Variable  ${arguments[3]}
+  ${value}=  Convert To String  ${arguments[4]}
+  ${arguments_length}=  Get Length  ${arguments}
+
+  # open contract form
+  Open Tender
+  Click Element  xpath=//a[contains(@href, '/tender/contract?id=')]
+  Sleep  1
+  Wait Until Page Contains  Завантаження контракту  10
+
+  # wait complaint period ended
+  JsSetScrollToElementBySelector  .js-award-complaint-period-wrapper
+  ${complaint_period_end_date}=  get_invisible_text  jquery=.js-award-complaint-period-wrapper .award-complaint-period-end-date-source.hidden
+  Wait date  ${complaint_period_end_date}
+  Sleep  60
+
+  Встановити поле відкритої форми редагування угоди  ${field}  ${value}
+  Run Keyword If  ${arguments_length} > 6  Встановити поле відкритої форми редагування угоди  ${arguments[5]}  ${arguments[6]}
+
+  ${contract_number}=  Get Value  id=contractform-contract_number
+  Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
+  ${date_signed}=  Get Current Date  result_format=%d.%m.%Y %H:%M
+  ${contract_date_signed}=  Get Value  id=contractform-date_signed
+  Run Keyword If  '${contract_date_signed}' == ''  Input Text  id=contractform-date_signed  ${date_signed}
+  ${date_start}=  Get Current Date  increment=02:00:00  result_format=%d.%m.%Y %H:%M
+  ${contract_date_start}=  Get Value  id=contractform-date_start
+  Run Keyword If  '${contract_date_start}' == ''  Input Text  id=contractform-date_start  ${date_start}
+  ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
+  ${contract_date_end}=  Get Value  id=contractform-date_end
+  Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
+  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
+  Run Keyword If  ${document_isset} == False  Завантажити у відкриту форму редагування угоди документ  Fake
+
+  # click save button
+  JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  Click Element   jquery=\#tender-contract-form .js-submit-btn
+  Sleep  1
+  Capture Page Screenshot
+  Wait Until Page Contains   Контракт успішно завантажений   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+
+  # wait sync
+  WaitPageSyncing  60
+
+Встановити дату підписання угоди
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ...      ${arguments[3]} =  ${date_signed}
+
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  dateSigned  ${arguments[3]}
+
+Вказати період дії угоди
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${tender_uaid}
+  ...      ${arguments[2]} =  ${contract_index}
+  ...      ${arguments[3]} =  ${date_start}
+  ...      ${arguments[4]} =  ${date_end}
+
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[1]}  ${arguments[2]}  period.startDate  ${arguments[3]}  period.endDate  ${arguments[4]}
+
+Завантажити документ в угоду
+  [Arguments]  @{arguments}
+  [Documentation]
+  ...      ${arguments[0]} =  ${username}
+  ...      ${arguments[1]} =  ${filename}
+  ...      ${arguments[2]} =  ${tender_uaid}
+  ...      ${arguments[3]} =  ${contract_index}
+
+  pzo.Редагувати угоду  ${arguments[0]}  ${arguments[2]}  ${arguments[3]}  document  ${arguments[1]}
 
 Підтвердити підписання контракту
   [Arguments]  @{ARGUMENTS}
   [Documentation]
   ...      ${ARGUMENTS[0]} =  ${username}
+  ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Sleep  61
   Open Tender
@@ -625,33 +836,37 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Завантаження контракту  10
   Перевірити неможливість підписання контракту
-  Input Text    id=contractform-contract_number  1234567890
+  ${contract_number}=  Get Value  id=contractform-contract_number
+  Run Keyword If  '${contract_number}' == ''  Input Text  id=contractform-contract_number  1234567890
   ${date_start}=  Get Current Date  increment=02:00:00  result_format=%d.%m.%Y %H:%M
-  Input Text    id=contractform-date_start  ${date_start}
+  ${contract_date_start}=  Get Value  id=contractform-date_start
+  Run Keyword If  '${contract_date_start}' == ''  Input Text  id=contractform-date_start  ${date_start}
   ${date_end}=  Get Current Date  increment=04:00:00  result_format=%d.%m.%Y %H:%M
-  Input Text    id=contractform-date_end  ${date_end}
-  ${file_path_t}  ${file_name_t}  ${file_content_t}=  create_fake_doc
-  Choose File   jquery=#tender-contract-form .documents-dynamic-forms-wrapper .item-wrapper.active[data-type="contractdocument"] input[type=file]  ${file_path_t}
-  Wait Until Page Contains  ${file_name_t}  20
+  ${contract_date_end}=  Get Value  id=contractform-date_end
+  Run Keyword If  '${contract_date_end}' == ''  Input Text  id=contractform-date_end  ${date_end}
+  ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
+  Run Keyword If  ${document_isset} == False and '${procurementMethodType}' != 'reporting'  Завантажити у відкриту форму редагування угоди документ  Fake
 
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
-  Wait Until Page Contains   Контракт успішно завантажений   10
+  Wait Until Page Contains   Контракт успішно завантажений   20
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  WaitPageSyncing  62
 
-  Sleep  62
-  Wait Until Page Contains   Активувати контракт   10
+  Wait Until Page Contains   Активувати контракт   20
   Click Element  xpath=//a[contains(@href, '/tender/contract-activate?id=')]
   Sleep  1
-  Wait Until Page Contains  Активація контракту  10
+  Wait Until Page Contains  Активація контракту  20
+  JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  ${sign_needed}=  Run keyword And Return Status  Page Should Contain  Накласти ЕЦП
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
 
-  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation'
+  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Negotiation' or ${sign_needed}
   ...  Run Keywords
-  ...  Load Sign  
+  ...  Load Sign
   ...  AND
-  ...  Wait Until Page Contains   ЕЦП успішно накладено   10
+  ...  Wait Until Page Contains   ЕЦП успішно накладено   20
   ...  AND
   ...  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
   ...  AND
@@ -661,13 +876,16 @@ Wait For Sync Tender Finish
   ...  AND
   ...  Sleep  1
 
-  Wait Until Page Contains   Контракт успішно активовано   10
+  Wait Until Page Contains   Контракт успішно активовано   20
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
-  Sleep  10
-  
+
+  # wait sync
+  WaitPageSyncing  60
+
 Перевірити неможливість підписання контракту
-  ${date_sign}=  Get Current Date  local  0  %d.%m.%Y %H:%M  
-  Input Text    id=contractform-date_signed  '${date_sign}'
+  ${date_sign}=  Get Current Date  local  0  %d.%m.%Y %H:%M
+  ${contract_date_signed}=  Get Value  id=contractform-date_signed
+  Run Keyword If  '${contract_date_signed}' == ''  Input Text  id=contractform-date_signed  ${date_sign}
   Execute JavaScript    $('#contractform-date_signed').blur();
   Sleep  3
   Capture Page Screenshot
@@ -676,34 +894,43 @@ Wait For Sync Tender Finish
   ${status}=  Run keyword And Return Status  Page Should Contain  Контракт можна буде підписати після
   Run Keyword If  ${status}  Fail  Підписати контракт неможливо
 
+Встановити поле відкритої форми редагування угоди
+  [Arguments]  ${field}  ${value}
+
+  JsSetScrollToElementBySelector  \#contractform-contract_number
+  Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
+  Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
+  Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
+  Run Keyword If  '${field}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${value}
+  Run Keyword If  '${field}' == 'document'  Завантажити у відкриту форму редагування угоди документ  ${value}
+
+Завантажити у відкриту форму редагування угоди документ
+  [Arguments]  ${filename}
+
+  # resolve filename
+  ${filename}=  Run Keyword If  '${filename}' == 'Fake'  GenerateFakeDocument
+  ...  ELSE  Set Variable  ${filename}
+
+  JsSetScrollToElementBySelector  \#contractform-documents
+  Choose File  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list .js-item.active .js-fileupload-input-wrapper .js-btn-upload input[type=file]  ${filename}
+  Sleep  3
+
 Load Sign
-  ${status}=  Run keyword And Return Status  Wait Until Page Contains   Горобець Сергій Миколайович   20
-  Run Keyword If  ${status} == False  Load Sign Data
+  ${loadingKey}=  Run keyword And Return Status  Wait Until Page Contains   Серійний номер   40
+  Run Keyword If  ${loadingKey} == False  Load Sign Data
+  Wait Until Page Contains   Серійний номер   60
   Click Element   id=SignDataButton
-  Sleep  1    
+  Sleep  5
 
 Load Sign Data
-  Wait Until Page Contains   Оберіть ЦСК:   10
-  Wait Until Page Contains Element   id=CAsServersSelect   20
-  Sleep  15
-  ${status_info}=  get_text  xpath=//div[@id='PKStatusInfo']
-  @{status_info_split}=  Split String  ${status_info}
-  ${status_info_check}=  Set Variable If  '@{status_info_split}[0]' != 'Оберіть'  1  0
-  Run Keyword If  '${status_info_check}' == '0'  Select From List By Label   id=CAsServersSelect     Тестовий ЦСК АТ "ІІТ"
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyFileInput  20
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Run Keyword If  '${status_info_check}' == '0'  Choose File   id=PKeyFileInput     ${CURDIR}/Key-6.dat
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyPassword  20
-  Run Keyword If  '${status_info_check}' == '0'  Input Text    id=PKeyPassword     qwerty
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains Element  id=PKeyReadButton  20
-  Run Keyword If  '${status_info_check}' == '0'  Click Element   id=PKeyReadButton
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  1
-  Run Keyword If  '${status_info_check}' == '0'  Wait Until Page Contains   Горобець Сергій Миколайович   20
-  Run Keyword If  '${status_info_check}' == '0'  Sleep  2
-  Wait Until Page Contains Element  id=SignDataButton  20
-  Click Element   id=SignDataButton
-  Sleep  1  
+  Wait Until Page Contains Element   id=CAsServersSelect   60
+  Select From List By Label   id=CAsServersSelect     Тестовий ЦСК АТ "ІІТ"
+  Wait Until Page Contains Element  id=PKeyFileInput  10
+  Choose File   id=PKeyFileInput     ${CURDIR}/Key-6.dat
+  Wait Until Page Contains Element  id=PKeyPassword  10
+  Input Text    id=PKeyPassword     12345677
+  Wait Until Page Contains Element  id=PKeyReadButton  10
+  Click Element   id=PKeyReadButton
 
 Wait user action
   [Arguments]  @{ARGUMENTS}
@@ -715,6 +942,10 @@ Wait user action
   [Documentation]
   ...      ${ARGUMENTS[0]} =  username
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
+
+  # open for owner without syncing
+  Run Keyword And Return If  '${ROLE}' == 'tender_owner'  Go To  ${BROKERS['pzo'].basepage}/tender/${ARGUMENTS[1]}
+
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Sync Tender
   Open Tender
@@ -732,6 +963,7 @@ Wait user action
 
   ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
 #  Log To Console  ${ARGUMENTS[0]}
 #  Log To Console  ${ARGUMENTS[1]}
@@ -752,12 +984,13 @@ Wait user action
 Внести зміни в тендер tenderPeriod.endDate
   [Arguments]  ${value}  ${procurementMethodType}
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${converted_date}=  convert_datetime_for_delivery  ${value}
   ${converted_date}=  Convert Date  ${converted_date}  %d.%m.%Y %H:%M
   Input text  id=tender${pzo_proc_type}form-tender_period_end_date  ${converted_date}
 
 Отримати посилання на аукціон для глядача
-  [Arguments]  ${username}  ${tenderId}
+  [Arguments]  ${username}  @{arguments}
   Selenium2Library.Switch browser  ${username}
   Wait For Status  active.auction  ${username}  100000
   Open Tender
@@ -765,7 +998,7 @@ Wait user action
   [return]  ${return_value}
 
 Отримати посилання на аукціон для учасника
-  [Arguments]  ${username}  ${tenderId}
+  [Arguments]  ${username}  @{arguments}
   Selenium2Library.Switch browser  ${username}
   Wait For Status  active.auction  ${username}  100000
   ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  100000 s  0 s  Search Participation Url
@@ -784,7 +1017,8 @@ Switch To Questions
 
 Save tender ID
   ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  Run Keyword If  ${status}  Add id to tender
+  ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
+  Run Keyword If  ${status} or '${procurementMethodType}' == 'competitiveDialogueUA.stage2' or '${procurementMethodType}' == 'competitiveDialogueEU.stage2'  Add id to tender
 
 Add id to tender
   ${url}=   Log Location
@@ -793,7 +1027,7 @@ Add id to tender
 
 Get Tender Sync Url
   [Arguments]  ${tender_id}
-  Run Keyword And Return  Catenate  SEPARATOR=  ${tender_sync_prefix}  ${tender_id}  
+  Run Keyword And Return  Catenate  SEPARATOR=  ${tender_sync_prefix}  ${tender_id}
 
 Sync Tender
   ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
@@ -808,19 +1042,19 @@ Open Tender
   Wait For All Transfer Complete
   Sync Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}  
+  ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}
   Go To  ${tender_url}
-  Sleep  1
+  Wait Until Page Contains Element  id=tender-general-info  3
 
 Wait For All Transfer Complete
   ${sync_passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  100 s  0 s  Wait For Transfer Complete
   Run Keyword Unless  ${sync_passed}  Fatal Error  Sync not finish in 100 sec
 
 Wait For Transfer Complete
-  Sleep  3
+  Sleep  2
   Reload Page
   Run Keyword And Ignore Error  Click Element  xpath=//div[@id='myBid']//a[contains(@href,'#collapseMyBid')]
-  Sleep  1
+  Run Keyword If  '${ROLE}' == 'provider'  Sleep  500ms
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
 Звірити статус тендераa
@@ -833,7 +1067,7 @@ Wait For Transfer Complete
 Check Status
   [Arguments]  ${wanted_status}  ${username}
   Sleep  5
-  Open Tender  
+  Open Tender
   Звірити статус тендераa  ${username}  ${wanted_status}
 
 Wait For Status
@@ -853,11 +1087,12 @@ Start Edit Lot
   Wait Until Page Contains  Основна інформація  10
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  1
-  Click Element  xpath=//div[@id='collapseLots']//span[contains(text(), '${lot_id}')] 
+  Click Element  xpath=//div[@id='collapseLots']//span[contains(text(), '${lot_id}')]
   Sleep  1
 
 Save Tender
   Sleep  1
+  JsSetScrollToElementBySelector  \#submitBtn
   Click Button  xpath=//*[text()='Зберегти зміни']
   Wait Until Page Contains  Закупівля оновлена  10
   Sleep  1
@@ -871,6 +1106,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
 
@@ -883,12 +1119,13 @@ Save Tender
 
   Save Tender
 
-Змінити лот 
+Змінити лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${field}  ${value}
   Switch browser   ${username}
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
 
@@ -914,6 +1151,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
@@ -933,6 +1171,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
   Click Element  xpath=//div[contains(@class, 'active')]//a[@href='#add-items']
@@ -947,18 +1186,29 @@ Save Tender
 
   Start Edit Lot  ${lot_id}
   Click Element  xpath=//div[contains(@class, 'active')]//span[contains(text(), '${item_id}')]
-  Sleep  1 
+  Sleep  1
   Click Element  xpath=//li[contains(@data-title, '${item_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний товар/послугу?']
-  Sleep  1 
+  Sleep  1
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
-  Sleep  1 
+  Sleep  1
 
   Save Tender
 
 Видалити лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}
   Switch browser   ${username}
-  Fail  delete lot not supported
+  #Fail  delete lot not supported
+
+  Start Edit Lot  ${lot_id}  # open tender form and open lots
+
+  Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  # open needed lot
+  Sleep  500ms
+  Click Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab'] .js-dynamic-form-remove  # click button to remove lot
+  Wait Until Page Contains  Ви впевнені що бажаєте видалити поточний лот?  3
+  Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]  # confrim deleting
+  Wait Until Page Does Not Contain Element  jquery=#collapseLots .nav li[data-title^='${lot_id}'] a[data-toggle='tab']  3
+
+  Save Tender
 
 Додати неціновий показник на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${feature}
@@ -966,6 +1216,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
@@ -983,13 +1234,13 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showfeaturebytext:${feature_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}\#showfeaturebytext:${feature_id}
   Sleep  2
 
   Click Element  xpath=//li[contains(@data-title, '${feature_id}')]//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний неціновий критерій?']
-  Sleep  1 
+  Sleep  1
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
-  Sleep  1 
+  Sleep  1
 
   Save Tender
 
@@ -999,6 +1250,7 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
 
   Start Edit Lot  ${lot_id}
   Add Feature  ${feature}  0  ${procurementMethodType}  div[contains(@class, 'form-group tender${pzo_proc_type}form-lots-dynamic-forms-wrapper')]//div[contains(@class, 'active')]//div[contains(@class, 'form-group lot${pzo_proc_type}form-features-dynamic-forms-wrapper')]  lot
@@ -1011,13 +1263,14 @@ Save Tender
 
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
   ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/update?id=${tender_id}#showitembytext:${item_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/update?id=${tender_id}\#showitembytext:${item_id}
   Sleep  2
   Add Feature  ${feature}  0  ${procurementMethodType}  div[contains(@class, 'form-group tender${pzo_proc_type}form-lots-dynamic-forms-wrapper')]//div[contains(@class, 'active')]//div[contains(@class, 'form-group lot${pzo_proc_type}form-items-dynamic-forms-wrapper')]//div[contains(@class, 'item${pzo_proc_type}form-features-dynamic-forms-wrapper')]  item
-  
+
   Save Tender
 
 Відповісти на запитання
@@ -1027,7 +1280,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/question-answer?id=${tender_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/question-answer?id=${tender_id}
   Click Element  xpath=//select[@id='questionanswerform-question']
   Click Element  xpath=//select[@id='questionanswerform-question']//option[contains(text(), '${question_id}')]
   Input text  xpath=//textarea[contains(@id, 'questionanswerform-answer')]  ${answer.data.answer}
@@ -1035,6 +1288,7 @@ Save Tender
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
   Sleep  1
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
+  Sleep  2
 
 Відповісти на вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}  ${award_index}
@@ -1043,9 +1297,7 @@ Save Tender
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Sync Tender
-  Go To  http://dev.pzo.com.ua/tender/complaint-answer?id=${tender_id}
-#  Click Element  xpath=//select[@id='complaintanswerform-complaint']
-#  Click Element  xpath=//select[@id='complaintanswerform-complaint']//option[contains(text(), '${claim_id}')]
+  Go To  ${BROKERS['pzo'].basepage}/tender/complaint-answer?id=${tender_id}
   Input text  xpath=//textarea[contains(@id, 'complaintanswerform-resolution')]  ${answer.data.resolution}
   Run Keyword If  '${answer.data.resolutionType}' == 'resolved'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Задоволено
   Run Keyword If  '${answer.data.resolutionType}' == 'declined'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Відхилено
@@ -1055,7 +1307,8 @@ Save Tender
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
   Sleep  1
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
-  
+  Sleep  2
+
 Відповісти на вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}
   Відповісти на вимогу  ${username}  ${tender_uaid}  ${claim_id}  ${answer}  null
@@ -1071,6 +1324,11 @@ Save Tender
 Завантажити документ у кваліфікацію
   [Arguments]  ${username}  ${doc_name}  ${tender_uaid}  ${proposal_id}
   Switch browser   ${username}
+
+  #workaround
+  ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
+
   ${doc_contents}=  Get File  ${doc_name}
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document=${doc_name}
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document_contents=${doc_contents}
@@ -1078,12 +1336,32 @@ Save Tender
 Відхилити кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${proposal_id}
   Switch browser   ${username}
-  Fail  temporary not working
+
+  #workaround
+  ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
+
+  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
+  Click Element   id=prequalificationform-decision
+  Click Element   jquery=#prequalificationform-decision option[value='decline']
+  Wait Until Page Contains Element  id=prequalificationform-description
+  Click Element   jquery=#prequalificationform-title option.js-decline:first
+  Input text  id=prequalificationform-description  GenerateFakeText
+  ${doc_name}=  Завантажити збережений документ у форму кваліфікації  ${proposal_id}
+  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  Remove File  ${doc_name}
 
 Скасувати кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${proposal_id}
   Switch browser   ${username}
-  Fail  temporary not working
+
+  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
+  Click Element   id=prequalificationform-decision
+  Click Element   jquery=#prequalificationform-decision option[value='cancel']
+  Wait Until Page Contains Element  id=prequalificationform-description
+  Run Keyword And Ignore Error  Click Element   jquery=#prequalificationform-title option.js-cancel:first
+  Input text  id=prequalificationform-description  GenerateFakeText
+  Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
 
 Підтвердити кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${proposal_id}
@@ -1091,26 +1369,58 @@ Save Tender
 
   #workaround
   ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
+  ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
 
-  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document
-  ${doc_contents}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_id}_document_contents
-  Create File  ${doc_name}  ${doc_contents}
+  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
+  Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
+  ${doc_name}=  Завантажити збережений документ у форму кваліфікації  ${proposal_id}
+  Click Element  id=prequalificationform-eligible
+  Click Element  id=prequalificationform-qualified
+  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  Remove File  ${doc_name}
+
+Відкрити форму прекваліфікації і потрібну кваліфікацію
+  [Arguments]  ${proposal_index}
 
   Open Tender
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/prequalification?id=')]
   Wait Until Page Contains  Прекваліфікація  10
+
   Click Element  id=prequalificationform-qualification
-  Click Element  jquery=select#prequalificationform-qualification option:eq(${proposal_id})
+  Click Element  jquery=select#prequalificationform-qualification option:eq(${proposal_index})
   Sleep  2
-  Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
+
+  JsSetScrollToElementBySelector  \#prequalificationform-decision
+
+Завантажити збережений документ у форму кваліфікації
+  [Arguments]  ${proposal_index}
+
+  ${doc_isset}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document
+  ${doc_contents}=  Run Keyword If  ${doc_isset}  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  proposal${proposal_index}_document_contents
+  Run Keyword If  ${doc_isset}  Create File  ${doc_name}  ${doc_contents}
+  ${doc_name}=  Run Keyword If  ${doc_isset} == False  GenerateFakeDocument
+    ...  ELSE  Set Variable  ${doc_name}
+
+  JsSetScrollToElementBySelector  \#prequalification-documents
   Choose File  xpath=//div[contains(@id, 'fileuploadbtnwrapper')]//input[@type='file']  ${doc_name}
   Sleep  2
-  Click Element  id=prequalificationform-eligible
-  Click Element  id=prequalificationform-qualified
 
-  Click Button  xpath=//*[text()='Завантажити рішення']
-  Wait Until Page Contains  Рішення завантажене  10
-  Sleep  1
+  [return]  ${doc_name}
+
+Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
+  Click Button  jquery=#tender-prequalification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  Sleep  3
+
+  Open Tender
+
+Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn  
+  Click Button  jquery=#tender-prequalification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20 
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1118,28 +1428,91 @@ Save Tender
   Click Button  xpath=//*[text()='Накласти ЕЦП']
   Sleep  1
   Load Sign
-  Wait Until Page Contains  ЕЦП успішно накладено на рішення  10
+  Wait Until Page Contains  ЕЦП успішно накладено на рішення  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
-  Click Button  xpath=//*[text()='Підтвердити рішення']
-  Sleep  1
-  Wait Until Page Contains  Рішення підтверджене  10
-  Sleep  3
-
-  Open Tender
-  Remove File  ${doc_name}
+  Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
 
 Затвердити остаточне рішення кваліфікації
   [Arguments]  ${username}  ${tender_uaid}
   Switch browser   ${username}
 
   Open Tender
+
   Click Element  xpath=//a[contains(@href, '/tender/prequalification-approve?id=')]
   Sleep  1
   Click Button  xpath=//*[text()='Так']
-  Wait Until Page Contains  Прекваліфікація підтверджена  10
+  Wait Until Page Contains  Прекваліфікація підтверджена  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+
+  Sleep  2
+  WaitPageSyncing  300
+
+### BOF - Competitive Dialogue ###
+Перевести тендер на статус очікування обробки мостом
+  [Arguments]  ${username}  ${tender_uaid}
+  Switch browser   ${username}
+
+  Open Tender
+  WaitTenderStage2  1800
+
+  Click Element  xpath=//a[contains(@href, '/tender/confirm-stage2?id=')]
+  Sleep  1
+  Click Button  xpath=//*[text()='Так']
+  Wait Until Page Contains  Підтвердження успішно надане  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+
+  Sleep  2
+  WaitPageSyncing  300
+
+WaitTenderStage2
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetIsTenderReadyForStage2
+  Run Keyword Unless  ${passed}  Fatal Error  Tender stage2 was not appeared in ${timeout} sec
+
+GetIsTenderReadyForStage2
+  Sleep  30
+  Reload Page
+  Sleep  1
+  Page Should Contain  Підтвердження другого епату
+
+Отримати тендер другого етапу та зберегти його
+  [Arguments]  ${username}  ${stage2_tender_uaid}
+  Switch browser   ${username}
+
+  Add id to tender
+
+активувати другий етап
+  [Arguments]  ${username}  ${stage2_tender_uaid}
+  Switch browser   ${username}
+
+  ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
+  Run Keyword If  '${current_tender_uaid}' != '${stage2_tender_uaid}'  Go To  ${BROKERS['pzo'].basepage}/tender/${stage2_tender_uaid}
+  WaitTenderStage2Update  1800
+
+  Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
+  Wait Until Page Contains  Основна інформація  10
+
+  ${tender_end_date}=  Get Current Date  increment=00:18:00  result_format=%d.%m.%Y %H:%M
+  JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
+  Input Text  id=tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
+  Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
+
+  Save Tender
+
+WaitTenderStage2Update
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetIsTenderReadyForStage2Update
+  Run Keyword Unless  ${passed}  Fatal Error  Tender stage2 can not be updated in ${timeout} sec
+
+GetIsTenderReadyForStage2Update
+  Sleep  30
+  Reload Page
+  Sleep  1
+  Page Should Contain Element  xpath=//a[contains(@href, '/tender/update?id=')]
+
+### EOF - Competitive Dialogue ###
 
 Задати запитання
   [Arguments]  ${username}  ${tender_uaid}  ${type}  ${type_id}  ${question}
@@ -1163,7 +1536,7 @@ Save Tender
 Задати запитання на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${question}
   Задати запитання  ${username}  ${tender_uaid}  tender  null  ${question}
-  
+
 Задати запитання на лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${question}
   Задати запитання  ${username}  ${tender_uaid}  lot  ${lot_id}  ${question}
@@ -1173,7 +1546,7 @@ Save Tender
   Задати запитання  ${username}  ${tender_uaid}  item  ${item_id}  ${question}
 
 Wait For Complaints Sync
-  Sleep  5
+  Sleep  3
   Reload Page
   Page Should Not Contain Element  xpath=//i[@class='fa fa-spin fa-refresh']
 
@@ -1182,15 +1555,24 @@ Wait For Complaints Sync
   Switch browser  ${username}
   Open Tender
   Capture Page Screenshot
-  Click Element  xpath=//a[contains(@href, '/tender/complaint-create?id=')]
-  Run Keyword And Ignore Error  Wait Until Page Contains Element  xpath=//select[@id='complaintform-related_of']  10
+  Click Element  xpath=//a[contains(@href, '/tender/complaint-create?id=')]  
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'complaint-create-form-wrapper')]  10
+  # fill complaintform
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'tender'  Select From List By Label  xpath=//select[@id='complaintform-related_of']  Закупівля
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Select From List By Label  xpath=//select[@id='complaintform-related_of']  Лот
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Click Element  xpath=//select[@id='complaintform-related_lot']
   Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'lot'  Click Element  xpath=//select[@id='complaintform-related_lot']//option[contains(text(), '${type_id}')]
   Run Keyword And Ignore Error  Select From List By Label  xpath=//select[@id='complaintform-type']  Вимога
-  Input text  xpath=//input[contains(@id, 'complaintform-title')]  ${claim.data.title}
-  Input text  xpath=//textarea[contains(@id, 'complaintform-description')]  ${claim.data.description}
+  Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'complaintform-title')]  ${claim.data.title}
+  Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'complaintform-description')]  ${claim.data.description}
+  # fill awardcomplaintform
+  Run Keyword And Ignore Error  Click Element  jquery=#awardcomplaintform-award
+  Run Keyword And Ignore Error  Click Element  jquery=#awardcomplaintform-award option:first
+  Run Keyword And Ignore Error  Select From List By Label  xpath=//select[@id='awardcomplaintform-type']  Вимога
+  Run Keyword And Ignore Error  Run Keyword If  '${type}' == 'winner_complaint'  Select From List By Label  xpath=//select[@id='awardcomplaintform-type']  Скарга
+  Run Keyword And Ignore Error  Input text  xpath=//input[contains(@id, 'awardcomplaintform-title')]  ${claim.data.title}
+  Run Keyword And Ignore Error  Input text  xpath=//textarea[contains(@id, 'awardcomplaintform-description')]  ${claim.data.description}
+  # upload document
   Run Keyword If  '${doc_name}' != 'null'  Click Element  xpath=//a[contains(@data-url, '/tender/get-complaint-document-form')]
   Run Keyword If  '${doc_name}' != 'null'  Wait Until Page Contains Element  xpath=//input[@type='file']  10
   Run Keyword If  '${doc_name}' != 'null'  Choose File  xpath=//input[@type='file']  ${doc_name}
@@ -1207,7 +1589,7 @@ Wait For Complaints Sync
   ${return_value}=  Get Element Attribute  xpath=//div[@id='tender-complaint-list']//a[contains(@href,'#collapseComplaint')]@data-complaint-id
   ${return_value}=  Convert To String  ${return_value}
   [return]  ${return_value}
-  
+
 Створити вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${doc_name}
   Run Keyword And Return  Створити вимогу  ${username}  ${tender_uaid}  tender  null  ${claim}  ${doc_name}
@@ -1231,6 +1613,10 @@ Wait For Complaints Sync
 Створити чернетку вимоги про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${proposal_id}
   Run Keyword And Return  Створити вимогу  ${username}  ${tender_uaid}  winner  ${proposal_id}  ${claim}  null
+
+Створити скаргу про виправлення визначення переможця
+  [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${proposal_id}  ${doc_name}
+  Run Keyword And Return  Створити вимогу  ${username}  ${tender_uaid}  winner_complaint  ${proposal_id}  ${claim}  ${doc_name}
 
 Скасувати вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${data}  ${award_index}
@@ -1262,7 +1648,7 @@ Wait For Complaints Sync
   Switch browser  ${username}
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   Open Tender
-  Go To  http://dev.pzo.com.ua/tender/complaint-resolve?id=${tender_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/complaint-resolve?id=${tender_id}
   Wait Until Page Contains Element  xpath=//select[@id='complaintresolveform-complaint']  10
   Click Element  xpath=//select[@id='complaintresolveform-complaint']
   Click Element  xpath=//select[@id='complaintresolveform-complaint']//option[@data-complaintid='${claim}']
@@ -1317,6 +1703,7 @@ Wait For Complaints Sync
   Switch browser  ${username}
 
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
+  ${bid_data_keys}=  Get Dictionary Keys  ${bid.data}
   ${lots}=  Get From Dictionary  ${bid.data}  lotValues
   ${lots_length}=  Get Length  ${lots}
 
@@ -1325,13 +1712,13 @@ Wait For Complaints Sync
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
   \   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
-  \   Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${lots[${INDEX}].relatedLot}
+  \   Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}\#showlotbykey:${lots[${INDEX}].relatedLot}
   \   Sleep  2
-  \   Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
+  \   Run Keyword And Ignore Error  Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Input text  xpath=//div[contains(@class, 'active')]//textarea[contains(@id, '-subcontracting_details')]  ${bid.data.tenderers[0].name}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_eligible')]
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_qualified')]
-  \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Подати цінову пропозицію Features  ${bid.data.parameters}
+  \   Run Keyword If  'parameters' in ${bid_data_keys}  Подати цінову пропозицію Features  ${bid.data.parameters}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Run Keyword If  '${procurementMethodType}' != 'aboveThresholdUA'  Подати цінову пропозицію FakeDocs
 
 Подати цінову пропозицію No Lots
@@ -1341,7 +1728,7 @@ Wait For Complaints Sync
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
 
   Open Tender
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}
   Sleep  2
   ${amount}=  convert_float_to_string  ${bid.data.value.amount}
   Input text  xpath=//input[contains(@id, '-value_amount')]  ${amount}
@@ -1373,7 +1760,8 @@ Wait For Complaints Sync
   Sleep  2
   Choose File  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//input[@type='file']  ${file_path_2}
   Sleep  2
-  Select From List By Label  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  Кошторис
+  ${result}=  Run Keyword And Return Status  Select From List By Label  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  Кошторис
+  Run Keyword If  ${result} == False  Select From List By Value  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//select[contains(@id, '-document_type')]  technicalSpecifications
   Input text  xpath=//div[contains(@class, 'active')]//div[contains(@class, 'active')]//textarea[contains(@id, '-description')]  test2
   Sleep  1
 
@@ -1386,12 +1774,12 @@ Start Edit Proposal
 
 Start Edit Proposal Whole
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}
+  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}
 
 Start Edit Proposal Lot
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${last_proposal_lotid}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid
-  Go To  http://dev.pzo.com.ua/tender/bid?id=${tender_id}#showlotbykey:${last_proposal_lotid}
+  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}\#showlotbykey:${last_proposal_lotid}
 
 Save Proposal
   Click Element   xpath=//button[contains(text(), 'Редагувати пропозицію')]
@@ -1431,7 +1819,7 @@ Save Proposal
   Sleep  1
 
   Save Proposal
-  
+
 Змінити документ в ставці
   [Arguments]  ${username}  ${tender_uaid}  ${file_path}  ${doc_id}
   Switch browser  ${username}
@@ -1476,33 +1864,107 @@ Save Proposal
 Завантажити документ рішення кваліфікаційної комісії
   [Arguments]  ${username}  ${doc_name}  ${tender_uaid}  ${award_index}
   Switch browser   ${username}
-  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document=${doc_name}
+  ## copy file to another dir to prevent it deleting
+  ${new_doc_name}=  Replace String  ${doc_name}  /tmp/  /tmp/pzo/
+  Copy File  ${doc_name}  ${new_doc_name}
+  Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document=${new_doc_name}
 
 Підтвердити постачальника
   [Arguments]  ${username}  ${tender_uaid}  ${award_index}
   Switch browser   ${username}
 
-  ${doc_name}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_isset}=  GetDictionaryKeyExist  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  GetValueFromDictionaryByKey  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ...  ELSE  GenerateFakeDocument
+
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
+  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
+
+  JsSetScrollToElementBySelector  \#qualification-documents
+  Choose File  xpath=//input[@type='file']  ${doc_name}
+  Sleep  2
+  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
+  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
+
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-eligible
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-qualified
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
+
+  Open Tender
+
+Дискваліфікувати постачальника
+  [Arguments]  ${username}  ${tender_uaid}  ${award_index}
+  Switch browser   ${username}
+
+  ${doc_isset}=  GetDictionaryKeyExist  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ${doc_name}=  Run Keyword If  ${doc_isset}  GetValueFromDictionaryByKey  ${USERS.users['${PZO_LOGIN_USER}']}  qproposal${award_index}_document
+  ...  ELSE  GenerateFakeDocument
+
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
+  Select From List By Value   id=qualificationform-decision  decline
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-title
+  Run Keyword And Ignore Error  Click Element  jquery=#qualificationform-title option.js-cancel:first
+  Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
+  JsSetScrollToElementBySelector  \#qualification-documents
+  Choose File  xpath=//input[@type='file']  ${doc_name}
+  Sleep  2
+  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
+  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
+
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
+  Open Tender
+
+Скасування рішення кваліфікаційної комісії
+  [Arguments]  ${username}  ${tender_uaid}  ${award_index}
+  Switch browser   ${username}
+
+  Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
+
+  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Скасувати рішення
+  Run Keyword And Ignore Error  Click Element  id=qualificationform-title
+  Run Keyword And Ignore Error  Click Element  jquery=#qualificationform-title option.js-cancel:first
+  Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
+
+  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
+  Open Tender
+
+Відкрити форму кваліфікації переможця і потрібну кваліфікацію
+  [Arguments]  ${proposal_index}
 
   Open Tender
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
   Wait Until Page Contains  Кваліфікація  10
   Click Element  id=qualificationform-award
-  Click Element  jquery=select#qualificationform-award option:eq(0)
-  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
-  Choose File  xpath=//input[@type='file']  ${doc_name}
+  Click Element  jquery=select#qualificationform-award option:eq(${proposal_index})
   Sleep  2
-  Select From List By Label  xpath=//select[contains(@id, '-document_type')]  Повідомлення про рішення
 
-  Click Button  xpath=//*[text()='Підтвердити рішення']
-  Wait Until Page Contains  Пропозиція прийнята  10
-  Sleep  1
+  JsSetScrollToElementBySelector  \#qualificationform-decision
+
+Підтвердити рішення кваліфікації переможця
+  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
+Завантажити рішення кваліфікації переможця і накласти ЕЦП
+  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  Sleep  3
 
-
-
+  Click Button  xpath=//*[text()='Накласти ЕЦП']
+  Sleep  1
+  Load Sign
+  Wait Until Page Contains  ЕЦП успішно накладено  20
+  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  Sleep  3
 
 # --------------------------------------------------------- #
 
@@ -1521,12 +1983,21 @@ Save Proposal
 #  Log To Console  ${arguments[1]}
 #  Log To Console  ${arguments[2]}
 
+  ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
+
+  Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
+  Run Keyword And Return If   'lots[0].auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-start-date.hidden
+  Run Keyword And Return If   'lots[0].auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-end-date.hidden
+  Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-end-date
   Run Keyword And Return If   'deliveryLocation.longitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
   Run Keyword And Return If   'deliveryLocation.latitude' == '${arguments[2]}'   Fail  Не реалізований функціонал
   Run Keyword And Return If   'tenderPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.startDate
   Run Keyword And Return If   'tenderPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера tenderPeriod.endDate
   Run Keyword And Return If   'procurementMethodType' == '${arguments[2]}'   Отримати інформацію із тендера procurementMethodType
   Run Keyword And Return If   'value.amount' == '${arguments[2]}'   Отримати інформацію із тендера value.amount
+  Run Keyword If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Reload Page
+  Run Keyword If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Sleep  3
+  Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   get_invisible_text  xpath=//*[contains(@class, 'hidden stage2.opstatus')]
   Run Keyword And Return If   'status' == '${arguments[2]}'   Отримати інформацію із тендера status
   Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.startDate
   Run Keyword And Return If   'enquiryPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.endDate
@@ -1537,6 +2008,7 @@ Save Proposal
   Run Keyword And Return If   'value.currency' == '${arguments[2]}'   Отримати інформацію із тендера value.currency
   Run Keyword And Return If   'value.valueAddedTaxIncluded' == '${arguments[2]}'   Отримати інформацію із тендера value.valueAddedTaxIncluded
   Run Keyword And Return If   'tenderID' == '${arguments[2]}'   Отримати інформацію із тендера tenderID
+  Run Keyword And Return If   'stage2TenderID' == '${arguments[2]}'   Отримати інформацію із тендера stage2tenderID
   Run Keyword And Return If   'procuringEntity.name' == '${arguments[2]}'   Отримати інформацію із тендера procuringEntity.name
   Run Keyword And Return If   'minimalStep.amount' == '${arguments[2]}'   Отримати інформацію із тендера minimalStep.amount
   Run Keyword And Return If   'bids' == '${arguments[2]}'   Fail  Unable to see bids
@@ -1559,13 +2031,13 @@ Save Proposal
   Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}'  Open Tender
   ${Result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=div.award-list-wrapper .panel-heading:eq(0) a[data-toggle="collapse"]
   Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  JsOpenAwardByIndex  0
-  Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  Capture Page Screenshot
+  Run Keyword If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}  JsSetScrollToElementBySelector  div.award-list-wrapper
   Run Keyword And Return If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}   Get text date by locator  jquery=div.award-list-wrapper .panel-collapse.collapse.in p.complaint-period span.end-date
-  ${Result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=#tender-contract-form .js-award-complaint-period-wrapper span.end-date  
+  ${Result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=#tender-contract-form .js-award-complaint-period-wrapper span.end-date
   Run Keyword And Return If   'awards[0].complaintPeriod.endDate' == '${arguments[2]}' and ${RESULT}   Get text date by locator  jquery=#tender-contract-form .js-award-complaint-period-wrapper span.end-date
 # nego viewer
   Run Keyword And Return If   'cause' == '${arguments[2]}'   Get invisible text by locator  jquery=div.tender-info-wrapper p.cause-source
-  Run Keyword And Return If   'causeDescription' == '${arguments[2]}'   Get text by locator  jquery=div.tender-info-wrapper p.cause-description span.value  
+  Run Keyword And Return If   'causeDescription' == '${arguments[2]}'   Get text by locator  jquery=div.tender-info-wrapper p.cause-description span.value
   Run Keyword And Return If   'procuringEntity.address.countryName' == '${arguments[2]}'   Get invisible text by locator  jquery=div#procuringentityinfo p.country
   Run Keyword And Return If   'procuringEntity.address.postalCode' == '${arguments[2]}'   Get invisible text by locator  jquery=div#procuringentityinfo p.postalcode
   Run Keyword And Return If   'procuringEntity.identifier.scheme' == '${arguments[2]}'   Get invisible text by locator  jquery=div#procuringentityinfo p.identifier-scheme
@@ -1609,8 +2081,83 @@ Save Proposal
   Run Keyword And Return If   'contracts[0].status' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.status-source
 #
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
-  Run Keyword If   'items[0].description' == '${arguments[2]}'  Click Element    xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]
-  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  xpath=//div[contains(@id,'accordionItems')]//a[contains(@href,'#collapseItem')]//span[contains(@class,'title')]
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
+  Run Keyword If   'items[0].description' == '${arguments[2]}'  Sleep  2
+  Run Keyword And Return If   'items[0].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
+
+  ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[0]
+  Run Keyword If   ${item0NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
+  Run Keyword If   ${item0NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'items[0].classification.scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   'items[0].classification.id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-code
+  Run Keyword And Return If   'items[0].classification.description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   'items[0].additionalClassifications[0].scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-scheme.hidden:first
+  Run Keyword And Return If   'items[0].additionalClassifications[0].id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-code.hidden:first
+  Run Keyword And Return If   'items[0].additionalClassifications[0].description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .additional-classification-description.hidden:first
+  Run Keyword And Return If   'items[0].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
+  Run Keyword And Return If   'items[0].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   'items[0].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   'items[0].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date.hidden
+  Run Keyword And Return If   'items[0].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
+  Run Keyword And Return If   'items[0].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
+  Run Keyword And Return If   'items[0].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
+  Run Keyword And Return If   'items[0].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
+  Run Keyword And Return If   'items[0].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
+  Run Keyword And Return If   'items[0].deliveryLocation.latitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
+  Run Keyword And Return If   'items[0].deliveryLocation.longitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
+
+  ${item1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[1]
+  Run Keyword If   ${item1NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(1);
+  Run Keyword If   ${item1NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'items[1].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
+  Run Keyword And Return If   'items[1].classification.scheme' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   'items[1].classification.id' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-code
+  Run Keyword And Return If   'items[1].classification.description' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   'items[1].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
+  Run Keyword And Return If   'items[1].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   'items[1].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   'items[1].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date.hidden
+  Run Keyword And Return If   'items[1].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
+  Run Keyword And Return If   'items[1].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
+  Run Keyword And Return If   'items[1].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
+  Run Keyword And Return If   'items[1].deliveryAddress.locality' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .locality
+  Run Keyword And Return If   'items[1].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
+  Run Keyword And Return If   'items[1].deliveryLocation.latitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
+  Run Keyword And Return If   'items[1].deliveryLocation.longitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
+
+  ### BOF - BelowFunders ###
+  ${funderWrapper}=  Set Variable  \#funderorganizationinfo
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].name'  get_invisible_text  jquery=${funderWrapper} .name.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.countryName'  get_invisible_text  jquery=${funderWrapper} .country.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.locality'  get_invisible_text  jquery=${funderWrapper} .locality.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.postalCode'  get_invisible_text  jquery=${funderWrapper} .postalcode.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.region'  get_invisible_text  jquery=${funderWrapper} .region.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].address.streetAddress'  get_invisible_text  jquery=${funderWrapper} .street-address.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].contactPoint.url'  Fail  Контактні дані не відображаються
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.id'  get_invisible_text  jquery=${funderWrapper} .identifier-code.hidden
+  Run Keyword If   '${arguments[2]}' == 'funders[0].identifier.legalName'  JsSetScrollToElementBySelector    ${funderWrapper}
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.legalName'  get_text  jquery=${funderWrapper} .legal-name .value
+  Run Keyword And Return If   '${arguments[2]}' == 'funders[0].identifier.scheme'  get_invisible_text  jquery=${funderWrapper} .identifier-scheme.hidden
+  ### EOF - BelowFunders ###
+
+  ### BOF - OpenUaDefense ###
+  Run Keyword And Return If   '${arguments[2]}' == 'enquiryPeriod.clarificationsUntil'  get_invisible_text  jquery=.enquiry-period-clarifications-until.hidden
+  ### EOF - OpenUaDefense ###
+
+  ### BOF - OpenEU ###
+  Run Keyword If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  JsOpenAwardByIndex  1
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[1].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse.in .complaint-period-end-date.hidden
+  Run Keyword If   '${arguments[2]}' == 'awards[2].complaintPeriod.endDate'  JsOpenAwardByIndex  2
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[2].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse.in .complaint-period-end-date.hidden
+  ### EOF - OpenEU ###
+
+  ### BOF - Esco ###
+  Run Keyword If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  JsOpenAwardByIndex  4
+  Run Keyword And Return If   '${arguments[2]}' == 'awards[4].complaintPeriod.endDate'  get_invisible_text  jquery=.award-list-wrapper:first .panel-collapse.in .complaint-period-end-date.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'minimalStepPercentage'  get_invisible_text  jquery=.minimal-step-percentage-source.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'yearlyPaymentsPercentageRange'  get_invisible_text  jquery=.yearly-payments-percentage-range-source.hidden
+  Run Keyword And Return If   '${arguments[2]}' == 'fundingKind'  get_invisible_text  jquery=.funding-kind-source.hidden
+  ### EOF - Esco ###
 
   Fail  Потрібна реалізація в "Отримати інформацію із тендера"
 
@@ -1884,7 +2431,7 @@ Save Proposal
 
   Open Tender
 
-  Collapse Single Proposal 
+  Collapse Single Proposal
   Run Keyword And Return If   'lotValues[0].value.amount' == '${field}'   Отримати інформацію із пропозиції lotValues[0].value.amount
   Run Keyword And Return If   'status' == '${field}'   Отримати інформацію із пропозиції status
   Run Keyword And Return If   'value.amount' == '${field}'   Отримати інформацію із пропозиції lotValues[0].value.amount
@@ -1968,7 +2515,7 @@ Collapse Single Proposal
 JsOpenItemByContainsText
   [Arguments]  ${text}
   Execute JavaScript  robottesthelpfunctions.showitembytext('${text}');
-  Sleep  3  
+  Sleep  3
   Wait Until Page Contains Element  jquery=.panel-lot-collapse.in .panel-item-collapse.in .item-info-wrapper  10
 
 JsOpenItemByIndex
@@ -1978,19 +2525,19 @@ JsOpenItemByIndex
 JsOpenDocumentByIndex
   [Arguments]  ${index}
   Execute JavaScript  robottesthelpfunctions.showdocumentbyindex(${index});
-  Sleep  3  
+  Sleep  3
   Wait Until Page Contains Element  jquery=#documents .panel-collapse.in .document-info-wrapper  10
 
 JsOpenAwardByIndex
   [Arguments]  ${index}
   Execute JavaScript  robottesthelpfunctions.showawardbyindex(${index});
-  Sleep  3  
+  Sleep  3
   Wait Until Page Contains Element  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper  10
 
 JsOpenContractByIndex
   [Arguments]  ${index}
   Execute JavaScript  robottesthelpfunctions.showcontractbyindex(${index});
-  Sleep  3  
+  Sleep  3
   Wait Until Page Contains Element  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper  10
 
 # --------------------------------------------------------- #
@@ -2409,7 +2956,16 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера tenderID
-  ${return_value}=  get_text  xpath=//*[contains(@class, 'tender-id')]//*[@class='value']
+  ${return_value}=  Get invisible text by locator  jquery=.aside-part .tenderuaid.hidden
+  [return]  ${return_value}
+
+Отримати інформацію із тендера stage2tenderID
+  ${result}=  Run Keyword And Return Status  Page Should Contain Element  jquery=.stage2-tender-id.hidden
+  Run Keyword If  ${result} == False  Sleep  125
+  Run Keyword If  ${result} == False  Reload Page
+  Run Keyword If  ${result} == False  Sleep  1
+  Capture Page Screenshot  getStage2tenderid
+  ${return_value}=  Get invisible text by locator  jquery=.stage2-tender-id.hidden
   [return]  ${return_value}
 
 Отримати інформацію із тендера procuringEntity.name
@@ -2455,7 +3011,7 @@ Switch To Complaints
 
 Отримати інформацію із тендера questions[0].title
   [Arguments]  ${username}  ${tender_uaid}
-  ${return_value}=  Отримати інформацію із запитання  ${username}  ${tender_uaid}  0  title
+  ${return_value}=  pzo.Отримати інформацію із запитання  ${username}  ${tender_uaid}  0  title
   Open Tender
   [return]  ${return_value}
 
@@ -2473,4 +3029,400 @@ Switch To Complaints
   Run Keyword If  'None' == '${complaint_id}'  Collapse Single Complaint
   [return]  ${return_value}
 
+### BOF - BELOW FUNDERS ###
+Видалити донора
+  [Arguments]  ${username}  @{arguments}
+  ${tenderid}=  Set Variable  ${arguments[0]}
 
+  TenderFormOpenByUAID  ${tenderid}
+  Click Element   id=tenderbelowthresholdform-is_donor
+  Save Tender
+
+Додати донора
+  [Arguments]  ${username}  @{arguments}
+  ${tenderid}=  Set Variable  ${arguments[0]}
+  ${funder_data}=  Set Variable  ${arguments[1]}
+
+  TenderFormOpenByUAID  ${tenderid}
+  Створити тендер Funder  ${funder_data}
+  Save Tender
+
+### EOF - BELOW FUNDERS ###
+
+### BOF - PLANNING ###
+
+Створити план
+  [Arguments]  ${user}  ${plan_data}
+  ${data}=  Get From Dictionary  ${plan_data}  data
+  ${data_keys}=  Get Dictionary Keys  ${data}
+  ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
+  ${budget_amount}=  Convert To String  ${data.budget.amount}
+  ${classificationWrapper}=  Set Variable  \#collapseGeneral
+  ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
+
+  ## preparing
+  UserChageOrgnizationInfo  ${data.procuringEntity}
+
+  ## load form page
+  Go To  ${BROKERS['pzo'].basepage}/plan/create
+  Wait Until Page Contains  Створення плану   10
+  Sleep  1
+
+  ## filling form
+  Select From List By Value  id=planform-procurement_method_type  ${data.tender.procurementMethodType}
+  JsInputHiddenText  \#planform-budget_id  ${data.budget.id}
+  Input text  id=planform-title  ${data.budget.description}
+  Input text  id=planform-value_amount  ${budget_amount}
+  Select From List By Value  id=planform-value_currency  ${data.budget.currency}
+  JsInputHiddenText  \#planform-project_id  ${data.budget.project.id}
+  JsInputHiddenText  \#planform-project_name  ${data.budget.project.name}
+  Input text  id=planform-tender_start_date  ${start_date}
+  InputClassificationByWrapper  ${classificationWrapper}  ${data.classification.id}
+  Run Keyword If  'additionalClassifications' in ${data_keys}  InputAdditionalClassificationsByWrapper  ${classificationWrapper}  ${data.additionalClassifications}
+  Run Keyword If  'items' in ${data_keys}  InputPlanItems  ${data}
+
+  ## submit form
+  Click Element   xpath=//*[@id='submitBtn']
+  Sleep  1
+  Wait Until Page Contains   План закупівлі створений, дочекайтесь опублікування на сайті уповноваженого органу.   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Wait For Sync Tender  60
+  ${plan_id}  Get Text  jquery=.content-part .plan-info-wrapper .plan-id .value
+  [Return]  ${plan_id}
+
+Пошук плану по ідентифікатору
+  [Arguments]  ${username}  ${tenderId}
+
+  Run Keyword If  '${ROLE}' == 'viewer'  Go To  ${BROKERS['pzo'].basepage}/utils/plan-sync?planid=${tenderId}
+  Run Keyword If  '${ROLE}' == 'viewer'  Sleep  5
+  ${planNotSynced}=  Run Keyword And Return Status  Page Should Contain  fail
+  Run Keyword If  '${ROLE}' == 'viewer' and ${planNotSynced}  Go To  ${BROKERS['pzo'].basepage}/utils/queue-plan-update
+  Run Keyword If  '${ROLE}' == 'viewer' and ${planNotSynced}  Sleep  30
+
+  Go To  ${BROKERS['pzo'].basepage}/plans
+  Wait Until Page Contains Element    id=plansearchform-query    10
+  Input Text    id=plansearchform-query    ${tenderId}
+  Click Element  jquery=#plan-search-form .js-submit-btn
+  Sleep  1
+  Wait Until Page Does Not Contain Element  jquery=#plan-list-pjax.loading-wrapper
+  Capture Page Screenshot
+  Click Element    xpath=(//div[@id='plan-list-pjax'])//a[contains(@href, '/plan/')][1]
+  Sleep  5
+
+Оновити сторінку з планом
+  [Arguments]  ${username}  ${tenderId}
+
+  Reload Page
+  Sleep  2s
+
+Внести зміни в план
+  [Arguments]  @{ARGUMENTS}
+  [Documentation]
+  ...      ${ARGUMENTS[0]} =  username
+  ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
+  ...      ${ARGUMENTS[2]} =  key
+  ...      ${ARGUMENTS[3]} =  value
+
+  PlanFormOpenByUAID  ${ARGUMENTS[1]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'budget.amount'  Input text  id=planform-value_amount  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'budget.description'  Input text  id=planform-title  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].deliveryDate.endDateitem'
+  ...  PlanUpdateItemDeliveryEndDate  \#collapseItems .tab-content .tab-pane:first  ${ARGUMENTS[3]}
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'  JsCollapseShowAndScroll  \#collapseItems
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'  JsTabShowAndScroll  \#collapseItems .nav li:first a
+  Run Keyword If  '${ARGUMENTS[2]}' == 'items[0].quantity'
+  ...  PlanUpdateItemQuantity  \#collapseItems .tab-content .tab-pane:first  ${ARGUMENTS[3]}
+  PlanUpdateSave
+
+Додати предмет закупівлі в план
+  [Arguments]  ${username}  ${uaid}  ${item_data}
+
+  PlanFormOpenByUAID  ${uaid}
+  InputPlanOneItem  ${item_data}
+  PlanUpdateSave
+
+Видалити предмет закупівлі плану
+  [Arguments]  ${username}  ${uaid}  ${item_key}
+
+  PlanFormOpenByUAID  ${uaid}
+  JsCollapseShowAndScroll  \#collapseItems
+  Click Element   jquery=#collapseItems .nav li[data-title^='${item_key}']
+  Sleep  1
+  Click Element   jquery=#collapseItems .nav li[data-title^='${item_key}'] .js-dynamic-form-remove
+  Wait Until Page Contains   Ви впевнені що бажаєте видали обрану номенклатуру?   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  PlanUpdateSave
+
+Отримати інформацію із плану
+  [Arguments]  ${username}  ${uaid}  ${key}
+  ${item0Wrapper}=  Set Variable  \#accordionItems .panel:nth(0) .panel-collapse:first
+  ${item1Wrapper}=  Set Variable  \#accordionItems .panel:nth(1) .panel-collapse:first
+  ${budget}=  get_invisible_text  jquery=#general-info .budget-amount
+
+  PlanOpenByUAID  ${uaid}
+  Run Keyword And Return If   '${key}' == 'tender.procurementMethodType'  get_invisible_text  jquery=#general-info .procurement-method-type
+  Run Keyword And Return If   '${key}' == 'budget.amount'   Convert To Number  ${budget}
+  Run Keyword And Return If   '${key}' == 'budget.description'   get_text  jquery=#general-info .budget-description .value
+  Run Keyword And Return If   '${key}' == 'budget.currency'   get_invisible_text  jquery=#general-info .budget-currency
+  Run Keyword And Return If   '${key}' == 'budget.id'   get_text  jquery=#general-info .budget-id .value
+  Run Keyword And Return If   '${key}' == 'budget.project.id'   get_invisible_text  jquery=#general-info .budget-project-id
+  Run Keyword And Return If   '${key}' == 'budget.project.name'   get_invisible_text  jquery=#general-info .budget-project-name
+  Run Keyword And Return If   '${key}' == 'procuringEntity.name'   get_invisible_text  jquery=#procuring-entity-info .name
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.scheme'   get_invisible_text  jquery=#procuring-entity-info .identifier-scheme
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.id'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
+  Run Keyword And Return If   '${key}' == 'classification.description'   get_invisible_text  jquery=#general-info .main-classification-description
+  Run Keyword And Return If   '${key}' == 'classification.scheme'   get_invisible_text  jquery=#general-info .main-classification-scheme
+  Run Keyword And Return If   '${key}' == 'classification.id'   get_invisible_text  jquery=#general-info .main-classification-code
+  Run Keyword And Return If   '${key}' == 'tender.tenderPeriod.startDate'   get_invisible_text  jquery=#general-info .tender-start-date-source
+  ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[0]
+  Run Keyword If   ${item0NeedToBeVisible}    JsCollapseShowAndScroll  ${item0Wrapper}
+  Run Keyword And Return If   '${key}' == 'items[0].description'    get_text  jquery=${item0Wrapper} .item-info-wrapper .title .value
+  Run Keyword And Return If   '${key}' == 'items[0].quantity'    Get invisible text number by locator  jquery=${item0Wrapper} .item-info-wrapper .quantity-source
+  Run Keyword And Return If   '${key}' == 'items[0].deliveryDate.endDate'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   '${key}' == 'items[0].unit.code'   get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   '${key}' == 'items[0].unit.name'   get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   '${key}' == 'items[0].classification.description'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   '${key}' == 'items[0].classification.scheme'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   '${key}' == 'items[0].classification.id'    get_invisible_text  jquery=${item0Wrapper} .item-info-wrapper .main-classification-code
+  ${item1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[1]
+  Run Keyword If   ${item1NeedToBeVisible}    JsCollapseShowAndScroll  ${item1Wrapper}
+  Run Keyword And Return If   '${key}' == 'items[1].description'    get_text  jquery=${item1Wrapper} .item-info-wrapper .title .value
+  Run Keyword And Return If   '${key}' == 'items[1].quantity'    Get invisible text number by locator  jquery=${item1Wrapper} .item-info-wrapper .quantity-source
+  Run Keyword And Return If   '${key}' == 'items[1].deliveryDate.endDate'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .delivery-end-date-source
+  Run Keyword And Return If   '${key}' == 'items[1].unit.code'   get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .unit-code-source
+  Run Keyword And Return If   '${key}' == 'items[1].unit.name'   get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .unit-title-source
+  Run Keyword And Return If   '${key}' == 'items[1].classification.description'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-description
+  Run Keyword And Return If   '${key}' == 'items[1].classification.scheme'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-scheme
+  Run Keyword And Return If   '${key}' == 'items[1].classification.id'    get_invisible_text  jquery=${item1Wrapper} .item-info-wrapper .main-classification-code
+  Fail  NotImplemented
+
+### EOF - PLANNING ###
+
+### BOF - HELPERS ###
+
+UserChageOrgnizationInfo
+  [Arguments]  ${data}
+
+  Go To  ${BROKERS['pzo'].basepage}/user/profile
+  Wait Until Page Contains  Інформація про компанію   10
+  Sleep  1
+
+  Input text  id=profileform-organization_name  ${data.name}
+  Input text  id=profileform-organization_edrpou  ${data.identifier.id}
+
+  JsSetScrollToElementBySelector  \#user-profile-form .js-submit-btn
+  Click Element   jquery=\#user-profile-form .js-submit-btn
+  Sleep  1
+  Wait Until Page Contains   Контактна інформація успішно оновлена   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+
+InputClassificationByWrapper
+  [Arguments]  ${wrapper}  ${classification_id}
+
+  Click Element                      jquery=${wrapper} a[href='#classification']
+  Wait Until Element Is Visible      xpath=//div[contains(@id, 'classification-modal')]//h4[contains(@id, 'classificationModalLabel')]
+  Sleep  1
+  Input text                         xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  ${classification_id}
+  Press key                          xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  \\13
+  Sleep  1
+  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//strong[contains(., '${classification_id}')]  20
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//i[@class='jstree-icon jstree-checkbox']
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//button[contains(@class, 'btn btn-default waves-effect waves-light js-submit')]
+  Sleep  1
+
+InputAdditionalClassificationsByWrapper
+  [Arguments]  ${wrapper}  ${additionalClassifications}
+
+  Click Element  jquery=${wrapper} a[href='#additionalclassification']
+  Wait Until Element Is Visible  xpath=//div[contains(@id, 'additional-classification-modal')]//h4[contains(@id, 'additionalClassificationModalLabel')]
+  Sleep  1
+
+  ${count}=  Get Length  ${additionalClassifications}
+  : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   Continue For Loop If  '${additionalClassifications[${INDEX}].scheme}' == 'ДКПП'
+  \   Click Element  jquery=#additional-classification-modal .nav a[data-toggle="tab"][data-scheme="${additionalClassifications[${INDEX}].scheme}"]
+  \   Wait Until Element Is Visible  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input
+  \   Input text     jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  ${additionalClassifications[${INDEX}].id}
+  \   Press key      jquery=#additional-classification-modal .tab-pane.tree-wrapper.active input.js-input  \\13
+  \   Sleep  2
+  \   Wait Until Page Contains Element   jquery=#additional-classification-modal .tab-pane.tree-wrapper.active .tree.js-search-tree strong:contains("${additionalClassifications[${INDEX}].id}")  20
+  \   Click Element  jquery=#additional-classification-modal .tab-pane.tree-wrapper.active .tree.js-search-tree li:first i.jstree-checkbox
+
+  Click Element  xpath=//div[contains(@id, 'additional-classification-modal')]//button[contains(@class, 'js-submit')]
+  Sleep  1
+
+InputPlanItems
+  [Arguments]  ${data}
+  ${items}=  Get From Dictionary   ${data}  items
+  ${count}=  Get Length  ${items}
+
+  : FOR    ${INDEX}    IN RANGE    0    ${count}
+  \   InputPlanOneItem  ${items[${INDEX}]}
+
+InputPlanOneItem
+  [Arguments]  ${data}
+  ${wrapper}=  Set Variable  \#collapseItems .tab-content .tab-pane.active
+  ${keys}=  Get Dictionary Keys  ${data}
+
+  JsCollapseShowAndScroll  \#collapseItems
+  Click Element  jquery=#collapseItems a[href="#add-items"]
+  Sleep  2
+  Input text  jquery=${wrapper} [id$='-description']  ${data.description}
+  PlanUpdateItemQuantity  ${wrapper}  ${data.quantity}
+  JsSetScrollToElementBySelector  ${wrapper} [id$='-unit_id']
+  Select From List By Label  jquery=${wrapper} [id$='-unit_id']  ${data.unit.name}
+  InputClassificationByWrapper  ${wrapper}  ${data.classification.id}
+  Run Keyword If  'additionalClassifications' in ${keys}
+  ...  InputAdditionalClassificationsByWrapper  ${wrapper}  ${data.additionalClassifications}
+  PlanUpdateItemDeliveryEndDate  ${wrapper}  ${data.deliveryDate.endDate}
+
+TenderOpenByUAID
+  [Arguments]  ${uaid}
+
+  Go To  ${BROKERS['pzo'].basepage}/tender/${uaid}
+  Wait Until Page Contains    Закупівля ${uaid}    10
+
+TenderFormOpenByUAID
+  [Arguments]  ${uaid}
+
+    TenderOpenByUAID  ${uaid}
+    Click Element  xpath=//a[contains(@href, '/tender/update')][1]
+    Wait Until Page Contains  Редагування   10
+    Sleep  1
+
+PlanOpenByUAID
+  [Arguments]  ${uaid}
+
+  Go To  ${BROKERS['pzo'].basepage}/plan/${uaid}
+  Wait Until Page Contains    План ${uaid}    10
+
+PlanFormOpenByUAID
+  [Arguments]  ${uaid}
+
+  PlanOpenByUAID  ${uaid}
+  Click Element  xpath=//a[contains(@href, '/plan/update')][1]
+  Wait Until Page Contains  Редагування   10
+  Sleep  1
+
+PlanUpdateItemQuantity
+  [Arguments]  ${wrapper}  ${quantity}
+  ${quantity_srt}=  Convert To String  ${quantity}
+
+  JsSetScrollToElementBySelector  ${wrapper} [id$='-quantity']
+  Input text  jquery=${wrapper} [id$='-quantity']  ${quantity_srt}
+
+PlanUpdateItemDeliveryEndDate
+  [Arguments]  ${wrapper}  ${delivery_end_date}
+  ${date}=  convert_isodate_to_site_datetime  ${delivery_end_date}
+
+  JsInputHiddenText  ${wrapper} [id$='-delivery_end_date']  ${date}
+
+PlanUpdateSave
+
+  JsSetScrollToElementBySelector  \#submitBtn
+  Click Element   xpath=//*[@id='submitBtn']
+  Sleep  1
+  Wait Until Page Contains   План оновлений, дочекайтесь опублікування на сайті уповноваженого органу.   10
+  Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
+  Wait For Sync Tender  60
+
+JsInputHiddenText
+  [Arguments]  ${selector}  ${text}
+
+  Execute JavaScript  jQuery("${selector}").val("${text}");
+
+JsSetScrollToElementBySelector
+  [Arguments]  ${selector}
+
+  Execute JavaScript  scrollToElement("${selector}");
+  Sleep  1
+
+JsCollapseShowAndScroll
+  [Arguments]  ${selector}
+
+  Execute JavaScript  jQuery("${selector}").collapse("show");
+  Sleep  1
+  JsSetScrollToElementBySelector  ${selector}
+
+JsTabShowAndScroll
+  [Arguments]  ${selector}
+
+  Execute JavaScript  jQuery("${selector}").tab("show");
+  Sleep  1
+  JsSetScrollToElementBySelector  ${selector}
+
+GetDictionaryKeyExist           [Arguments]     ${Dictionary Name}      ${Key}
+  Run Keyword And Return Status       Dictionary Should Contain Key       ${Dictionary Name}      ${Key}
+
+GetValueFromDictionaryByKey      [Arguments]     ${Dictionary Name}      ${Key}
+  ${KeyIsPresent}=    Run Keyword And Return Status       Dictionary Should Contain Key       ${Dictionary Name}      ${Key}
+  ${Value}=           Run Keyword If      ${KeyIsPresent}     Get From Dictionary             ${Dictionary Name}      ${Key}
+  Return From Keyword         ${Value}
+
+GenerateFakeDocument
+  ${file_path}  ${file_name}  ${file_content}=  op_robot_tests.tests_files.service_keywords.Create Fake Doc
+  [return]  ${file_path}
+
+GenerateFakeText
+  ${text}= Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+  [return] ${text}
+
+WaitPageSyncing
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetPageSyncingStatus
+  Run Keyword Unless  ${passed}  Fatal Error  Sync Finish not finish in ${timeout} sec
+
+GetPageSyncingStatus
+  Sleep  2
+  Reload Page
+  Sleep  1
+  Page Should Not Contain Element  jquery=.wrapper .card-box .fa.fa-refresh
+
+Input Float
+  [Arguments]  ${input_jquery_selector}  ${value}
+  ${value}=          Convert To String  ${value}
+  Input Text  jquery=${input_jquery_selector}  ${value}
+
+Input Float Multiply100
+  [Arguments]  ${input_jquery_selector}  ${value}
+  ${value}=  multiply_hundred  ${value}
+  Input Float  ${input_jquery_selector}  ${value}
+
+Input DateTime
+  [Arguments]  ${input_jquery_selector}  ${date}
+  ${date}=  convert_datetime_for_delivery  ${date}
+  ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
+  Input Text  jquery=${input_jquery_selector}  ${date}
+
+Input DateTime XPath
+  [Arguments]  ${input_selector}  ${date}
+  ${date}=  convert_datetime_for_delivery  ${date}
+  ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
+  Input Text  xpath=//${input_selector}  ${date}
+
+Input Text With Checking Input Isset
+  [Arguments]  ${input_jquery_selector}  ${text}
+  Log  ${input_jquery_selector}
+  ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  jquery=${input_jquery_selector}
+  Run Keyword If  ${input_isset}  Input Text  jquery=${input_jquery_selector}  ${text}
+
+Input Text With Checking Input Isset XPath
+  [Arguments]  ${input_selector}  ${text}
+  Log  ${input_selector}
+  ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//${input_selector}
+  Run Keyword If  ${input_isset}  Input Text  xpath=//${input_selector}  ${text}
+
+Select From List By Label With Checking Input Isset XPath
+  [Arguments]  ${input_selector}  ${text}
+  Log  ${input_selector}
+  ${input_isset}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//${input_selector}
+  Run Keyword If  ${input_isset}  Select From List By Label  xpath=//${input_selector}  ${text}
+
+GetInputProcTypeByProcurementMethodType
+  [Arguments]  ${procurementMethodType}
+  ${pzo_proc_type}=  Convert_to_Lowercase  ${procurementMethodType}
+  ${pzo_proc_type}=  Remove String  ${pzo_proc_type}  \.
+  ${pzo_proc_type}=  Set Variable If  '${pzo_proc_type}' == 'belowthreshold'  ${EMPTY}  ${pzo_proc_type}
+  [return]  ${pzo_proc_type}
+
+### EOF - HELPERS ###

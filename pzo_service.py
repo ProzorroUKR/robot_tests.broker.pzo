@@ -19,6 +19,15 @@ def convert_datetime_for_delivery(isodate):
     date_string = iso_dt.strftime("%Y-%m-%d %H:%M")
     return date_string
 
+def convert_isodate_to_site_date(isodate):
+    iso_dt = parse_date(isodate)
+    date_string = iso_dt.strftime("%d.%m.%Y")
+    return date_string
+
+def convert_isodate_to_site_datetime(isodate):
+    iso_dt = parse_date(isodate)
+    date_string = iso_dt.strftime("%d.%m.%Y %H:%M")
+    return date_string
 
 def convert_date_for_compare(datestr):
     return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M")
@@ -90,10 +99,10 @@ def convert_float_to_string(number):
     return format(number, '.2f')
 
 def convert_date_for_compare_ex(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
 
 def convert_date_for_compare_ex2(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
 
 def download_file(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
