@@ -82,25 +82,21 @@ Login
   ${procurementMethodType} =  Set Variable If  'procurementMethodType' in ${tender_data_keys}  ${tender_data.data.procurementMethodType}  belowThreshold
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype=${procurementMethodType}
 
+  # change organization info
+  UserChangeOrgnizationInfo  ${tender_data.data.procuringEntity}
+
 #  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints' and '${procurementMethodType}' == 'belowThreshold'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
   Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=1080
 
   Selenium2Library.Switch Browser    ${user}
-  Go To                             ${USERS.users['${user}'].homepage}
-  Wait Until Page Contains          Мої закупівлі   10
-  Sleep  1
-
-  Run Keyword And Ignore Error  Click Element                     xpath=//*[contains(@href, '/tender/create')]
-  Run Keyword And Ignore Error  Click Element                     xpath=//ol[contains(@class, 'breadcrumb')]//*[contains(@href, '/tender/create')]
-  Sleep  1
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold' and 'funders' not in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}&multilot=0
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold' or 'funders' in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}
   Wait Until Page Contains          Створення закупівлі  10
-
-  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Select From List By Value  xpath=//select[@id='tenderbelowthresholdform-procurement_method_type']  ${procurementMethodType}
-  Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Sleep  3
 
   ### BOF - Reporting ###
   Run Keyword And Return If  '${procurementMethodType}' == 'reporting'  Створити тендер без лотів  ${user}  ${tender_data}
+  Run Keyword And Return If  '${procurementMethodType}' == 'belowThreshold' and 'funders' not in ${tender_data_keys}  Створити тендер без лотів  ${user}  ${tender_data}
   ### EOF - Reporting ###
 
   ${title}=         Get From Dictionary   ${tender_data.data}               title
@@ -166,9 +162,15 @@ Login
   # fill general data
   Input text  id=tender${pzo_proc_type}form-title  ${tender_data.data.title}
   Input text  id=tender${pzo_proc_type}form-description  ${tender_data.data.description}
+  JsSetScrollToElementBySelector  \#tender${pzo_proc_type}form-value_amount
   Input text  id=tender${pzo_proc_type}form-value_amount  ${budget}
   Select From List By Value  id=tender${pzo_proc_type}form-value_currency  ${tender_data.data.value.currency}
   Run Keyword If  ${tender_data.data.value.valueAddedTaxIncluded}  Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.startDate}
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.endDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.endDate}
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер tenderPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.tenderPeriod.startDate}
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер tenderPeriod.end_date  ${pzo_proc_type}  ${tender_data.data.tenderPeriod.endDate}
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Select Checkbox  id=tender${pzo_proc_type}form-quick_mode
 
   # fill items
   Click Element  xpath=//*[contains(@href, '#collapseItems')]
@@ -3061,7 +3063,7 @@ Switch To Complaints
   ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
 
   ## preparing
-  UserChageOrgnizationInfo  ${data.procuringEntity}
+  UserChangeOrgnizationInfo  ${data.procuringEntity}
 
   ## load form page
   Go To  ${BROKERS['pzo'].basepage}/plan/create
@@ -3200,7 +3202,7 @@ Switch To Complaints
 
 ### BOF - HELPERS ###
 
-UserChageOrgnizationInfo
+UserChangeOrgnizationInfo
   [Arguments]  ${data}
 
   Go To  ${BROKERS['pzo'].basepage}/user/profile
@@ -3334,21 +3336,21 @@ JsInputHiddenText
 JsSetScrollToElementBySelector
   [Arguments]  ${selector}
 
-  Execute JavaScript  scrollToElement("${selector}");
-  Sleep  1
+  Execute JavaScript  scrollToElement("${selector}", 0, 10);
+  Sleep  100ms
 
 JsCollapseShowAndScroll
   [Arguments]  ${selector}
 
   Execute JavaScript  jQuery("${selector}").collapse("show");
-  Sleep  1
+  Sleep  500ms
   JsSetScrollToElementBySelector  ${selector}
 
 JsTabShowAndScroll
   [Arguments]  ${selector}
 
   Execute JavaScript  jQuery("${selector}").tab("show");
-  Sleep  1
+  Sleep  300ms
   JsSetScrollToElementBySelector  ${selector}
 
 GetDictionaryKeyExist           [Arguments]     ${Dictionary Name}      ${Key}
