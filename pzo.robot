@@ -1942,6 +1942,7 @@ Save Proposal
   [Arguments]  ${proposal_index}
 
   Open Tender
+  WaitTenderAuctionEnd  3600
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
   Wait Until Page Contains  Кваліфікація  10
   Click Element  id=qualificationform-award
@@ -3382,6 +3383,18 @@ GetPageSyncingStatus
   Reload Page
   Sleep  1
   Page Should Not Contain Element  jquery=.wrapper .card-box .fa.fa-refresh
+
+WaitTenderAuctionEnd
+  [Arguments]  ${timeout}
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetTenderAuctionEndStatus
+  Run Keyword Unless  ${passed}  Fatal Error  Tender not changed status from active.auction in ${timeout} sec
+
+GetTenderAuctionEndStatus
+  Sleep  60
+  Reload Page
+  Sleep  5
+  ${tenderStatus}=  get_invisible_text  xpath=//*[contains(@class, 'hidden opstatus')]
+  [return]  '${tenderStatus}' != 'active.auction'
 
 Input Float
   [Arguments]  ${input_jquery_selector}  ${value}
