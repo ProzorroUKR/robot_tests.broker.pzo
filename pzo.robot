@@ -126,6 +126,7 @@ Login
 
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  1
+  JsSetScrollToElementBySelector  \#collapseLots
   Click Element  xpath=//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний лот?']
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
 
@@ -166,6 +167,7 @@ Login
   Input text  id=tender${pzo_proc_type}form-value_amount  ${budget}
   Select From List By Value  id=tender${pzo_proc_type}form-value_currency  ${tender_data.data.value.currency}
   Run Keyword If  ${tender_data.data.value.valueAddedTaxIncluded}  Click Element  id=tender${pzo_proc_type}form-value_added_tax_included
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Input Float  \#tender${pzo_proc_type}form-min_step_amount  ${tender_data.data.minimalStep.amount}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.startDate}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер enquiryPeriod.endDate  ${pzo_proc_type}  ${tender_data.data.enquiryPeriod.endDate}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold'  Створити тендер tenderPeriod.startDate  ${pzo_proc_type}  ${tender_data.data.tenderPeriod.startDate}
@@ -175,6 +177,7 @@ Login
   # fill items
   Click Element  xpath=//*[contains(@href, '#collapseItems')]
   Sleep  1
+  JsSetScrollToElementBySelector  \#collapseItems
   Click Element  xpath=//span[@data-confirm-text='Ви впевнені що бажаєте видалити поточний товар/послугу?']
   Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
 
