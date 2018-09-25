@@ -885,7 +885,7 @@ Wait For Sync Tender Finish
   Click Element   xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(@class, 'btn btn-default waves-effect waves-light btn-lg')]
 
   # wait sync
-  WaitPageSyncing  60
+  WaitPageSyncing  300
 
 Перевірити неможливість підписання контракту
   ${date_sign}=  Get Current Date  local  0  %d.%m.%Y %H:%M
@@ -1018,7 +1018,7 @@ Wait date
 
 Switch To Questions
   Click Element                      xpath=//a[contains(@href, '/tender/questions?id=')]
-  Wait Until Page Contains           Питання/відповіді   10
+  Wait Until Page Contains Element  id=tender-question-list  10
 
 Save tender ID
   ${status}=  Run keyword And Return Status  Dictionary Should Not Contain Key  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
@@ -3434,8 +3434,7 @@ GetTenderAuctionEndStatus
   Reload Page
   Sleep  5
   ${tenderStatus}=  get_invisible_text  xpath=//*[contains(@class, 'hidden opstatus')]
-  ${pass}=  Run keyword And Return Status  Should Not Be Equal As Strings  ${tenderStatus}  active.auction
-  [return]  ${pass}
+  Should Not Be Equal As Strings  ${tenderStatus}  active.auction
 
 Input Float
   [Arguments]  ${input_jquery_selector}  ${value}

@@ -43,7 +43,7 @@ def procuring_entity_name(tender_data):
     tender_data.data.procuringEntity.address['postalCode'] = u"123123"
     tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
     tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
-    tender_data.data.procuringEntity.contactPoint['name'] = u"Тест"
+    tender_data.data.procuringEntity.contactPoint['name'] = u"Замовник Тест"
     tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
     tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
     tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
