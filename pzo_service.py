@@ -35,15 +35,19 @@ def convert_date_for_compare(datestr):
 
 def procuring_entity_name(tender_data):
     tender_data.data.procuringEntity['name'] = u"ТОВ \"ПЗО\""
+    tender_data.data.procuringEntity['name_en'] = u"TOV \"PZO\""
     tender_data.data.procuringEntity.identifier['id'] = u"1234567890"
     tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"ПЗО\""
+    tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"PZO\""
     tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
     tender_data.data.procuringEntity.address['postalCode'] = u"123123"
     tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
     tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
-    tender_data.data.procuringEntity.contactPoint['name'] = u"slam_ua slam_ua"
-    tender_data.data.procuringEntity.contactPoint['telephone'] = u"0971112233"
-    tender_data.data.procuringEntity.contactPoint['url'] = u"http://dev.pzo.com.ua"
+    tender_data.data.procuringEntity.contactPoint['name'] = u"Тест"
+    tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
+    tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
+    tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
+    tender_data.data.procuringEntity.contactPoint['url'] = u"http://pzo.com.ua"
     return tender_data
 
 def split_take_item(value, separator, index):

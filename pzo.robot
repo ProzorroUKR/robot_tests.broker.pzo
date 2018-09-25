@@ -83,7 +83,7 @@ Login
   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype=${procurementMethodType}
 
   # change organization info
-  UserChangeOrgnizationInfo  ${tender_data.data.procuringEntity}
+  #UserChangeOrgnizationInfo  ${tender_data.data.procuringEntity}
 
 #  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints' and '${procurementMethodType}' == 'belowThreshold'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
@@ -1703,6 +1703,24 @@ Wait For Complaints Sync
   Sleep  2
   Wait For All Transfer Complete
 
+Скасувати цінову пропозицію
+  [Arguments]  ${username}  ${tender_uaid}
+
+  Switch browser  ${username}
+  Open Tender
+
+  ${canbedone}=  run keyword and return status  page should contain element  jquery=.aside-part .js-bid-delete
+  run keyword if  ${canbedone}  fail  Скасування неможливе
+
+  Click Element   jquery=.aside-part .js-bid-delete
+  Sleep  1
+  Click Element  xpath=//div[contains(@class, 'jconfirm-box')]//button[contains(text(), 'Так')]
+  wait until page contains  Пропозиція скасована
+  Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
+  Sleep  10
+  reload page
+  sleep  2
+
 Подати цінову пропозицію Lots
   [Arguments]  ${username}  ${tender_uaid}  ${bid}  ${lots_ids}  ${features_ids}
   Switch browser  ${username}
@@ -1992,6 +2010,7 @@ Save Proposal
   ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
 
   Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
+  Run Keyword And Return If   'lots[0].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=#accordionLots .lot-info-wrapper:first .budget-source.hidden
   Run Keyword And Return If   'lots[0].auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-start-date.hidden
   Run Keyword And Return If   'lots[0].auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .lot-info-wrapper:first .auction-period-end-date.hidden
   Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-end-date
@@ -2081,10 +2100,20 @@ Save Proposal
   Run Keyword And Return If   'awards[0].value.currency' == '${arguments[2]}'   Get invisible text by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-currency
   Run Keyword If   'awards[0].value.amount' == '${arguments[2]}'   JsOpenAwardByIndex  0
   Run Keyword And Return If   'awards[0].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-amount
+  Run Keyword If   'awards[1].value.amount' == '${arguments[2]}'   JsOpenAwardByIndex  1
+  Run Keyword And Return If   'awards[1].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-amount
   Run Keyword If   'awards[0].suppliers[0].contactPoint.name' == '${arguments[2]}'   JsOpenAwardByIndex  0
   Run Keyword And Return If   'awards[0].suppliers[0].contactPoint.name' == '${arguments[2]}'   Get invisible text by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.organization-contact-point-name
   Run Keyword If   'contracts[0].status' == '${arguments[2]}'   JsOpenContractByIndex  0
   Run Keyword And Return If   'contracts[0].status' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.status-source
+
+  ${contract1NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  contracts[1]
+  Run Keyword If   ${contract1NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showcontractbyindex(1);
+  Run Keyword If   ${contract1NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'contracts[1].dateSigned' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.date-signed-source.hidden
+  Run Keyword And Return If   'contracts[1].period.startDate' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.period-start-date.hidden
+  Run Keyword And Return If   'contracts[1].period.endDate' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.period-end-date.hidden
+  Run Keyword And Return If   'contracts[1].status' == '${arguments[2]}'   Get invisible text by locator  jquery=#accordionContracts .panel-collapse.in .contract-info-wrapper p.status-source
 #
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Open Tender
   Run Keyword If   'items[0].description' == '${arguments[2]}'  Execute JavaScript  robottesthelpfunctions.showitembyindex(0);
@@ -2103,7 +2132,8 @@ Save Proposal
   Run Keyword And Return If   'items[0].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
   Run Keyword And Return If   'items[0].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
   Run Keyword And Return If   'items[0].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
-  Run Keyword And Return If   'items[0].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date.hidden
+  Run Keyword And Return If   'items[0].deliveryDate.startDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-start-date-source.hidden
+  Run Keyword And Return If   'items[0].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date-source.hidden
   Run Keyword And Return If   'items[0].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
   Run Keyword And Return If   'items[0].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
   Run Keyword And Return If   'items[0].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
@@ -2122,7 +2152,8 @@ Save Proposal
   Run Keyword And Return If   'items[1].quantity' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .quantity-source
   Run Keyword And Return If   'items[1].unit.name' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-title-source
   Run Keyword And Return If   'items[1].unit.code' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .unit-code-source
-  Run Keyword And Return If   'items[1].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date.hidden
+  Run Keyword And Return If   'items[1].deliveryDate.startDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-start-date-source.hidden
+  Run Keyword And Return If   'items[1].deliveryDate.endDate' == '${arguments[2]}'  get_invisible_text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-end-date-source.hidden
   Run Keyword And Return If   'items[1].deliveryAddress.countryName' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .country
   Run Keyword And Return If   'items[1].deliveryAddress.postalCode' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .postcode
   Run Keyword And Return If   'items[1].deliveryAddress.region' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .region
@@ -2191,6 +2222,8 @@ Save Proposal
   Run Keyword And Return If   'value.valueAddedTaxIncluded' == '${arguments[2]}'   Отримати інформацію із лоту value.valueAddedTaxIncluded  ${arguments[1]}
   Run Keyword And Return If   'minimalStep.currency' == '${arguments[2]}'   Отримати інформацію із лоту minimalStep.currency  ${arguments[1]}
   Run Keyword And Return If   'minimalStep.valueAddedTaxIncluded' == '${arguments[2]}'   Отримати інформацію із лоту minimalStep.valueAddedTaxIncluded  ${arguments[1]}
+  Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'  get_invisible_text  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .auction-period-start-date.hidden
+  Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'  get_invisible_text  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .auction-period-end-date.hidden
 
   Collapse Lot  ${arguments[1]}
   [return]  pzo.lot.default
@@ -2979,6 +3012,8 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера minimalStep.amount
+  ${nolot}=  run keyword and return status  page should contain element  jquery=#tender-general-info .minimal-step-source.hidden
+  run keyword and return if  ${nolot}  get invisible text number by locator  jquery=#tender-general-info .minimal-step-source.hidden
   Collapse Single Lot
   ${return_value}=  get_text  xpath=//div[@id='lots']//p[@class='minimal-step']//span[@class='value']
   ${return_value}=  Evaluate  ''.join('${return_value}'.split()[:-3])
@@ -3215,6 +3250,11 @@ UserChangeOrgnizationInfo
 
   Input text  id=profileform-organization_name  ${data.name}
   Input text  id=profileform-organization_edrpou  ${data.identifier.id}
+  JsSetScrollToElementBySelector  \#profileform-organization_region_id
+  Select From List By Label  jquery=#profileform-organization_region_id  ${data.address.region}
+  Input Text  jquery=#profileform-organization_postal_code  ${data.address.postalCode}
+  Input Text  jquery=#profileform-organization_locality  ${data.address.locality}
+  Input Text  jquery=#profileform-organization_street_address  ${data.address.streetAddress}
 
   JsSetScrollToElementBySelector  \#user-profile-form .js-submit-btn
   Click Element   jquery=\#user-profile-form .js-submit-btn
@@ -3394,7 +3434,8 @@ GetTenderAuctionEndStatus
   Reload Page
   Sleep  5
   ${tenderStatus}=  get_invisible_text  xpath=//*[contains(@class, 'hidden opstatus')]
-  [return]  '${tenderStatus}' != 'active.auction'
+  ${pass}=  Run keyword And Return Status  Should Not Be Equal As Strings  ${tenderStatus}  active.auction
+  [return]  ${pass}
 
 Input Float
   [Arguments]  ${input_jquery_selector}  ${value}
