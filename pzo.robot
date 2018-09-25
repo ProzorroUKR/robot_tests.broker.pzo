@@ -2551,6 +2551,12 @@ Collapse Single Proposal
   Sleep  1
 #  Log To Console  Collapse Single Proposal +
 
+JsOpenLotByContaintText
+  [arguments]  ${text}
+  Execute JavaScript  robottesthelpfunctions.showlotbytitle('${text}');
+  Sleep  1
+  JsSetScrollToElementBySelector  \#lot .panel-lot-collapse.in
+
 JsOpenItemByContainsText
   [Arguments]  ${text}
   Execute JavaScript  robottesthelpfunctions.showitembytext('${text}');
@@ -2774,6 +2780,7 @@ Get invisible text boolean by locator
 
 Отримати інформацію із лоту description
   [Arguments]  ${lot_id}
+  JsOpenLotByContaintText  ${lot_id}
   ${return_value}=  get_text  xpath=//div[@id='lots']//div[contains(@data-title,'${lot_id}')]//p[@class='description']
   Collapse Lot  ${lot_id}
   [return]  ${return_value}
@@ -3008,7 +3015,7 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера procuringEntity.name
-  ${return_value}=  get_text  xpath=//*[contains(@class, 'legal-name')]//*[@class='value']
+  ${return_value}=  get_text  jquery=#procuringentityinfo .legal-name .value
   [return]  ${return_value}
 
 Отримати інформацію із тендера minimalStep.amount
