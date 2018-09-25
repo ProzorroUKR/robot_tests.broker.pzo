@@ -384,6 +384,9 @@ Login
   Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${ARGUMENTS[0].deliveryDate.startDate}
   Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${ARGUMENTS[0].deliveryDate.endDate}
 
+  #Run Keyword If  'deliveryLocation' in ${item_keys}
+  #...  InputItemDeliveryLocationByWrapper  \#collapseLots div[data-type='lot'].active div[data-type='item'].active  ${ARGUMENTS[0].deliveryLocation}  ${ARGUMENTS[2]}
+
 Додати предмет By Wrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
   ${data_keys}=  Get Dictionary Keys  ${data}
@@ -403,6 +406,8 @@ Login
   ...  InputItemDeliveryAddressByWrapper  ${wrapper}  ${data.deliveryAddress}  ${procurementMethodType}
   Run Keyword If  'deliveryDate' in ${data_keys}
   ...  InputItemDeliveryDateByWrapper  ${wrapper}  ${data.deliveryDate}  ${procurementMethodType}
+  Run Keyword If  'deliveryLocation' in ${data_keys}
+  ...  InputItemDeliveryLocationByWrapper  ${wrapper}  ${data.deliveryLocation}  ${procurementMethodType}
 
 InputItemDeliveryAddressByWrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
@@ -413,6 +418,12 @@ InputItemDeliveryAddressByWrapper
   Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_postal_code']  ${data.postalCode}
   Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_locality']  ${data.locality}
   Input text  jquery=${wrapper} div[class^='form-group field-item${pzo_proc_type}form'] input[id$='-delivery_street_address']  ${data.streetAddress}
+
+InputItemDeliveryLocationByWrapper
+  [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
+
+  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_latitude']").val("${data.latitude}");
+  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_longitude']").val("${data.longitude}");
 
 InputItemDeliveryDateByWrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
@@ -2551,6 +2562,12 @@ Collapse Single Proposal
   Sleep  1
 #  Log To Console  Collapse Single Proposal +
 
+JsOpenLotByContaintText
+  [arguments]  ${text}
+  Execute JavaScript  robottesthelpfunctions.showlotbytitle('${text}');
+  Sleep  1
+  JsSetScrollToElementBySelector  \#lot .panel-lot-collapse.in
+
 JsOpenItemByContainsText
   [Arguments]  ${text}
   Execute JavaScript  robottesthelpfunctions.showitembytext('${text}');
@@ -2774,6 +2791,7 @@ Get invisible text boolean by locator
 
 Отримати інформацію із лоту description
   [Arguments]  ${lot_id}
+  JsOpenLotByContaintText  ${lot_id}
   ${return_value}=  get_text  xpath=//div[@id='lots']//div[contains(@data-title,'${lot_id}')]//p[@class='description']
   Collapse Lot  ${lot_id}
   [return]  ${return_value}
@@ -3008,7 +3026,7 @@ Switch To Complaints
   [return]  ${return_value}
 
 Отримати інформацію із тендера procuringEntity.name
-  ${return_value}=  get_text  xpath=//*[contains(@class, 'legal-name')]//*[@class='value']
+  ${return_value}=  get_text  jquery=#procuringentityinfo .legal-name .value
   [return]  ${return_value}
 
 Отримати інформацію із тендера minimalStep.amount
