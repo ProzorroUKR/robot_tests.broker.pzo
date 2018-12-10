@@ -623,7 +623,7 @@ Load And Wait Text
   Wait Until Page Contains  Ідентифікатор закупівлі  20
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Sleep  1
-  Wait Until Page Contains  Редагування закупівлі  10
+  wait until page contains element    id=tender-form    10
 
   Click Element   xpath=//*[@class='panel-heading']//*[@href='#collapseDocuments']
   Sleep  1
@@ -657,7 +657,7 @@ Wait For Sync Tender Finish
   Wait Until Page Contains  Ідентифікатор закупівлі  20
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Sleep  1
-  Wait Until Page Contains  Редагування закупівлі  10
+  wait until page contains element    id=tender-form    10
 
   ### BOF - Reporting ###
   ${procurementMethodType}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  tender_methodtype
@@ -988,7 +988,7 @@ Wait user action
 
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
   Sleep  1
-  Wait Until Page Contains  Редагування закупівлі  10
+  wait until page contains element    id=tender-form    10
 
   Run Keyword If  '${ARGUMENTS[2]}' == 'tenderPeriod.endDate'  Внести зміни в тендер tenderPeriod.endDate  ${ARGUMENTS[3]}  ${procurementMethodType}
   Run Keyword If  '${ARGUMENTS[2]}' == 'description'  Input text  id=tender${pzo_proc_type}form-description  ${ARGUMENTS[3]}
@@ -1100,7 +1100,8 @@ Start Edit Lot
   [Arguments]  ${lot_id}
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
-  Wait Until Page Contains  Основна інформація  10
+  sleep    1
+  wait until page contains element    id=tender-form    10
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  1
   Click Element  xpath=//div[@id='collapseLots']//span[contains(text(), '${lot_id}')]
@@ -1171,7 +1172,8 @@ Save Tender
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
-  Wait Until Page Contains  Основна інформація  10
+  sleep    1
+  wait until page contains element    id=tender-form    10
   Click Element  xpath=//*[contains(@href, '#collapseLots')]
   Sleep  2
   Click Element  xpath=//a[@href='#add-lots']
@@ -1236,7 +1238,8 @@ Save Tender
 
   Open Tender
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
-  Wait Until Page Contains  Основна інформація  10
+  sleep    1
+  wait until page contains element    id=tender-form    10
   Click Element  xpath=//h4[contains(@class, 'panel-title')]//*[contains(@href, '#collapseFeatures')]
   Sleep  1
   Add Feature  ${feature}  0  ${procurementMethodType}  div[@id='collapseFeatures']  tenderer
@@ -1508,7 +1511,8 @@ GetIsTenderReadyForStage2
   WaitTenderStage2Update  1800
 
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
-  Wait Until Page Contains  Основна інформація  10
+  sleep    1
+  wait until page contains element    id=tender-form    10
 
   ${tender_end_date}=  Get Current Date  increment=00:18:00  result_format=%d.%m.%Y %H:%M
   JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
@@ -2539,7 +2543,9 @@ Collapse Document2
 Collapse Question
   [Arguments]  ${question_id}
 #  Log To Console  Collapse Question ${question_id}
-  Click Element   xpath=//div[@id='tender-question-list']//span[contains(text(),'${question_id}')]
+  execute javascript  jQuery("#tender-question-list .panel-title .title:contains('${question_id}')").trigger('click');
+  #Click Element   xpath=//div[@id='tender-question-list']//span[contains(text(),'${question_id}')]
+  #execute javascript  robottesthelpfunctions.showquestionbykey('${question_id}');
   Sleep  1
 #  Log To Console  Collapse Question ${question_id}
 
@@ -3351,7 +3357,8 @@ TenderFormOpenByUAID
 
     TenderOpenByUAID  ${uaid}
     Click Element  xpath=//a[contains(@href, '/tender/update')][1]
-    Wait Until Page Contains  Редагування   10
+    sleep    1
+    wait until page contains element    id=tender-form    10
     Sleep  1
 
 PlanOpenByUAID

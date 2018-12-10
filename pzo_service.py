@@ -34,11 +34,11 @@ def convert_date_for_compare(datestr):
 
 
 def procuring_entity_name(tender_data):
-    tender_data.data.procuringEntity['name'] = u"ТОВ \"ПЗО\""
-    tender_data.data.procuringEntity['name_en'] = u"TOV \"PZO\""
-    tender_data.data.procuringEntity.identifier['id'] = u"1234567890"
-    tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"ПЗО\""
-    tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"PZO\""
+    tender_data.data.procuringEntity['name'] = u"ТОВ \"Test\""
+    tender_data.data.procuringEntity['name_en'] = u"TOV \"Test\""
+    tender_data.data.procuringEntity.identifier['id'] = u"1234567890-test"
+    tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"Test\""
+    tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"Test\""
     tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
     tender_data.data.procuringEntity.address['postalCode'] = u"123123"
     tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
@@ -103,10 +103,10 @@ def convert_float_to_string(number):
     return format(number, '.2f')
 
 def convert_date_for_compare_ex(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def convert_date_for_compare_ex2(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def download_file(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
