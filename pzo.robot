@@ -384,8 +384,8 @@ Login
   Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_start_date')]  ${ARGUMENTS[0].deliveryDate.startDate}
   Run Keyword If  'deliveryDate' in ${item_keys}  Input DateTime XPath  div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//input[contains(@id, '-delivery_end_date')]  ${ARGUMENTS[0].deliveryDate.endDate}
 
-  #Run Keyword If  'deliveryLocation' in ${item_keys}
-  #...  InputItemDeliveryLocationByWrapper  \#collapseLots div[data-type='lot'].active div[data-type='item'].active  ${ARGUMENTS[0].deliveryLocation}  ${ARGUMENTS[2]}
+  Run Keyword If  'deliveryLocation' in ${item_keys}
+  ...  InputItemDeliveryLocationByWrapper  \#collapseLots div[data-type='lot'].active div[data-type='item'].active  ${ARGUMENTS[0].deliveryLocation}  ${ARGUMENTS[2]}
 
 Додати предмет By Wrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
@@ -422,8 +422,8 @@ InputItemDeliveryAddressByWrapper
 InputItemDeliveryLocationByWrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
 
-  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_latitude']").val("${data.latitude}");
-  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_longitude']").val("${data.longitude}");
+  run keyword and ignore error  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_latitude']").val("${data.latitude}");
+  run keyword and ignore error  Execute JavaScript  jQuery("${wrapper} input[id$='-delivery_location_longitude']").val("${data.longitude}");
 
 InputItemDeliveryDateByWrapper
   [Arguments]  ${wrapper}  ${data}  ${procurementMethodType}
@@ -3267,18 +3267,19 @@ Switch To Complaints
 
 UserChangeOrgnizationInfo
   [Arguments]  ${data}
+  ${keys}=  Get Dictionary Keys  ${data}
 
   Go To  ${BROKERS['pzo'].basepage}/user/profile
   Wait Until Page Contains  Інформація про компанію   10
   Sleep  1
 
-  Input text  id=profileform-organization_name  ${data.name}
-  Input text  id=profileform-organization_edrpou  ${data.identifier.id}
-  JsSetScrollToElementBySelector  \#profileform-organization_region_id
-  Select From List By Label  jquery=#profileform-organization_region_id  ${data.address.region}
-  Input Text  jquery=#profileform-organization_postal_code  ${data.address.postalCode}
-  Input Text  jquery=#profileform-organization_locality  ${data.address.locality}
-  Input Text  jquery=#profileform-organization_street_address  ${data.address.streetAddress}
+  Run Keyword If  'name' in ${keys}  Input text  id=profileform-organization_name  ${data.name}
+  Run Keyword If  'identifier' in ${keys}  Input text  id=profileform-organization_edrpou  ${data.identifier.id}
+  Run Keyword If  'address' in ${keys}  JsSetScrollToElementBySelector  \#profileform-organization_region_id
+  Run Keyword If  'address' in ${keys}  Select From List By Label  jquery=#profileform-organization_region_id  ${data.address.region}
+  Run Keyword If  'address' in ${keys}  Input Text  jquery=#profileform-organization_postal_code  ${data.address.postalCode}
+  Run Keyword If  'address' in ${keys}  Input Text  jquery=#profileform-organization_locality  ${data.address.locality}
+  Run Keyword If  'address' in ${keys}  Input Text  jquery=#profileform-organization_street_address  ${data.address.streetAddress}
 
   JsSetScrollToElementBySelector  \#user-profile-form .js-submit-btn
   Click Element   jquery=\#user-profile-form .js-submit-btn
