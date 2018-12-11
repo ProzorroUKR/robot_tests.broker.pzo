@@ -90,13 +90,13 @@ Login
   Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=1080
 
   Selenium2Library.Switch Browser    ${user}
-  Run Keyword If  '${procurementMethodType}' == 'belowThreshold' and 'funders' not in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}&multilot=0
-  Run Keyword If  '${procurementMethodType}' != 'belowThreshold' or 'funders' in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}
+  Run Keyword If  '${procurementMethodType}' == 'belowThreshold' and 'lots' not in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}&multilot=0
+  Run Keyword If  '${procurementMethodType}' != 'belowThreshold' or 'lots' in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}
   Wait Until Page Contains          Створення закупівлі  10
 
   ### BOF - Reporting ###
   Run Keyword And Return If  '${procurementMethodType}' == 'reporting'  Створити тендер без лотів  ${user}  ${tender_data}
-  Run Keyword And Return If  '${procurementMethodType}' == 'belowThreshold' and 'funders' not in ${tender_data_keys}  Створити тендер без лотів  ${user}  ${tender_data}
+  Run Keyword And Return If  '${procurementMethodType}' == 'belowThreshold' and 'lots' not in ${tender_data_keys}  Створити тендер без лотів  ${user}  ${tender_data}
   ### EOF - Reporting ###
 
   ${title}=         Get From Dictionary   ${tender_data.data}               title
