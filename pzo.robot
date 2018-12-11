@@ -2039,8 +2039,8 @@ Save Proposal
   Run Keyword If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   Sleep  3
   Run Keyword And Return If   'status' == '${arguments[2]}' and '${current_tender_uaid}' != '${arguments[1]}'   get_invisible_text  xpath=//*[contains(@class, 'hidden stage2.opstatus')]
   Run Keyword And Return If   'status' == '${arguments[2]}'   Отримати інформацію із тендера status
-  Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.startDate
-  Run Keyword And Return If   'enquiryPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера enquiryPeriod.endDate
+  Run Keyword And Return If   'enquiryPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .enquiry-period-start-date.hidden
+  Run Keyword And Return If   'enquiryPeriod.endDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .enquiry-period-end-date.hidden
   Run Keyword And Return If   'complaintPeriod.startDate' == '${arguments[2]}'   Отримати інформацію із тендера complaintPeriod.startDate
   Run Keyword And Return If   'complaintPeriod.endDate' == '${arguments[2]}'   Отримати інформацію із тендера complaintPeriod.endDate
   Run Keyword And Return If   'title' == '${arguments[2]}'   Отримати інформацію із тендера title
@@ -2176,6 +2176,11 @@ Save Proposal
   Run Keyword And Return If   'items[1].deliveryAddress.streetAddress' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery .street-address
   Run Keyword And Return If   'items[1].deliveryLocation.latitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-latitude.hidden
   Run Keyword And Return If   'items[1].deliveryLocation.longitude' == '${arguments[2]}'  Get invisible text number by locator  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper .delivery-longitude.hidden
+
+  ${item2NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${arguments[2]}  items[2]
+  Run Keyword If   ${item2NeedToBeVisible}  Execute JavaScript  robottesthelpfunctions.showitembyindex(2);
+  Run Keyword If   ${item2NeedToBeVisible}  Sleep  2
+  Run Keyword And Return If   'items[2].description' == '${arguments[2]}'  Get Text  jquery=div[id^='accordionItems']:visible .panel-item-collapse.in .item-info-wrapper p.title .value
 
   ### BOF - BelowFunders ###
   ${funderWrapper}=  Set Variable  \#funderorganizationinfo
