@@ -82,7 +82,7 @@ CompetitiveDialogueEU
 
 ESCO
 
-. bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"esco": {"tender": [0, 35]}}}}' -v ARTIFACT_FILE:'artifact_esco_owner.yaml'
+. bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:tender_owner -v api_version:2.4 -d test_output/esco__owner__all -v BROKERS_PARAMS:'{"pzo": {"intervals": {"open_esco": {"tender": [0, 35]}}}}' -v ARTIFACT_FILE:'artifact_esco_owner.yaml'
 . bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:provider -v api_version:2.4 -d test_output/esco__provider__all -v ARTIFACT_FILE:'artifact_esco_provider.yaml'
 . bin/op_tests -s 01openProcedure -s 02auction -s 03qualification -s 04contract_signing -A robot_tests_arguments/esco_testing.txt -v broker:pzo -v role:viewer -v api_version:2.4 -d test_output/esco__viewer__all -v ARTIFACT_FILE:'artifact_esco_viewer.yaml'
 
