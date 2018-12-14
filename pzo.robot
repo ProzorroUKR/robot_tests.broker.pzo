@@ -1516,7 +1516,7 @@ GetIsTenderReadyForStage2
 
   ${tender_end_date}=  Get Current Date  increment=00:25:00  result_format=%d.%m.%Y %H:%M
   JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
-  Input Text  id=tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
+  Input Converted DateTime  \#tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
   Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
 
   Save Tender
@@ -3493,6 +3493,13 @@ Input DateTime XPath
   ${date}=  convert_datetime_for_delivery  ${date}
   ${date}=  Convert Date  ${date}  %d.%m.%Y %H:%M
   Input Text  xpath=//${input_selector}  ${date}
+
+Input Converted DateTime
+  [Arguments]  ${input_jquery_selector}  ${date}
+  Input Text  jquery=${input_jquery_selector}  ${date}
+  sleep    1s
+  execute javascript    $("${input_jquery_selector}").blur();
+  sleep    100ms
 
 Input Text With Checking Input Isset
   [Arguments]  ${input_jquery_selector}  ${text}
