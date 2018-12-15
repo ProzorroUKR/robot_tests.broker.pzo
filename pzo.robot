@@ -1390,13 +1390,16 @@ Save Tender
   ${proposal_id} =  Set Variable If  '-1' == '${proposal_id}'  1  ${proposal_id}
   ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
 
-  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
-  Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
-  ${doc_name}=  Завантажити збережений документ у форму кваліфікації  ${proposal_id}
-  Click Element  id=prequalificationform-eligible
-  Click Element  id=prequalificationform-qualified
-  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
-  Remove File  ${doc_name}
+  # handle sign not loaded
+  : FOR    ${INDEX}    IN RANGE    0    3
+  \  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
+  \  Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
+  \  ${doc_name}=  Завантажити збережений документ у форму кваліфікації  ${proposal_id}
+  \  Click Element  id=prequalificationform-eligible
+  \  Click Element  id=prequalificationform-qualified
+  \  ${passed}=  run keyword and return status  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
+  \  run keyword if  ${passed} == True  Remove File  ${doc_name}
+  \  exit for loop if  ${passed} == True
 
 Відкрити форму прекваліфікації і потрібну кваліфікацію
   [Arguments]  ${proposal_index}
