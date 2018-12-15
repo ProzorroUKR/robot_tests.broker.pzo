@@ -1747,12 +1747,15 @@ Wait For Complaints Sync
 
   Open Tender
   ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
+  Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}
+  sleep  1
 
   : FOR    ${INDEX}    IN RANGE    0    ${lots_length}
   \   Set To Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  last_proposal_lotid=${lots[${INDEX}].relatedLot}
-  \   Go To  ${BROKERS['pzo'].basepage}/tender/bid?id=${tender_id}\#showlotbykey:${lots[${INDEX}].relatedLot}
-  \   Sleep  2
+  \   execute javascript  robottesthelpfunctions.showlotbykey("${lots[${INDEX}].relatedLot}")
+  \   Sleep  1
   \   Run Keyword And Ignore Error  Подати цінову пропозицію Amount  ${lots[${INDEX}].value.amount}
+  \   Run Keyword If  '${procurementMethodType}' == 'esco'  Подати цінову пропозицію Esco  ${lots[${INDEX}].value}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Input text  xpath=//div[contains(@class, 'active')]//textarea[contains(@id, '-subcontracting_details')]  ${bid.data.tenderers[0].name}
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_eligible')]
   \   Run Keyword If  '${procurementMethodType}' != 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-self_qualified')]
@@ -1775,6 +1778,23 @@ Wait For Complaints Sync
   [Arguments]  ${amount}
   ${amount}=  convert_float_to_string  ${amount}
   Input text  xpath=//div[contains(@class, 'active')]//input[contains(@id, '-value_amount')]  ${amount}
+
+Подати цінову пропозицію Esco
+  [Arguments]  ${value}
+  ${value_keys}=  Get Dictionary Keys  ${value}
+
+  run keyword and ignore error  input text  jquery=.tab-pane.js-lot-tab.active [id$='-contract_duration_years']  ${value.contractDuration.years}
+  run keyword and ignore error  input text  jquery=.tab-pane.js-lot-tab.active [id$='-contract_duration_days']  ${value.contractDuration.days}
+  run keyword if  'yearlyPaymentsPercentage' in ${value_keys}  input float multiply100  .tab-pane.js-lot-tab.active [id$='-yearly_payments_percentage']  ${value.yearlyPaymentsPercentage}
+  run keyword if  'annualCostsReduction' in ${value_keys}  Подати цінову пропозицію Esco AnnualCostsReduction  ${value.annualCostsReduction}
+
+Подати цінову пропозицію Esco AnnualCostsReduction
+  [Arguments]  ${values}
+
+  ${input_index}=  set variable  1
+  : FOR    ${value}    IN    @{values}
+  \  input float  .tab-pane.js-lot-tab.active [id$='-annual_costs_reduction_${input_index}']  ${value}
+  \  ${input_index}=  evaluate  ${input_index} + 1
 
 Подати цінову пропозицію Features
   [Arguments]  ${features}
