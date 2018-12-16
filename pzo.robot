@@ -1399,6 +1399,7 @@ Save Tender
   \  Click Element  id=prequalificationform-qualified
   \  ${passed}=  run keyword and return status  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
   \  run keyword if  ${passed} == True  Remove File  ${doc_name}
+  \  run keyword if  ${passed} == False  sleep  10
   \  exit for loop if  ${passed} == True
 
 Відкрити форму прекваліфікації і потрібну кваліфікацію
@@ -3261,6 +3262,7 @@ Switch To Complaints
   ${budget}=  get_invisible_text  jquery=#general-info .budget-amount
 
   PlanOpenByUAID  ${uaid}
+  JsSetScrollToElementBySelector  \#general-info
   Run Keyword And Return If   '${key}' == 'tender.procurementMethodType'  get_invisible_text  jquery=#general-info .procurement-method-type
   Run Keyword And Return If   '${key}' == 'budget.amount'   Convert To Number  ${budget}
   Run Keyword And Return If   '${key}' == 'budget.description'   get_text  jquery=#general-info .budget-description .value
@@ -3268,13 +3270,16 @@ Switch To Complaints
   Run Keyword And Return If   '${key}' == 'budget.id'   get_text  jquery=#general-info .budget-id .value
   Run Keyword And Return If   '${key}' == 'budget.project.id'   get_invisible_text  jquery=#general-info .budget-project-id
   Run Keyword And Return If   '${key}' == 'budget.project.name'   get_invisible_text  jquery=#general-info .budget-project-name
-  Run Keyword And Return If   '${key}' == 'procuringEntity.name'   get_invisible_text  jquery=#procuring-entity-info .name
-  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.scheme'   get_invisible_text  jquery=#procuring-entity-info .identifier-scheme
-  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.id'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
   Run Keyword And Return If   '${key}' == 'classification.description'   get_invisible_text  jquery=#general-info .main-classification-description
   Run Keyword And Return If   '${key}' == 'classification.scheme'   get_invisible_text  jquery=#general-info .main-classification-scheme
   Run Keyword And Return If   '${key}' == 'classification.id'   get_invisible_text  jquery=#general-info .main-classification-code
   Run Keyword And Return If   '${key}' == 'tender.tenderPeriod.startDate'   get_invisible_text  jquery=#general-info .tender-start-date-source
+  ${procuringEntityNeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  procuringEntity
+  Run Keyword If   ${procuringEntityNeedToBeVisible}  JsSetScrollToElementBySelector  \#procuring-entity-info
+  Run Keyword And Return If   '${key}' == 'procuringEntity.name'   get_invisible_text  jquery=#procuring-entity-info .name
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.scheme'   get_invisible_text  jquery=#procuring-entity-info .identifier-scheme
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.id'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.legalName'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
   ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[0]
   Run Keyword If   ${item0NeedToBeVisible}    JsCollapseShowAndScroll  ${item0Wrapper}
   Run Keyword And Return If   '${key}' == 'items[0].description'    get_text  jquery=${item0Wrapper} .item-info-wrapper .title .value
