@@ -3154,6 +3154,7 @@ Switch To Complaints
   ${data}=  Get From Dictionary  ${plan_data}  data
   ${data_keys}=  Get Dictionary Keys  ${data}
   ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
+  ${budget_keys}=  Get Dictionary Keys  ${data.budget}
   ${budget_amount}=  Convert To String  ${data.budget.amount}
   ${classificationWrapper}=  Set Variable  \#collapseGeneral
   ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
@@ -3168,6 +3169,8 @@ Switch To Complaints
 
   ## filling form
   Select From List By Value  id=planform-procurement_method_type  ${data.tender.procurementMethodType}
+  run keyword if  'period' in ${budget_keys}  input datetime  \#planform-period_start_date  ${data.budget.period.startDate}
+  run keyword if  'period' in ${budget_keys}  input datetime  \#planform-period_end_date  ${data.budget.period.endDate}
   JsInputHiddenText  \#planform-budget_id  ${data.budget.id}
   Input text  id=planform-title  ${data.budget.description}
   Input text  id=planform-value_amount  ${budget_amount}
