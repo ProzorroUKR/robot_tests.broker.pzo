@@ -39,15 +39,17 @@ def procuring_entity_name(tender_data):
     tender_data.data.procuringEntity.identifier['id'] = u"1234567890-test"
     tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"Test\""
     tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"Test\""
-    tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
-    tender_data.data.procuringEntity.address['postalCode'] = u"123123"
-    tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
-    tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
-    tender_data.data.procuringEntity.contactPoint['name'] = u"Замовник Тест"
-    tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
-    tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
-    tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
-    tender_data.data.procuringEntity.contactPoint['url'] = u"http://pzo.com.ua"
+    if 'address' in tender_data.data.procuringEntity:
+        tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
+        tender_data.data.procuringEntity.address['postalCode'] = u"123123"
+        tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
+        tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
+    if 'contactPoint' in tender_data.data.procuringEntity:
+        tender_data.data.procuringEntity.contactPoint['name'] = u"Замовник Тест"
+        tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
+        tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
+        tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
+        tender_data.data.procuringEntity.contactPoint['url'] = u"http://pzo.com.ua"
     return tender_data
 
 def split_take_item(value, separator, index):
