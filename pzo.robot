@@ -2014,10 +2014,16 @@ Save Proposal
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
+  # check if eds is needed
   ${eds_isset}=  run keyword and return status  Click Button  xpath=//*[text()='Накласти ЕЦП']
-  run keyword if  ${eds_isset}  Накласти ЕЦП на відкритий попап
+  run keyword if  ${eds_isset}  Накласти ЕЦП на відкритий попап та закрити його
+  run keyword if  ${eds_isset}  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+  run keyword if  ${eds_isset}  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  run keyword if  ${eds_isset}  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  run keyword if  ${eds_isset}  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
+  run keyword if  ${eds_isset}  Sleep  3
 
-Накласти ЕЦП на відкритий попап
+Накласти ЕЦП на відкритий попап та закрити його
 
   Sleep  1
   Load Sign
