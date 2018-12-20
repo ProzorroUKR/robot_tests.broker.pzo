@@ -1391,7 +1391,7 @@ Save Tender
   ${proposal_id} =  Set Variable If  '-2' == '${proposal_id}'  2  ${proposal_id}
 
   # handle sign not loaded
-  : FOR    ${INDEX}    IN RANGE    0    3
+  : FOR    ${INDEX}    IN RANGE    0    10
   \  Відкрити форму прекваліфікації і потрібну кваліфікацію  ${proposal_id}
   \  Select From List By Label  xpath=//select[@id='prequalificationform-decision']  Підтвердити
   \  ${doc_name}=  Завантажити збережений документ у форму кваліфікації  ${proposal_id}
@@ -1399,7 +1399,7 @@ Save Tender
   \  Click Element  id=prequalificationform-qualified
   \  ${passed}=  run keyword and return status  Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
   \  run keyword if  ${passed} == True  Remove File  ${doc_name}
-  \  run keyword if  ${passed} == False  sleep  10
+  \  run keyword if  ${passed} == False  sleep  30
   \  exit for loop if  ${passed} == True
 
 Відкрити форму прекваліфікації і потрібну кваліфікацію
@@ -1407,7 +1407,7 @@ Save Tender
 
   Open Tender
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/prequalification?id=')]
-  Wait Until Page Contains  Прекваліфікація  10
+  wait until page contains element  id=tender-prequalification-form  10
 
   Click Element  id=prequalificationform-qualification
   Click Element  jquery=select#prequalificationform-qualification option:eq(${proposal_index})
@@ -1941,20 +1941,21 @@ Save Proposal
 
   Відкрити форму кваліфікації переможця і потрібну кваліфікацію  0
 
-  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
-
-  JsSetScrollToElementBySelector  \#qualification-documents
-  Choose File  xpath=//input[@type='file']  ${doc_name}
-  Sleep  2
-  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
-  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
-
-  Run Keyword And Ignore Error  Click Element  id=qualificationform-eligible
-  Run Keyword And Ignore Error  Click Element  id=qualificationform-qualified
-  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
-  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
-
-  Open Tender
+  # handle sign not loaded
+  : FOR    ${INDEX}    IN RANGE    0    10
+  \  run keyword if  ${INDEX} != 0  reload page
+  \  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
+  \  JsSetScrollToElementBySelector  \#qualification-documents
+  \  run keyword if  ${INDEX} == 0  Choose File  xpath=//input[@type='file']  ${doc_name}
+  \  run keyword if  ${INDEX} == 0  Sleep  2
+  \  JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
+  \  run keyword if  ${INDEX} == 0  Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
+  \  Run Keyword And Ignore Error  Click Element  id=qualificationform-eligible
+  \  Run Keyword And Ignore Error  Click Element  id=qualificationform-qualified
+  \  ${passed}=  run keyword and return status  Підтвердити рішення кваліфікації переможця
+  \  run keyword if  ${passed} == True  Open Tender
+  \  run keyword if  ${passed} == False  sleep  30
+  \  exit for loop if  ${passed} == True
 
 Дискваліфікувати постачальника
   [Arguments]  ${username}  ${tender_uaid}  ${award_index}
@@ -1976,8 +1977,7 @@ Save Proposal
   JsSetScrollToElementBySelector  .tab-pane.active [id$='-document_type']
   Select From List By Label  jquery=.tab-pane.active [id$='-document_type']  Повідомлення про рішення
 
-  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
-  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
+  Підтвердити рішення кваліфікації переможця
   Open Tender
 
 Скасування рішення кваліфікаційної комісії
@@ -1991,8 +1991,7 @@ Save Proposal
   Run Keyword And Ignore Error  Click Element  jquery=#qualificationform-title option.js-cancel:first
   Run Keyword And Ignore Error  Input text  id=qualificationform-description  GenerateFakeText
 
-  Run Keyword And Ignore Error  Завантажити рішення кваліфікації переможця і накласти ЕЦП
-  Run Keyword And Ignore Error  Підтвердити рішення кваліфікації переможця
+  Підтвердити рішення кваліфікації переможця
   Open Tender
 
 Відкрити форму кваліфікації переможця і потрібну кваліфікацію
@@ -2015,14 +2014,11 @@ Save Proposal
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
-Завантажити рішення кваліфікації переможця і накласти ЕЦП
-  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
-  Click Button  jquery=#tender-qualification-form .js-submit-btn
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
-  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
-  Sleep  3
+  ${eds_isset}=  run keyword and return status  Click Button  xpath=//*[text()='Накласти ЕЦП']
+  run keyword if  ${eds_isset}  Накласти ЕЦП на відкритий попап
 
-  Click Button  xpath=//*[text()='Накласти ЕЦП']
+Накласти ЕЦП на відкритий попап
+
   Sleep  1
   Load Sign
   Wait Until Page Contains  ЕЦП успішно накладено  20
@@ -3279,7 +3275,7 @@ Switch To Complaints
   Run Keyword And Return If   '${key}' == 'procuringEntity.name'   get_invisible_text  jquery=#procuring-entity-info .name
   Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.scheme'   get_invisible_text  jquery=#procuring-entity-info .identifier-scheme
   Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.id'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
-  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.legalName'   get_invisible_text  jquery=#procuring-entity-info .identifier-code
+  Run Keyword And Return If   '${key}' == 'procuringEntity.identifier.legalName'   get_text  jquery=#procuring-entity-info .legal-name .value
   ${item0NeedToBeVisible}=  Run Keyword And Return Status  Should Start With  ${key}  items[0]
   Run Keyword If   ${item0NeedToBeVisible}    JsCollapseShowAndScroll  ${item0Wrapper}
   Run Keyword And Return If   '${key}' == 'items[0].description'    get_text  jquery=${item0Wrapper} .item-info-wrapper .title .value
