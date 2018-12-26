@@ -90,7 +90,7 @@ def get_invisible_text(locator):
     element = get_library()._element_find(locator, False, True)
     text = get_webdriver_instance().execute_script('return jQuery(arguments[0]).text();', element)
     return text
-  
+
 
 def get_text_excluding_children(locator):
     element = get_library()._element_find(locator, False, True)
@@ -102,7 +102,7 @@ def get_text_excluding_children(locator):
     return text.strip()
 
 def convert_float_to_string(number):
-    return format(number, '.2f')
+    return repr(number);
 
 def convert_date_for_compare_ex(datestr):
     return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
@@ -119,4 +119,4 @@ def multiply_hundred(number):
 def inject_urllib3():
     import urllib3.contrib.pyopenssl
     urllib3.contrib.pyopenssl.inject_into_urllib3()
- 
+
