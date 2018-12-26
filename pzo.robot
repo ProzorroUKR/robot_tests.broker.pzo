@@ -733,7 +733,6 @@ Wait For Sync Tender Finish
 Додати постачальника For Reporting
   [Arguments]  ${budget}  ${data}
   ${wrapper}=  Set Variable  \#collapseAward
-  ${budget}=  Convert To String  ${budget}
 
   JsSetScrollToElementBySelector  \#collapseAward
   Click Element  jquery=.panel-title a[data-toggle="collapse"][href="#collapseAward"]
@@ -750,7 +749,7 @@ Wait For Sync Tender Finish
   Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_name  ${data.contactPoint.name}
   Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_email  ${data.contactPoint.email}
   Input Text    jquery=${wrapper} \#tenderreportingform-award_organization_contact_point_phone  ${data.contactPoint.telephone}
-  Input Text    jquery=${wrapper} \#tenderreportingform-award_value_amount  ${budget}
+  Input Float    ${wrapper} \#tenderreportingform-award_value_amount  ${budget}
 
 Додати постачальника For Reporting Fake
   ${identifier}  Create Dictionary    id=1234567890
@@ -915,7 +914,7 @@ Wait For Sync Tender Finish
   [Arguments]  ${field}  ${value}
 
   JsSetScrollToElementBySelector  \#contractform-contract_number
-  Run Keyword If  '${field}' == 'value.amount'  Input Text  id=contractform-value_amount  ${value}
+  Run Keyword If  '${field}' == 'value.amount'  Input Float  \#contractform-value_amount  ${value}
   Run Keyword If  '${field}' == 'dateSigned'  Input DateTime  \#contractform-date_signed  ${value}
   Run Keyword If  '${field}' == 'period.startDate'  Input DateTime  \#contractform-date_start  ${value}
   Run Keyword If  '${field}' == 'period.endDate'  Input DateTime  \#contractform-date_end  ${value}
@@ -3171,7 +3170,6 @@ Switch To Complaints
   ${data_keys}=  Get Dictionary Keys  ${data}
   ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
   ${budget_keys}=  Get Dictionary Keys  ${data.budget}
-  ${budget_amount}=  Convert To String  ${data.budget.amount}
   ${classificationWrapper}=  Set Variable  \#collapseGeneral
   ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
 
@@ -3189,7 +3187,7 @@ Switch To Complaints
   run keyword if  'period' in ${budget_keys}  input datetime  \#planform-period_end_date  ${data.budget.period.endDate}
   JsInputHiddenText  \#planform-budget_id  ${data.budget.id}
   Input text  id=planform-title  ${data.budget.description}
-  Input text  id=planform-value_amount  ${budget_amount}
+  Input Float  \#planform-value_amount  ${data.budget.amount}
   Select From List By Value  id=planform-value_currency  ${data.budget.currency}
   JsInputHiddenText  \#planform-project_id  ${data.budget.project.id}
   JsInputHiddenText  \#planform-project_name  ${data.budget.project.name}
@@ -3520,7 +3518,7 @@ GetTenderAuctionEndStatus
 
 Input Float
   [Arguments]  ${input_jquery_selector}  ${value}
-  ${value}=          Convert To String  ${value}
+  ${value}=          convert_float_to_string  ${value}
   Input Text  jquery=${input_jquery_selector}  ${value}
 
 Input Float Multiply100
