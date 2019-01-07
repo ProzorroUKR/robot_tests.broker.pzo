@@ -36,7 +36,7 @@ def convert_date_for_compare(datestr):
 def procuring_entity_name(tender_data):
     tender_data.data.procuringEntity['name'] = u"ТОВ \"Test\""
     tender_data.data.procuringEntity['name_en'] = u"TOV \"Test\""
-    tender_data.data.procuringEntity.identifier['id'] = u"1234567890-test"
+    tender_data.data.procuringEntity.identifier['id'] = u"pzo-dev-zamovnuk"
     tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"Test\""
     tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"Test\""
     if 'address' in tender_data.data.procuringEntity:
@@ -102,7 +102,7 @@ def get_text_excluding_children(locator):
     return text.strip()
 
 def convert_float_to_string(number):
-    return repr(number);
+    return repr(float(number));
 
 def convert_date_for_compare_ex(datestr):
     return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")

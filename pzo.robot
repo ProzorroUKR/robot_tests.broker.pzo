@@ -594,7 +594,10 @@ Load And Wait Text
 #  Sleep  3
   Wait Until Page Contains Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][1]    20
   Sleep  3
-  Click Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][1]
+  ${count}=  execute javascript    return $('#tender-list .js-item').length;
+  ${count}=  convert to integer  ${count}
+  run keyword if  ${count} == 1  Click Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][1]
+  run keyword if  ${count} > 1  Click Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][2]
   Wait Until Page Contains    ${ARGUMENTS[1]}   60
   Save Tender ID
   Capture Page Screenshot
@@ -619,7 +622,6 @@ Load And Wait Text
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER_UAID}
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  #ubiz.Пошук тендера по ідентифікатору  ${ARGUMENTS[0]}  ${ARGUMENTS[2]}
   Open Tender
   Wait Until Page Contains  Ідентифікатор закупівлі  20
   Click Element  xpath=//a[contains(@href, '/tender/update?id=')]
@@ -2149,6 +2151,8 @@ Save Proposal
   Run Keyword And Return If   'awards[0].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-amount
   Run Keyword If   'awards[1].value.amount' == '${arguments[2]}'   JsOpenAwardByIndex  1
   Run Keyword And Return If   'awards[1].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-amount
+  Run Keyword If   'awards[2].value.amount' == '${arguments[2]}'   JsOpenAwardByIndex  2
+  Run Keyword And Return If   'awards[2].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.budget-amount
   Run Keyword If   'awards[0].suppliers[0].contactPoint.name' == '${arguments[2]}'   JsOpenAwardByIndex  0
   Run Keyword And Return If   'awards[0].suppliers[0].contactPoint.name' == '${arguments[2]}'   Get invisible text by locator  jquery=.award-list-wrapper .panel-collapse.in .award-info-wrapper p.organization-contact-point-name
   Run Keyword If   'contracts[0].status' == '${arguments[2]}'   JsOpenContractByIndex  0
