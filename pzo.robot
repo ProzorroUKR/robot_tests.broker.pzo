@@ -88,6 +88,7 @@ Login
 #  Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=${BROKERS['pzo'].intervals.belowThreshold.accelerator}
   Run Keyword If  '${SUITE_NAME}' == 'Tests Files.Complaints' and '${procurementMethodType}' == 'belowThreshold'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=360
   Run Keyword If  '${procurementMethodType}' == 'negotiation'  Go To  ${BROKERS['pzo'].basepage}/utils/config?tacceleration=1080
+  Run Keyword If  '${procurementMethodType}' == 'aboveThresholdUA.defense'  Go To  ${BROKERS['playtender'].basepage}/utils/config?tacceleration=720
 
   Selenium2Library.Switch Browser    ${user}
   Run Keyword If  '${procurementMethodType}' == 'belowThreshold' and 'lots' not in ${tender_data_keys}  Go To  ${BROKERS['pzo'].basepage}/tender/create?type=${procurementMethodType}&multilot=0
@@ -597,7 +598,7 @@ Load And Wait Text
   ${count}=  execute javascript    return $('#tender-list .js-item').length;
   ${count}=  convert to integer  ${count}
   run keyword if  ${count} == 1  Click Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][1]
-  run keyword if  ${count} > 1  Click Element    xpath=(//div[@id='tender-list'])//a[contains(@href, '/tender/')][2]
+  run keyword if  ${count} > 1  Click Element    jquery=#tender-list .js-item:nth(1) a.title.js-link
   Wait Until Page Contains    ${ARGUMENTS[1]}   60
   Save Tender ID
   Capture Page Screenshot
@@ -1523,7 +1524,8 @@ GetIsTenderReadyForStage2
   ${tender_end_date}=  Get Current Date  increment=00:25:00  result_format=%d.%m.%Y %H:%M
   JsSetScrollToElementBySelector  \#tendercompetitivedialogueuastage2form-tender_period_end_date
   Input Converted DateTime  \#tendercompetitivedialogueuastage2form-tender_period_end_date  ${tender_end_date}
-  Click Element  id=tendercompetitivedialogueuastage2form-draft_mode
+  ${draftchecked}=  execute javascript  return $('#tendercompetitivedialogueuastage2form-draft_mode').is(":checked") ? 1 : 0;
+  run keyword if  '${draftchecked}' == '1'  click Element  id=tendercompetitivedialogueuastage2form-draft_mode
 
   Save Tender
 
@@ -2285,6 +2287,8 @@ Save Proposal
   Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'  get_invisible_text  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .auction-period-start-date.hidden
   Run Keyword And Return If   'auctionPeriod.endDate' == '${arguments[2]}'  get_invisible_text  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .auction-period-end-date.hidden
   Run Keyword And Return If   'minimalStepPercentage' == '${arguments[2]}'  Get invisible text number by locator  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .minimal-step-percentage-source.hidden
+  Run Keyword And Return If   'fundingKind' == '${arguments[2]}'   get_invisible_text  jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .funding-kind-source.hidden
+  Run Keyword And Return If   'yearlyPaymentsPercentageRange' == '${arguments[2]}'  Get invisible text number by locator   jquery=#accordionLots .panel-collapse.in .lot-info-wrapper .yearly-payments-percentage-range-source.hidden
 
   Collapse Lot  ${arguments[1]}
   [return]  pzo.lot.default
