@@ -1303,8 +1303,8 @@ Save Tender
 
   Sync Tender
   Go To  ${BROKERS['pzo'].basepage}/tender/question-answer?id=${tender_id}
-  Click Element  xpath=//select[@id='questionanswerform-question']
-  Click Element  xpath=//select[@id='questionanswerform-question']//option[contains(text(), '${question_id}')]
+  Click Element  xpath=//select[@id='questionanswerform-pk']
+  Click Element  xpath=//select[@id='questionanswerform-pk']//option[contains(text(), '${question_id}')]
   Input text  xpath=//textarea[contains(@id, 'questionanswerform-answer')]  ${answer.data.answer}
 
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
@@ -1950,7 +1950,7 @@ Save Proposal
   # handle sign not loaded
   : FOR    ${INDEX}    IN RANGE    0    10
   \  run keyword if  ${INDEX} != 0  reload page
-  \  Select From List By Label  xpath=//select[@id='qualificationform-decision']  Визначити переможною
+  \  select from list by value  xpath=//select[@id='qualificationform-decision']  accept
   \  JsSetScrollToElementBySelector  \#qualification-documents
   \  run keyword if  ${INDEX} == 0  Choose File  xpath=//input[@type='file']  ${doc_name}
   \  run keyword if  ${INDEX} == 0  Sleep  2
