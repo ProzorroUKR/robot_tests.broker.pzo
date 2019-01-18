@@ -1060,6 +1060,9 @@ Open Tender
   Return From Keyword If  ${no_id}
   Wait For All Transfer Complete
   Sync Tender
+  Open Tender Without Syncing
+
+Open Tender Without Syncing
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}
   Go To  ${tender_url}
@@ -1312,6 +1315,8 @@ Save Tender
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
   Sleep  2
 
+  WaitPageSyncing  60
+
 Відповісти на вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}  ${award_index}
   Switch browser   ${username}
@@ -1330,6 +1335,8 @@ Save Tender
   Sleep  1
   Click Element   xpath=//div[contains(@class, 'jconfirm')]//button[contains(text(), 'Закрити')]
   Sleep  2
+
+  WaitPageSyncing  60
 
 Відповісти на вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim_id}  ${answer}
@@ -2092,7 +2099,9 @@ Save Proposal
   Run Keyword And Return If   'qualifications[1].status' == '${arguments[2]}'  Отримати інформацію із тендера qualifications[1].status
   Run Keyword If   'qualificationPeriod.endDate' == '${arguments[2]}'  Open Tender
   Run Keyword And Return If   'qualificationPeriod.endDate' == '${arguments[2]}'  Отримати інформацію із тендера qualificationPeriod.endDate
-  Run Keyword And Return If   'questions[0].title' == '${arguments[2]}'  Отримати інформацію із тендера questions[0].title  ${arguments[0]}  ${arguments[1]}
+  Run Keyword And Return If   'questions[0].title' == '${arguments[2]}'  Отримати інформацію із тендера questions.title  ${arguments[0]}  ${arguments[1]}  0
+  Run Keyword And Return If   'questions[1].title' == '${arguments[2]}'  Отримати інформацію із тендера questions.title  ${arguments[0]}  ${arguments[1]}  1
+  Run Keyword And Return If   'questions[2].title' == '${arguments[2]}'  Отримати інформацію із тендера questions.title  ${arguments[0]}  ${arguments[1]}  2
   Run Keyword And Return If   'procuringEntity.identifier.id' == '${arguments[2]}'   Get invisible text by locator  jquery=div#procuringentityinfo p.identifier-code
   Run Keyword And Return If   'procuringEntity.identifier.legalName' == '${arguments[2]}'   Get text by locator  jquery=div#procuringentityinfo p.legal-name .value
   Run Keyword And Return If   'procuringEntity.address.region' == '${arguments[2]}'   Get invisible text by locator  jquery=div#procuringentityinfo p.region
@@ -2420,7 +2429,7 @@ Save Proposal
 #  Log To Console  ${object_id}
 #  Log To Console  ${field_name}
 
-  Open Tender
+  Open Tender Without Syncing
   Switch To Questions
 
   Collapse Question  ${object_id}
@@ -2428,7 +2437,6 @@ Save Proposal
   Run Keyword And Return If   'answer' == '${field_name}'   Отримати інформацію із запитання answer  ${object_id}
   Run Keyword And Return If   'description' == '${field_name}'   Отримати інформацію із запитання description  ${object_id}
 
-  Collapse Question  ${object_id}
   [return]  pzo.question.default
 
 Отримати інформацію із скарги
@@ -2592,12 +2600,10 @@ Collapse Document2
 
 Collapse Question
   [Arguments]  ${question_id}
-#  Log To Console  Collapse Question ${question_id}
-  execute javascript  jQuery("#tender-question-list .panel-title .title:contains('${question_id}')").trigger('click');
+  #execute javascript  jQuery("#tender-question-list .panel-title .title:contains('${question_id}')").trigger('click');
   #Click Element   xpath=//div[@id='tender-question-list']//span[contains(text(),'${question_id}')]
-  #execute javascript  robottesthelpfunctions.showquestionbykey('${question_id}');
+  execute javascript  robottesthelpfunctions.showquestionbykey('${question_id}');
   Sleep  1
-#  Log To Console  Collapse Question ${question_id}
 
 Collapse Complaint
   [Arguments]  ${complaint_id}
@@ -2922,19 +2928,16 @@ Get invisible text boolean by locator
 Отримати інформацію із запитання title
   [Arguments]  ${question_id}
   ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//span[contains(text(),'${question_id}')]
-  Collapse Question  ${question_id}
   [return]  ${return_value}
 
 Отримати інформацію із запитання answer
   [Arguments]  ${question_id}
   ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//div[contains(@data-title,'${question_id}')]//p[@class='answer']//span[@class='value']
-  Collapse Question  ${question_id}
   [return]  ${return_value}
 
 Отримати інформацію із запитання description
   [Arguments]  ${question_id}
   ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//div[contains(@data-title,'${question_id}')]//p[@class='description']//span[@class='value']
-  Collapse Question  ${question_id}
   [return]  ${return_value}
 
 Switch To Complaints
@@ -3130,10 +3133,10 @@ Switch To Complaints
   ${return_value}=  convert_date_for_compare_ex   ${return_value}
   [return]  ${return_value}
 
-Отримати інформацію із тендера questions[0].title
-  [Arguments]  ${username}  ${tender_uaid}
-  ${return_value}=  pzo.Отримати інформацію із запитання  ${username}  ${tender_uaid}  0  title
-  Open Tender
+Отримати інформацію із тендера questions.title
+  [Arguments]  ${username}  ${tender_uaid}  ${index}
+  ${return_value}=  pzo.Отримати інформацію із запитання  ${username}  ${tender_uaid}  ${index}  title
+  Open Tender Without Syncing
   [return]  ${return_value}
 
 Отримати інформацію із скарги cancellationReason
@@ -3504,7 +3507,7 @@ GenerateFakeText
 
 WaitPageSyncing
   [Arguments]  ${timeout}
-  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetPageSyncingStatus
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  3 s  GetPageSyncingStatus
   Run Keyword Unless  ${passed}  Fatal Error  Sync Finish not finish in ${timeout} sec
 
 GetPageSyncingStatus
