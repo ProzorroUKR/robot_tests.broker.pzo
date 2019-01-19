@@ -1060,9 +1060,13 @@ Open Tender
   Return From Keyword If  ${no_id}
   Wait For All Transfer Complete
   Sync Tender
-  Open Tender Without Syncing
+  Open Tender Without Transfer and Syncing
 
-Open Tender Without Syncing
+Open Tender With Syncing
+  Sync Tender
+  Open Tender Without Transfer and Syncing
+
+Open Tender Without Transfer and Syncing
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}
   Go To  ${tender_url}
@@ -2429,13 +2433,13 @@ Save Proposal
 #  Log To Console  ${object_id}
 #  Log To Console  ${field_name}
 
-  Open Tender Without Syncing
+  Open Tender With Syncing
   Switch To Questions
 
   Collapse Question  ${object_id}
-  Run Keyword And Return If   'title' == '${field_name}'   Отримати інформацію із запитання title  ${object_id}
-  Run Keyword And Return If   'answer' == '${field_name}'   Отримати інформацію із запитання answer  ${object_id}
-  Run Keyword And Return If   'description' == '${field_name}'   Отримати інформацію із запитання description  ${object_id}
+  Run Keyword And Return If   'title' == '${field_name}'   get text  jquery=#tender-question-list .panel-collapse.collapse.in .title .value
+  Run Keyword And Return If   'answer' == '${field_name}'   get text  jquery=#tender-question-list .panel-collapse.collapse.in .answer .value
+  Run Keyword And Return If   'description' == '${field_name}'   get text  jquery=#tender-question-list .panel-collapse.collapse.in .description .value
 
   [return]  pzo.question.default
 
@@ -2923,21 +2927,6 @@ Get invisible text boolean by locator
   [Arguments]  ${document_id}
   ${return_value}=  get_text  xpath=//div[@id='documents']//span[contains(text(),'${document_id}')]
   Collapse Document  ${document_id}
-  [return]  ${return_value}
-
-Отримати інформацію із запитання title
-  [Arguments]  ${question_id}
-  ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//span[contains(text(),'${question_id}')]
-  [return]  ${return_value}
-
-Отримати інформацію із запитання answer
-  [Arguments]  ${question_id}
-  ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//div[contains(@data-title,'${question_id}')]//p[@class='answer']//span[@class='value']
-  [return]  ${return_value}
-
-Отримати інформацію із запитання description
-  [Arguments]  ${question_id}
-  ${return_value}=  get_text  xpath=//div[@id='tender-question-list']//div[contains(@data-title,'${question_id}')]//p[@class='description']//span[@class='value']
   [return]  ${return_value}
 
 Switch To Complaints
