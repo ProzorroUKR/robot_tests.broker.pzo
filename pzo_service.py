@@ -34,20 +34,22 @@ def convert_date_for_compare(datestr):
 
 
 def procuring_entity_name(tender_data):
-    tender_data.data.procuringEntity['name'] = u"ТОВ \"ПЗО\""
-    tender_data.data.procuringEntity['name_en'] = u"TOV \"PZO\""
-    tender_data.data.procuringEntity.identifier['id'] = u"1234567890"
-    tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"ПЗО\""
-    tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"PZO\""
-    tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
-    tender_data.data.procuringEntity.address['postalCode'] = u"123123"
-    tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
-    tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
-    tender_data.data.procuringEntity.contactPoint['name'] = u"Замовник Тест"
-    tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
-    tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
-    tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
-    tender_data.data.procuringEntity.contactPoint['url'] = u"http://pzo.com.ua"
+    tender_data.data.procuringEntity['name'] = u"ТОВ \"Test\""
+    tender_data.data.procuringEntity['name_en'] = u"TOV \"Test\""
+    tender_data.data.procuringEntity.identifier['id'] = u"pzo-dev-zamovnuk"
+    tender_data.data.procuringEntity.identifier['legalName'] = u"ТОВ \"Test\""
+    tender_data.data.procuringEntity.identifier['legalName_en'] = u"TOV \"Test\""
+    if 'address' in tender_data.data.procuringEntity:
+        tender_data.data.procuringEntity.address['region'] = u"Житомирська область"
+        tender_data.data.procuringEntity.address['postalCode'] = u"123123"
+        tender_data.data.procuringEntity.address['locality'] = u"населений пункт"
+        tender_data.data.procuringEntity.address['streetAddress'] = u"адреса"
+    if 'contactPoint' in tender_data.data.procuringEntity:
+        tender_data.data.procuringEntity.contactPoint['name'] = u"Замовник Тест"
+        tender_data.data.procuringEntity.contactPoint['name_en'] = u"Test"
+        tender_data.data.procuringEntity.contactPoint['email'] = u"zamovnuk@rambler.ru"
+        tender_data.data.procuringEntity.contactPoint['telephone'] = u"+3801111111111"
+        tender_data.data.procuringEntity.contactPoint['url'] = u"http://pzo.com.ua"
     return tender_data
 
 def split_take_item(value, separator, index):
@@ -88,7 +90,7 @@ def get_invisible_text(locator):
     element = get_library()._element_find(locator, False, True)
     text = get_webdriver_instance().execute_script('return jQuery(arguments[0]).text();', element)
     return text
-  
+
 
 def get_text_excluding_children(locator):
     element = get_library()._element_find(locator, False, True)
@@ -100,13 +102,13 @@ def get_text_excluding_children(locator):
     return text.strip()
 
 def convert_float_to_string(number):
-    return format(number, '.2f')
+    return repr(float(number));
 
 def convert_date_for_compare_ex(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def convert_date_for_compare_ex2(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+03:00")
+    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M+02:00")
 
 def download_file(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
@@ -117,4 +119,4 @@ def multiply_hundred(number):
 def inject_urllib3():
     import urllib3.contrib.pyopenssl
     urllib3.contrib.pyopenssl.inject_into_urllib3()
- 
+
