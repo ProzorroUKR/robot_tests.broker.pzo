@@ -3507,12 +3507,12 @@ GetPageSyncingStatus
 
 WaitTenderAuctionEnd
   [Arguments]  ${timeout}
-  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetTenderAuctionEndStatus
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  10 s  GetTenderAuctionEndStatus
   Run Keyword Unless  ${passed}  Fatal Error  Tender not changed status from active.auction in ${timeout} sec
 
 GetTenderAuctionEndStatus
   ${tenderStatus}=  get_invisible_text  xpath=//*[contains(@class, 'hidden opstatus')]
-  return from keyword if  Should Not Be Equal As Strings  ${tenderStatus}  active.auction
+  return from keyword if  '${tenderStatus}' != 'active.auction'
   Sleep  60
   Reload Page
   Sleep  5
