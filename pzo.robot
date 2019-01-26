@@ -866,9 +866,6 @@ Wait For Sync Tender Finish
   ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
   Run Keyword If  ${document_isset} == False and '${procurementMethodType}' != 'reporting'  Завантажити у відкриту форму редагування угоди документ  Fake
 
-  # enable form singing for belowThreshold
-  run keyword if  '${procurementMethodType}' == 'belowThreshold'  click element  id=form-signing
-
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
   Wait Until Page Contains   Контракт успішно завантажений   20
@@ -880,6 +877,7 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Активація контракту  20
   JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  run keyword and ignore error  click element  id=form-signing
   ${sign_needed}=  Run keyword And Return Status  Page Should Contain  Накласти ЕЦП
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
@@ -1458,7 +1456,7 @@ Save Tender
   Open Tender
 
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
-  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn  
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  jquery=#tender-prequalification-form .js-submit-btn
   Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20 
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
@@ -2029,6 +2027,7 @@ Save Proposal
 
 Підтвердити рішення кваліфікації переможця
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+  run keyword and ignore error  click element  id=form-signing
   Click Button  jquery=#tender-qualification-form .js-submit-btn
   Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
@@ -3173,6 +3172,7 @@ Switch To Complaints
   ${data}=  Get From Dictionary  ${plan_data}  data
   ${data_keys}=  Get Dictionary Keys  ${data}
   ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
+  ${start_date}=  get substring  ${start_date}  3
   ${budget_keys}=  Get Dictionary Keys  ${data.budget}
   ${classificationWrapper}=  Set Variable  \#collapseGeneral
   ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
