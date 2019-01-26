@@ -866,6 +866,9 @@ Wait For Sync Tender Finish
   ${document_isset}=  Run keyword And Return Status  Page Should Contain Element  jquery=.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .init-value,.contractform-documents-dynamic-forms-wrapper .js-dynamic-forms-list > .js-item:last .js-fileupload-input-wrapper .btn.js-item
   Run Keyword If  ${document_isset} == False and '${procurementMethodType}' != 'reporting'  Завантажити у відкриту форму редагування угоди документ  Fake
 
+  # enable form singing for belowThreshold
+  run keyword if  '${procurementMethodType}' == 'belowThreshold'  click element  id=form-signing
+
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
   Wait Until Page Contains   Контракт успішно завантажений   20
