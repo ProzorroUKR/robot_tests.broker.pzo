@@ -3443,7 +3443,7 @@ PlanUpdateItemQuantity
 
 PlanUpdateItemDeliveryEndDate
   [Arguments]  ${wrapper}  ${delivery_end_date}
-  ${date}=  convert_isodate_to_site_datetime  ${delivery_end_date}
+  ${date}=  convert_isodate_to_site_date  ${delivery_end_date}
 
   JsInputHiddenText  ${wrapper} [id$='-delivery_end_date']  ${date}
 
