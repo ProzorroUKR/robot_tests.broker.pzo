@@ -376,7 +376,7 @@ Login
   Run Keyword If  'additionalClassifications' in ${item_keys}  Input Additional Classifications  ${ARGUMENTS[0].additionalClassifications}  ${wraper}
   Run Keyword If  'additionalClassifications' in ${item_keys}  Sleep  1
 
-  Run Keyword If  '${ARGUMENTS[2]}' == 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//input[contains(@id, '-delivery')]
+  #Run Keyword If  '${ARGUMENTS[2]}' == 'belowThreshold'  Click Element  xpath=//div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//input[contains(@id, '-delivery')]
 
   Select From List By Label          //div[contains(@class, 'active')]//${wraper}//div[contains(@class, 'active')]//div[contains(@class, 'form-group field-item${pzo_proc_type}form')]//select[contains(@id, '-delivery_region_id')]  ${region}
   Sleep  1
@@ -877,6 +877,7 @@ Wait For Sync Tender Finish
   Sleep  1
   Wait Until Page Contains  Активація контракту  20
   JsSetScrollToElementBySelector  \#tender-contract-form .js-submit-btn
+  run keyword and ignore error  click element  id=form-signing
   ${sign_needed}=  Run keyword And Return Status  Page Should Contain  Накласти ЕЦП
   Click Element   jquery=#tender-contract-form .js-submit-btn
   Sleep  1
@@ -1333,7 +1334,7 @@ Save Tender
   Run Keyword If  '${answer.data.resolutionType}' == 'resolved'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Задоволено
   Run Keyword If  '${answer.data.resolutionType}' == 'declined'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Відхилено
   Run Keyword If  '${answer.data.resolutionType}' == 'invalid'  Select From List By Label  xpath=//select[@id='complaintanswerform-resolution_type']  Не задоволено
-  Input text  xpath=//textarea[contains(@id, 'complaintanswerform-tenderer_action')]  ${answer.data.tendererAction}
+  run keyword and ignore error  Input text  xpath=//textarea[contains(@id, 'complaintanswerform-tenderer_action')]  ${answer.data.tendererAction}
 
   Click Element   xpath=//button[contains(text(), 'Надати відповідь')]
   Sleep  1
@@ -1455,7 +1456,7 @@ Save Tender
   Open Tender
 
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
-  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn  
+  JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  jquery=#tender-prequalification-form .js-submit-btn
   Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20 
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
@@ -2026,6 +2027,7 @@ Save Proposal
 
 Підтвердити рішення кваліфікації переможця
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
+  run keyword and ignore error  click element  id=form-signing
   Click Button  jquery=#tender-qualification-form .js-submit-btn
   Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
@@ -3170,6 +3172,7 @@ Switch To Complaints
   ${data}=  Get From Dictionary  ${plan_data}  data
   ${data_keys}=  Get Dictionary Keys  ${data}
   ${start_date}=  convert_isodate_to_site_date  ${data.tender.tenderPeriod.startDate}
+  ${start_date}=  get substring  ${start_date}  3
   ${budget_keys}=  Get Dictionary Keys  ${data.budget}
   ${classificationWrapper}=  Set Variable  \#collapseGeneral
   ${itemsWrapper}=  Set Variable  a[href='#collapseItems']
@@ -3440,7 +3443,7 @@ PlanUpdateItemQuantity
 
 PlanUpdateItemDeliveryEndDate
   [Arguments]  ${wrapper}  ${delivery_end_date}
-  ${date}=  convert_isodate_to_site_datetime  ${delivery_end_date}
+  ${date}=  convert_isodate_to_site_date  ${delivery_end_date}
 
   JsInputHiddenText  ${wrapper} [id$='-delivery_end_date']  ${date}
 
@@ -3507,12 +3510,12 @@ GetPageSyncingStatus
 
 WaitTenderAuctionEnd
   [Arguments]  ${timeout}
-  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  0 s  GetTenderAuctionEndStatus
+  ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout} s  10 s  GetTenderAuctionEndStatus
   Run Keyword Unless  ${passed}  Fatal Error  Tender not changed status from active.auction in ${timeout} sec
 
 GetTenderAuctionEndStatus
   ${tenderStatus}=  get_invisible_text  xpath=//*[contains(@class, 'hidden opstatus')]
-  return from keyword if  Should Not Be Equal As Strings  ${tenderStatus}  active.auction
+  return from keyword if  '${tenderStatus}' != 'active.auction'
   Sleep  60
   Reload Page
   Sleep  5
