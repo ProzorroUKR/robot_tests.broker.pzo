@@ -1450,7 +1450,7 @@ Save Tender
 Підтвердити рішення кваліфікації і повернутися на перегляд закупівлі
   JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  jquery=#tender-prequalification-form .js-submit-btn
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1459,7 +1459,7 @@ Save Tender
 Завантажити рішення кваліфікації і накласти ЕЦП і повернутися на перегляд закупівлі
   JsSetScrollToElementBySelector  \#tender-prequalification-form .js-submit-btn
   Click Button  jquery=#tender-prequalification-form .js-submit-btn
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20 
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1467,7 +1467,7 @@ Save Tender
   Click Button  xpath=//*[text()='Накласти ЕЦП']
   Sleep  1
   Load Sign
-  Wait Until Page Contains  ЕЦП успішно накладено на рішення  20
+  Wait Until Page Contains  ЕЦП успішно накладено на рішення  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -1482,7 +1482,7 @@ Save Tender
   Click Element  xpath=//a[contains(@href, '/tender/prequalification-approve?id=')]
   Sleep  1
   Click Button  xpath=//*[text()='Так']
-  Wait Until Page Contains  Прекваліфікація підтверджена  20
+  Wait Until Page Contains  Прекваліфікація підтверджена  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
 
   Sleep  2
@@ -1499,7 +1499,7 @@ Save Tender
   Click Element  xpath=//a[contains(@href, '/tender/confirm-stage2?id=')]
   Sleep  1
   Click Button  xpath=//*[text()='Так']
-  Wait Until Page Contains  Підтвердження успішно надане  20
+  Wait Until Page Contains  Підтвердження успішно надане  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
 
   Sleep  2
@@ -2030,7 +2030,7 @@ Save Proposal
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
   run keyword and ignore error  click element  id=form-signing
   Click Button  jquery=#tender-qualification-form .js-submit-btn
-  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
@@ -2039,7 +2039,7 @@ Save Proposal
   run keyword if  ${eds_isset}  Накласти ЕЦП на відкритий попап та закрити його
   run keyword if  ${eds_isset}  JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
   run keyword if  ${eds_isset}  Click Button  jquery=#tender-qualification-form .js-submit-btn
-  run keyword if  ${eds_isset}  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
+  run keyword if  ${eds_isset}  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
   run keyword if  ${eds_isset}  Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   run keyword if  ${eds_isset}  Sleep  3
 
@@ -2047,7 +2047,7 @@ Save Proposal
 
   Sleep  1
   Load Sign
-  Wait Until Page Contains  ЕЦП успішно накладено  20
+  Wait Until Page Contains  ЕЦП успішно накладено  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  3
 
@@ -2934,8 +2934,10 @@ Get invisible text boolean by locator
   [return]  ${return_value}
 
 Switch To Complaints
+  ${procurementMethodType}=  Отримати інформацію із тендера procurementMethodType
   Click Element                      xpath=//a[contains(@href, '/tender/complaints?id=')]
-  Wait Until Page Contains           Вимоги/скарги   10
+  run keyword if  '${procurementMethodType}' != 'belowThreshold'  Wait Until Page Contains           Вимоги/скарги   10
+  run keyword if  '${procurementMethodType}' == 'belowThreshold'  Wait Until Page Contains           Вимоги   10
 
 Отримати інформацію із скарги description
   [Arguments]  ${complaint_id}
