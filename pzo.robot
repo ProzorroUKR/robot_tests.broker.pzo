@@ -1075,7 +1075,7 @@ Open Tender Without Transfer and Syncing
   Wait Until Page Contains Element  id=tender-general-info  3
 
 Wait For All Transfer Complete
-  ${sync_passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  100 s  0 s  Wait For Transfer Complete
+  ${sync_passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  300 s  3 s  Wait For Transfer Complete
   Run Keyword Unless  ${sync_passed}  Fatal Error  Sync not finish in 100 sec
 
 Wait For Transfer Complete
