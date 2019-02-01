@@ -2030,12 +2030,9 @@ Save Proposal
 Підтвердити рішення кваліфікації переможця
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
   run keyword and ignore error  click element  id=form-signing
-  Click Button  jquery=#tender-qualification-form .js-submit-btn
+  execute javascript  $("#tender-qualification-form .js-submit-btn").trigger("click");
   sleep  1
-  ${passed}=  run keyword and return status  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  20
-  run keyword if  ${passed} == False  Click Button  jquery=#tender-qualification-form .js-submit-btn
-  run keyword if  ${passed} == False  sleep  1
-  run keyword if  ${passed} == False  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
+  Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
   Click Button  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']
   Sleep  2
 
