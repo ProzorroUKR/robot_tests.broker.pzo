@@ -369,8 +369,8 @@ Login
   Input text                         xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  ${cpv_id}
   Press key                          xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  \\13
   Sleep  1
-  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//strong[contains(., '${cpv_id}')]  60
-  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//i[@class='jstree-icon jstree-checkbox']
+  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//div[contains(@class, 'search-wrapper')]//strong[contains(., '${cpv_id}')]  60
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//div[contains(@class, 'search-wrapper')]//i[@class='jstree-icon jstree-checkbox']
   Click Element                      xpath=//div[contains(@id, 'classification-modal')]//button[contains(@class, 'btn btn-default waves-effect waves-light js-submit')]
   Sleep  1
 
@@ -2072,7 +2072,7 @@ Save Proposal
 
   ${current_tender_uaid}=  Отримати інформацію із тендера tenderID
 
-  Run Keyword And Return If   'NBUdiscountRate' == '${arguments[2]}'   Get number from text by locator  jquery=#tender-general-info .nbu-discount-rate .value
+  Run Keyword And Return If   'NBUdiscountRate' == '${arguments[2]}'   Get invisible text number by locator  jquery=#tender-general-info .nbu-discount-rate-source
   Run Keyword And Return If   'mainProcurementCategory' == '${arguments[2]}'   get_invisible_text  jquery=#tender-general-info .main-procurement-category-source.hidden
   Run Keyword And Return If   'auctionPeriod.startDate' == '${arguments[2]}'   get_invisible_text  jquery=.timeline-info-wrapper .auction-start-date
   Run Keyword And Return If   'lots[0].value.amount' == '${arguments[2]}'   Get invisible text number by locator  jquery=#accordionLots .lot-info-wrapper:first .budget-source.hidden
@@ -3361,8 +3361,8 @@ InputClassificationByWrapper
   Input text                         xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  ${classification_id}
   Press key                          xpath=//div[contains(@id, 'classification-modal')]//input[@class='form-control js-input']  \\13
   Sleep  1
-  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//strong[contains(., '${classification_id}')]  60
-  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//i[@class='jstree-icon jstree-checkbox']
+  Wait Until Page Contains Element   xpath=//div[contains(@id, 'classification-modal')]//div[contains(@class, 'search-wrapper')]//strong[contains(., '${classification_id}')]  60
+  Click Element                      xpath=//div[contains(@id, 'classification-modal')]//div[contains(@class, 'search-wrapper')]//i[@class='jstree-icon jstree-checkbox']
   Click Element                      xpath=//div[contains(@id, 'classification-modal')]//button[contains(@class, 'btn btn-default waves-effect waves-light js-submit')]
   Sleep  1
 
