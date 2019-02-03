@@ -60,17 +60,17 @@ ${pzo_proc_type}=                                              unknown
 
 Login
   [Arguments]  ${username}
-  Wait Until Element Is Visible  xpath=//*[contains(@data-language, '1')]  60
-  Click Link    xpath=//*[contains(@data-language, '1')]
+  Wait Until Element Is Visible  xpath=//header[@id='topnav']//div[contains(@class, 'header-topbar-wrapper')]//li[contains(@class, 'language-list-wrapper')]//a[@data-language='1']  60
+  Click Link    xpath=//header[@id='topnav']//div[contains(@class, 'header-topbar-wrapper')]//li[contains(@class, 'language-list-wrapper')]//a[@data-language='1']
 
-  Wait Until Element Is Visible  xpath=//*[contains(@class, 'btn btn-lg btn-default btn-custom waves-effect waves-light')]  60
-  Click Link    xpath=//*[contains(@class, 'btn btn-lg btn-default btn-custom waves-effect waves-light')]
+  Wait Until Element Is Visible  xpath=//header[@id='topnav']//div[contains(@class, 'header-topbar-wrapper')]//a[@data-action='login']  60
+  Click Link    xpath=//header[@id='topnav']//div[contains(@class, 'header-topbar-wrapper')]//a[@data-action='login']
   Sleep    1
   Wait Until Page Contains Element   id=loginform-email   60
   Input text   id=loginform-email      ${USERS.users['${username}'].login}
   Input text   id=loginform-password      ${USERS.users['${username}'].password}
   # Click Button   xpath=//*[@type='submit']
-  Click Button   xpath=//*[@class='btn btn-lg w-lg-x2 btn-success js-submit-btn']
+  Click Button   xpath=//div[@id='loginform']//button[contains(@class, 'js-submit-btn')]
   Wait Until Page Contains          Активні   60
   Set Global Variable  ${PZO_LOGIN_USER}  ${username}
   #Go To  ${USERS.users['${username}'].homepage}
@@ -680,7 +680,7 @@ Wait For Sync Tender Finish
 
   Click Element   jquery=#tender-part-pjax .list-group-item[href*="tender/qualification"]
   Sleep  1
-  Wait Until Page Contains  Кваліфікація  60
+  wait until page contains element  id=tender-qualification-form  60
   Select From List By Value  id=qualificationform-decision  accept
 
   ### BOF - Reporting ###
@@ -1072,7 +1072,7 @@ Open Tender Without Transfer and Syncing
   ${tender_id}=  Get From Dictionary  ${USERS.users['${PZO_LOGIN_USER}']}  TENDER_ID
   ${tender_url}=  Catenate  SEPARATOR=  ${tender_page_prefix}  ${tender_id}
   Go To  ${tender_url}
-  Wait Until Page Contains Element  id=tender-general-info  3
+  Wait Until Page Contains Element  id=tender-general-info  20
 
 Wait For All Transfer Complete
   ${sync_passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  300 s  3 s  Wait For Transfer Complete
@@ -2020,16 +2020,21 @@ Save Proposal
   Open Tender
   WaitTenderAuctionEnd  3600
   Click Element  xpath=//div[contains(@class, 'aside-menu ')]//a[contains(@href, '/tender/qualification?id=')]
-  Wait Until Page Contains  Кваліфікація  60
+  wait until page contains element  id=tender-qualification-form  60
   Click Element  id=qualificationform-award
   Click Element  jquery=select#qualificationform-award option:eq(${proposal_index})
-  Sleep  2
+  Sleep  5
+  wait until page contains element  id=tender-qualification-form  10
 
   JsSetScrollToElementBySelector  \#qualificationform-decision
 
 Підтвердити рішення кваліфікації переможця
   JsSetScrollToElementBySelector  \#tender-qualification-form .js-submit-btn
-  run keyword and ignore error  click element  id=form-signing
+  page should contain element  id=tender-qualification-form
+  ${pass}=  run keyword and return status  page should contain element  id=form-signing
+  run keyword if  ${pass}  click element  id=form-signing
+  run keyword if  ${pass}  sleep  2
+  page should contain element  id=tender-qualification-form
   execute javascript  $("#tender-qualification-form .js-submit-btn").trigger("click");
   sleep  1
   Wait Until Page Contains Element  xpath=//div[contains(@class, 'jconfirm')]//*[text()='Закрити']  60
